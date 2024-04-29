@@ -1,1 +1,1 @@
-console.log('ad')
+console.log('ad');
