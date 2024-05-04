@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["esnext"],
-    "module": "commonjs",
-    "types": ["jest", "node"],
+    "lib": [
+      "esnext"
+    ],
+    "module": "CommonJS",
+    "types": [
+      "jest",
+      "node"
+    ],
     "allowSyntheticDefaultImports": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -20,10 +25,14 @@
     "isolatedModules": false,
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./server/*"]
+      "@/*": [
+        "./server/*"
+      ]
     }
   },
-  "include": ["**/*.ts"],
+  "include": [
+    "**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "settings.js",
