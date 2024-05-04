@@ -1,6 +1,7 @@
 import User from '@/models/User';
 import catchAsync from '@/utilities/catchAsync';
 import { hashPassword } from '@/utilities/hashPassword';
+import { jwtGen } from '@/utilities/jwt';
 import { Response, Request } from 'express';
 import { z } from 'zod';
 
@@ -42,6 +43,7 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
+    fcmToken: z.string().optional(),
 });
 
 type bodyType = z.infer<typeof schema>;
@@ -50,7 +52,8 @@ const signupController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         schema.parse(req.body);
 
-        const { name, email, password, phoneNumber } = req.body as bodyType;
+        const { name, email, password, phoneNumber, fcmToken } =
+            req.body as bodyType;
 
         const isAlreadyExists = await User.findOne(
             {
@@ -80,9 +83,25 @@ const signupController = catchAsync(
 
         await user.save();
 
+        const updatedUser = await User.findOneAndUpdate(
+            {
+                phoneNumber,
+            },
+            {
+                fcmToken: fcmToken,
+            },
+            {
+                new: true,
+            },
+        );
+
+        const token = jwtGen(updatedUser);
+
         return res.json({
             success: true,
             message: 'Sign up successfully',
+            user: updatedUser,
+            token,
         });
     },
 );

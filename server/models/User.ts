@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema(
             required: true,
             default: [ROLE_TYPE_ENUM.USER],
         },
+        fcmToken: {
+            type: String,
+        },
         isDeleted: {
             type: Boolean,
             default: false,

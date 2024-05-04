@@ -31,6 +31,7 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
+    fcmToken: z.string().optional(),
 });
 
 type bodyType = z.infer<typeof schema>;
@@ -39,7 +40,7 @@ const signInController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         schema.parse(req.body);
 
-        const { password, phoneNumber } = req.body as bodyType;
+        const { password, phoneNumber, fcmToken } = req.body as bodyType;
 
         const user = await User.findOne({
             phoneNumber,
@@ -61,14 +62,24 @@ const signInController = catchAsync(
             });
         }
 
-        console.log(user);
+        const updatedUser = await User.findOneAndUpdate(
+            {
+                phoneNumber,
+            },
+            {
+                fcmToken: fcmToken,
+            },
+            {
+                new: true,
+            },
+        );
 
-        const token = jwtGen(user);
+        const token = jwtGen(updatedUser);
         return res.json({
             success: true,
             message: 'Sign in successfully',
+            user: updatedUser,
             token,
-            user,
         });
     },
 );

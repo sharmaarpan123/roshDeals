@@ -3,7 +3,8 @@ import catchAsync from '@/utilities/catchAsync';
 import { randomOtp } from '@/utilities/utilitis';
 import { Response, Request } from 'express';
 import { z } from 'zod';
-import nodemailer from 'nodemailer';
+import forgetPasswordTemplate from '@/services/email/emailsTemplates/forgetpasswordTemplate';
+import NodeMailerTransPorter from '@/services/email/NodeMailerTransPorter';
 
 const schema = z.object({
     email: z
@@ -36,25 +37,15 @@ const forgetPasswordController = catchAsync(
 
         await User.findOneAndUpdate({ email }, { otp });
 
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.GOOGLE_APP_USER,
-                pass: process.env.GOOGLE_APP_PASSWORD,
-            },
-        });
+        const transporter = NodeMailerTransPorter();
 
         const mailOptions = {
             from: process.env.GOOGLE_APP_USER,
             to: email,
-            subject: 'Reset Your Password',
-            html: `<p>
-        here is your one time otp ==>  ${otp}
-        </p>`,
+            subject: 'ROSH DEALS - Reset Your Password ',
+            html: forgetPasswordTemplate(otp),
         };
+
         transporter.sendMail(mailOptions, (error) => {
             if (error) {
                 return res.json({
