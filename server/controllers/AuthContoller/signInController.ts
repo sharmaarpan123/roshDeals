@@ -68,6 +68,7 @@ const signInController = catchAsync(
             success: true,
             message: 'Sign in successfully',
             token,
+            user,
         });
     },
 );
