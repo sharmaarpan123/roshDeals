@@ -26,7 +26,7 @@ const forgetPasswordController = catchAsync(
         });
 
         if (!isUserRegistered) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 statusCode: 400,
                 message: 'This email is not registered',
@@ -48,14 +48,14 @@ const forgetPasswordController = catchAsync(
 
         transporter.sendMail(mailOptions, (error) => {
             if (error) {
-                return res.json({
+                return res.status(400).json({
                     success: false,
                     statusCode: 400,
                     message: `something went wrong while sending the mail please contact us at ==>  ${process.env.HELP_CONTACT_NUMBER}`,
                     errorInfo: error,
                 });
             } else {
-                return res.json({
+                return res.status(200).json({
                     success: true,
                     statusCode: 200,
                     message: 'Your One Time Password is sended to the mail',

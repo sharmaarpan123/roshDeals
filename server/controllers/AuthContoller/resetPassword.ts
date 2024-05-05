@@ -55,7 +55,7 @@ const resetPasswordController = catchAsync(
         });
 
         if (!isUserExists) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 statusCode: 400,
                 message: 'This email is not registered , please sign up',
@@ -67,7 +67,7 @@ const resetPasswordController = catchAsync(
             otp,
         });
         if (!isOtpValid) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 statusCode: 400,
                 message: 'wrong otp',
@@ -81,7 +81,7 @@ const resetPasswordController = catchAsync(
             { password: hashedPassword, otp: '' },
         );
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             statusCode: 200,
             message: 'Your Password is upgraded',

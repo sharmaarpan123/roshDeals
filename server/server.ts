@@ -33,7 +33,7 @@ const init = async () => {
         ) => {
             console.log(err, 'global error');
             if (err instanceof ZodError) {
-                return res.json({
+                return res.status(400).json({
                     success: false,
                     statusCode: 400,
                     message: err.errors[0].message,
@@ -41,7 +41,7 @@ const init = async () => {
                     type: 'validationError',
                 });
             }
-            return res.json({
+            return res.status(500).json({
                 success: false,
                 statusCode: err.statusCode || 500,
                 message: 'Server Error',

@@ -66,7 +66,7 @@ const signupController = catchAsync(
         );
 
         if (isAlreadyExists) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: `${(isAlreadyExists.email === email && 'This Email ') || 'This Phone Number '} is already exists`,
             });
@@ -97,7 +97,7 @@ const signupController = catchAsync(
 
         const token = jwtGen(updatedUser);
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Sign up successfully',
             user: updatedUser,

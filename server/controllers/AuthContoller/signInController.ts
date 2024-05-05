@@ -47,7 +47,7 @@ const signInController = catchAsync(
         });
 
         if (!user) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: 'This Phone Number is not registered , please sign up',
             });
@@ -56,7 +56,7 @@ const signInController = catchAsync(
         const isMatched = await comparePassword(password, user.password);
 
         if (!isMatched) {
-            return res.json({
+            return res.status(400).json({
                 success: false,
                 message: 'wrong password',
             });
@@ -75,7 +75,7 @@ const signInController = catchAsync(
         );
 
         const token = jwtGen(updatedUser);
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: 'Sign in successfully',
             user: updatedUser,
