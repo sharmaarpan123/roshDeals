@@ -8,7 +8,18 @@ import AuthRouter from './routes/AuthRouter';
 import logger from 'morgan';
 import path from 'path';
 import mongoInit from './models/mongoInit';
-import { ZodError } from 'zod';
+import catchErrorHandler from './utilities/catchErrorHandler';
+import AdminRouter from './routes/AdminRouter';
+import { ROLE_TYPE_ENUM } from './utilities/commonTypes';
+import AuthMiddleware from './utilities/AuthMiddleware';
+import { UserType } from './models/User';
+declare global {
+    namespace Express {
+        export interface Request {
+            user: UserType;
+        }
+    }
+}
 
 const init = async () => {
     const PORT = process.env.PORT;
@@ -23,32 +34,9 @@ const init = async () => {
     await mongoInit();
 
     app.use('/auth', AuthRouter);
+    app.use('/admin', AuthMiddleware(ROLE_TYPE_ENUM.ADMIN), AdminRouter);
 
-    app.use(
-        (
-            err: Record<string, string>,
-            _req: Request,
-            res: Response,
-            _next: NextFunction,
-        ) => {
-            console.log(err, 'global error');
-            if (err instanceof ZodError) {
-                return res.status(400).json({
-                    success: false,
-                    statusCode: 400,
-                    message: err.errors[0].message,
-                    errorInfo: err.errors[0],
-                    type: 'validationError',
-                });
-            }
-            return res.status(500).json({
-                success: false,
-                statusCode: err.statusCode || 500,
-                message: 'Server Error',
-                errorInfo: err.message,
-            });
-        },
-    );
+    app.use(catchErrorHandler);
 
     app.listen(PORT || 8000, () => {
         console.log(`server start on the ${PORT}`);

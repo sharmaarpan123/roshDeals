@@ -10,7 +10,8 @@ const schema = z.object({
             required_error: 'Email is required',
         })
         .trim()
-        .email('Please send a valid email'),
+        .email('Please send a valid email')
+        .toLowerCase(),
     otp: z
         .string({
             required_error: 'otp is required',

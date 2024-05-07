@@ -23,6 +23,7 @@
       }
     },
     "rules": {
+      "@typescript-eslint/no-namespace": "off",
       "no-use-before-define": "off",
       "@typescript-eslint/no-use-before-define": ["warn"],
       "@typescript-eslint/triple-slash-reference": 0,

@@ -1,7 +1,21 @@
 import { ROLE_TYPE_ENUM } from '@/utilities/commonTypes';
 import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema(
+export type RoleType = keyof typeof ROLE_TYPE_ENUM;
+
+export interface UserType {
+    name: string;
+    email: string;
+    password: string;
+    phoneNumber: string;
+    otp: string;
+    roles: ROLE_TYPE_ENUM[];
+    fcmToken?: string;
+    isDeleted: boolean;
+    isVerified: boolean;
+}
+
+const userSchema = new mongoose.Schema<UserType>(
     {
         name: {
             type: String,
@@ -24,7 +38,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: '',
         },
-        role: {
+        roles: {
             type: [String],
             enum: ROLE_TYPE_ENUM,
             required: true,

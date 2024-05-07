@@ -33,7 +33,8 @@ const schema = z.object({
             required_error: 'Email is required',
         })
         .trim()
-        .email('Please send a valid email'),
+        .email('Please send a valid email')
+        .toLowerCase(),
     phoneNumber: z
         .string({
             required_error: 'Phone Number is required',
@@ -46,14 +47,11 @@ const schema = z.object({
     fcmToken: z.string().optional(),
 });
 
-type bodyType = z.infer<typeof schema>;
-
 const signupController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
-        schema.parse(req.body);
+        const body = schema.parse(req.body);
 
-        const { name, email, password, phoneNumber, fcmToken } =
-            req.body as bodyType;
+        const { name, email, password, phoneNumber, fcmToken } = body;
 
         const isAlreadyExists = await User.findOne(
             {
