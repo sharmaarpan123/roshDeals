@@ -7,6 +7,15 @@ import { Response, Request } from 'express';
 import { z } from 'zod';
 
 const schema = z.object({
+    phoneNumber: z
+        .string({
+            required_error: 'Phone Number is required',
+        })
+        .trim()
+        .min(1, { message: 'Phone Number is required' })
+        .refine((data) => /^\d+$/.test(data), {
+            message: 'phone Number should be Numeric',
+        }),
     password: z
         .string({
             required_error: 'Password is required',
@@ -23,15 +32,7 @@ const schema = z.object({
                     'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
             },
         ),
-    phoneNumber: z
-        .string({
-            required_error: 'Phone Number is required',
-        })
-        .trim()
-        .min(1, { message: 'Phone Number is required' })
-        .refine((data) => /^\d+$/.test(data), {
-            message: 'phone Number should be Numeric',
-        }),
+
     fcmToken: z.string().optional(),
 });
 

@@ -13,6 +13,23 @@ const schema = z.object({
         })
         .trim()
         .min(1, { message: 'name should have at least one character' }),
+    phoneNumber: z
+        .string({
+            required_error: 'Phone Number is required',
+        })
+        .trim()
+        .min(1, { message: 'Phone Number is required' })
+        .refine((data) => /^\d+$/.test(data), {
+            message: 'phone Number should be Numeric',
+        }),
+    email: z
+        .string({
+            required_error: 'Email is required',
+        })
+        .trim()
+        .email('Please send a valid email')
+        .toLowerCase(),
+
     password: z
         .string({
             required_error: 'Password is required',
@@ -29,22 +46,6 @@ const schema = z.object({
                     'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
             },
         ),
-    email: z
-        .string({
-            required_error: 'Email is required',
-        })
-        .trim()
-        .email('Please send a valid email')
-        .toLowerCase(),
-    phoneNumber: z
-        .string({
-            required_error: 'Phone Number is required',
-        })
-        .trim()
-        .min(1, { message: 'Phone Number is required' })
-        .refine((data) => /^\d+$/.test(data), {
-            message: 'phone Number should be Numeric',
-        }),
     fcmToken: z.string().optional(),
 });
 

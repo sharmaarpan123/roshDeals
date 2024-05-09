@@ -13,6 +13,9 @@ import AdminRouter from './routes/AdminRouter';
 import { ROLE_TYPE_ENUM } from './utilities/commonTypes';
 import AuthMiddleware from './utilities/AuthMiddleware';
 import { UserType } from './models/User';
+import dealCategoryController from './controllers/DealCategoryController/dealCategoryController';
+import platFormController from './controllers/PlatFormController/platFormController';
+import brandController from './controllers/BrandConroller/brandController';
 declare global {
     namespace Express {
         export interface Request {
@@ -35,8 +38,16 @@ const init = async () => {
 
     app.use('/auth', AuthRouter);
     app.use('/admin', AuthMiddleware(ROLE_TYPE_ENUM.ADMIN), AdminRouter);
-    // app.use('/platForm/', AuthMiddleware(ROLE_TYPE_ENUM.USER), PlatFormRouter)
-    // app.use('/platForm',)
+    app.get(
+        '/dealCategory/getAllDealCategories',
+        dealCategoryController.getAllDealCategoryController,
+    );
+    app.get(
+        '/platForm/getAllPlatForms',
+        platFormController.getAllPlatFormController,
+    );
+
+    app.get('/brand/getAllBrands', brandController.getAllBrandController);
 
     app.use(catchErrorHandler);
 
