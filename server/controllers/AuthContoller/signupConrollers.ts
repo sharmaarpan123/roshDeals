@@ -1,4 +1,5 @@
 import User from '@/models/User';
+import { errorResponse, successResponse } from '@/utilities/Responses';
 import catchAsync from '@/utilities/catchAsync';
 import { hashPassword } from '@/utilities/hashPassword';
 import { jwtGen } from '@/utilities/jwt';
@@ -64,10 +65,11 @@ const signupController = catchAsync(
         );
 
         if (isAlreadyExists) {
-            return res.status(400).json({
-                success: false,
-                message: `${(isAlreadyExists.email === email && 'This Email ') || 'This Phone Number '} is already exists`,
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message: `${(isAlreadyExists.email === email && 'This Email ') || 'This Phone Number '} is already exists`,
+                }),
+            );
         }
 
         const hashedPassword = await hashPassword(password);
@@ -95,12 +97,15 @@ const signupController = catchAsync(
 
         const token = jwtGen(updatedUser);
 
-        return res.status(200).json({
-            success: true,
-            message: 'Sign up successfully',
-            user: updatedUser,
-            token,
-        });
+        return res.status(200).json(
+            successResponse({
+                message: 'Sign up successfully',
+                others: {
+                    user: updatedUser,
+                    token,
+                },
+            }),
+        );
     },
 );
 

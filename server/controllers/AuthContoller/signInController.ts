@@ -1,4 +1,5 @@
 import User from '@/models/User';
+import { errorResponse, successResponse } from '@/utilities/Responses';
 import catchAsync from '@/utilities/catchAsync';
 import { comparePassword } from '@/utilities/hashPassword';
 import { jwtGen } from '@/utilities/jwt';
@@ -47,19 +48,22 @@ const signInController = catchAsync(
         });
 
         if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: 'This Phone Number is not registered , please sign up',
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message:
+                        'This Phone Number is not registered , please sign up',
+                }),
+            );
         }
 
         const isMatched = await comparePassword(password, user.password);
 
         if (!isMatched) {
-            return res.status(400).json({
-                success: false,
-                message: 'wrong password',
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message: 'wrong password',
+                }),
+            );
         }
 
         const updatedUser = await User.findOneAndUpdate(
@@ -75,12 +79,12 @@ const signInController = catchAsync(
         );
 
         const token = jwtGen(updatedUser);
-        return res.status(200).json({
-            success: true,
-            message: 'Sign in successfully',
-            user: updatedUser,
-            token,
-        });
+        return res.status(200).json(
+            successResponse({
+                message: 'Sign in successfully',
+                others: { user: updatedUser, token },
+            }),
+        );
     },
 );
 

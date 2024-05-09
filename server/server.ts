@@ -35,6 +35,8 @@ const init = async () => {
 
     app.use('/auth', AuthRouter);
     app.use('/admin', AuthMiddleware(ROLE_TYPE_ENUM.ADMIN), AdminRouter);
+    // app.use('/platForm/', AuthMiddleware(ROLE_TYPE_ENUM.USER), PlatFormRouter)
+    // app.use('/platForm',)
 
     app.use(catchErrorHandler);
 

@@ -5,6 +5,7 @@ import { Response, Request } from 'express';
 import { z } from 'zod';
 import forgetPasswordTemplate from '@/services/email/emailsTemplates/forgetpasswordTemplate';
 import NodeMailerTransPorter from '@/services/email/NodeMailerTransPorter';
+import { errorResponse, successResponse } from '@/utilities/Responses';
 
 const schema = z.object({
     email: z
@@ -27,11 +28,11 @@ const forgetPasswordController = catchAsync(
         });
 
         if (!isUserRegistered) {
-            return res.status(400).json({
-                success: false,
-                statusCode: 400,
-                message: 'This email is not registered',
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message: 'This email is not registered',
+                }),
+            );
         }
 
         const otp: number = randomOtp();
@@ -49,18 +50,18 @@ const forgetPasswordController = catchAsync(
 
         transporter.sendMail(mailOptions, (error) => {
             if (error) {
-                return res.status(400).json({
-                    success: false,
-                    statusCode: 400,
-                    message: `something went wrong while sending the mail please contact us at ==>  ${process.env.HELP_CONTACT_NUMBER}`,
-                    errorInfo: error,
-                });
+                return res.status(400).json(
+                    errorResponse({
+                        message: `something went wrong while sending the mail please contact us at ==>  ${process.env.HELP_CONTACT_NUMBER}`,
+                        errorInfo: error,
+                    }),
+                );
             } else {
-                return res.status(200).json({
-                    success: true,
-                    statusCode: 200,
-                    message: 'Your One Time Password is sended to the mail',
-                });
+                return res.status(200).json(
+                    successResponse({
+                        message: 'Your One Time Password is sended to the mail',
+                    }),
+                );
             }
         });
     },

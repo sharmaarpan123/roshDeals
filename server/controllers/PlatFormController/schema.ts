@@ -7,6 +7,11 @@ const addPlatFormSchema = z.object({
         })
         .trim()
         .min(1, { message: 'name should have at least one character' }),
+    image: z
+        .string()
+        .trim()
+        .min(1, { message: 'image url should have at least one character' })
+        .optional(),
 });
 
 const deletePlatFormSchema = z.object({

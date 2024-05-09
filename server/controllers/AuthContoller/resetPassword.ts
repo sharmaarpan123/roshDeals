@@ -1,4 +1,5 @@
 import User from '@/models/User';
+import { errorResponse, successResponse } from '@/utilities/Responses';
 import catchAsync from '@/utilities/catchAsync';
 import { hashPassword } from '@/utilities/hashPassword';
 import { Response, Request } from 'express';
@@ -56,11 +57,11 @@ const resetPasswordController = catchAsync(
         });
 
         if (!isUserExists) {
-            return res.status(400).json({
-                success: false,
-                statusCode: 400,
-                message: 'This email is not registered , please sign up',
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message: 'This email is not registered , please sign up',
+                }),
+            );
         }
 
         const isOtpValid = await User.findOne({
@@ -68,11 +69,11 @@ const resetPasswordController = catchAsync(
             otp,
         });
         if (!isOtpValid) {
-            return res.status(400).json({
-                success: false,
-                statusCode: 400,
-                message: 'wrong otp',
-            });
+            return res.status(400).json(
+                errorResponse({
+                    message: 'wrong otp',
+                }),
+            );
         }
 
         const hashedPassword = await hashPassword(password);
@@ -82,11 +83,11 @@ const resetPasswordController = catchAsync(
             { password: hashedPassword, otp: '' },
         );
 
-        return res.status(200).json({
-            success: true,
-            statusCode: 200,
-            message: 'Your Password is upgraded',
-        });
+        return res.status(200).json(
+            successResponse({
+                message: 'Your Password is upgraded',
+            }),
+        );
     },
 );
 
