@@ -4,15 +4,18 @@ export const successResponse = ({
     data,
     others,
     statusCode,
+    total,
 }: {
     message: string;
     data?: unknown;
     others?: Record<string, unknown>;
     statusCode?: number;
+    total?: number;
 }) => ({
     statusCode: statusCode || 200,
     success: true,
     message: message,
+    total,
     ...(data && { data }),
     ...(others && others),
 });

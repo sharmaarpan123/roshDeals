@@ -1,4 +1,4 @@
-import { UserType } from '@/models/User';
+import { UserType } from '@/database/models/User';
 import jwt from 'jsonwebtoken';
 
 const secret = process.env.JWT_SECRET_KEY;

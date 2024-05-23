@@ -2,20 +2,25 @@
 import './init-aliases';
 import { config } from 'dotenv';
 config();
-import express, { NextFunction, Response, Request } from 'express';
+import express from 'express';
 import cors from 'cors';
 import AuthRouter from './routes/AuthRouter';
 import logger from 'morgan';
 import path from 'path';
-import mongoInit from './models/mongoInit';
+import mongoInit from './database';
 import catchErrorHandler from './utilities/catchErrorHandler';
 import AdminRouter from './routes/AdminRouter';
 import { ROLE_TYPE_ENUM } from './utilities/commonTypes';
 import AuthMiddleware from './utilities/AuthMiddleware';
-import { UserType } from './models/User';
+import { UserType } from './database/models/User';
 import dealCategoryController from './controllers/DealCategoryController/dealCategoryController';
 import platFormController from './controllers/PlatFormController/platFormController';
 import brandController from './controllers/BrandConroller/brandController';
+import DealRouter from './routes/DealRouter';
+import DealCategoryRouter from './routes/DealCategoryRouter';
+import PlatFromRouter from './routes/PlatFromRouter';
+import BrandRouter from './routes/BrandRouter';
+import GetHomeResult from './controllers/GetHomeResult';
 declare global {
     namespace Express {
         export interface Request {
@@ -38,16 +43,11 @@ const init = async () => {
 
     app.use('/auth', AuthRouter);
     app.use('/admin', AuthMiddleware(ROLE_TYPE_ENUM.ADMIN), AdminRouter);
-    app.get(
-        '/dealCategory/getAllDealCategories',
-        dealCategoryController.getAllDealCategoryController,
-    );
-    app.get(
-        '/platForm/getAllPlatForms',
-        platFormController.getAllPlatFormController,
-    );
-
-    app.get('/brand/getAllBrands', brandController.getAllBrandController);
+    app.use('/deal', DealRouter);
+    app.use('/dealCategory', DealCategoryRouter);
+    app.use('/platForm', PlatFromRouter);
+    app.use('/brand', BrandRouter);
+    app.get('/getHomeData', GetHomeResult);
 
     app.use(catchErrorHandler);
 

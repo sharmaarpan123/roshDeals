@@ -2,15 +2,33 @@ import { Request, Response } from 'express';
 import { addSchema, deleteSchema, editSchema } from './schema';
 import catchAsync from '@/utilities/catchAsync';
 import { errorResponse, successResponse } from '@/utilities/Responses';
-import Brand from '@/models/Brand';
+import Brand from '@/database/models/Brand';
+import { filterSchema } from '@/utilities/ValidationSchema';
+import Deal from '@/database/models/Deal';
 
 const getAllBrandController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
-        const AllDAta = await Brand.find({ isDeleted: false });
+        const { offset, limit, search } = filterSchema.parse(req.body);
+
+        const AllDAta = Brand.find({
+            isDeleted: false,
+            ...(search && { name: { $regex: search, $options: 'i' } }),
+        })
+            .skip(offset || 0)
+            .limit(limit || 20);
+
+        const total = Brand.find({
+            isDeleted: false,
+            ...(search && { name: { $regex: search, $options: 'i' } }),
+        }).countDocuments();
+
+        const data = await Promise.all([AllDAta, total]);
+
         return res.status(200).json(
             successResponse({
                 message: 'All Brands',
-                data: AllDAta,
+                data: data[0],
+                total: data[1],
             }),
         );
     },
@@ -54,6 +72,21 @@ const editBrandController = catchAsync(
         const body = editSchema.parse(req.body);
 
         const { name, brandId, image } = body;
+
+        if (name) {
+            // checking unique name
+            const alreadyExists = await Brand.findOne({
+                name: { $regex: new RegExp(name, 'i') },
+            }).lean();
+
+            if (alreadyExists && alreadyExists._id.toString() !== brandId) {
+                return res.status(400).json(
+                    errorResponse({
+                        message: 'This Brand already exists',
+                    }),
+                );
+            }
+        }
 
         const UpdatedBrand = await Brand.findByIdAndUpdate(
             { _id: brandId },
@@ -109,9 +142,67 @@ const deleteBrandController = catchAsync(
         }
     },
 );
+
+const getActiveBrandController = catchAsync(
+    async (req: Request, res: Response): Promise<Response> => {
+        const { offset, limit, search } = filterSchema.parse(req.body);
+
+        const brandData = await Deal.aggregate([
+            {
+                $match: {
+                    isDeleted: false,
+                    isActive: true,
+                    isSlotCompleted: false,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'brands', // Collection name in your database
+                    localField: 'brand',
+                    foreignField: '_id',
+                    as: 'brandData',
+                },
+            },
+            {
+                $match: {
+                    'brandData.name': { $regex: search, $options: 'i' },
+                },
+            },
+            {
+                $unwind: '$brandData',
+            },
+            {
+                $group: {
+                    _id: '$brandData._id', // Group by the unique identifier of the brand document
+                    brandData: { $first: '$brandData' }, // Keep the first document in each group
+                },
+            },
+            {
+                $replaceRoot: {
+                    newRoot: '$brandData',
+                },
+            },
+            {
+                $skip: offset || 0,
+            },
+            {
+                $limit: limit || 10,
+            },
+        ]);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'All active Brands',
+                data: brandData,
+            }),
+        );
+    },
+);
+
 export = {
     addBrandController,
     editBrandController,
     deleteBrandController,
     getAllBrandController,
+    getActiveBrandController,
 };

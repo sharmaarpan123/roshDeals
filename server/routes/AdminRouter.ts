@@ -1,5 +1,9 @@
 import brandController from '@/controllers/BrandConroller/brandController';
 import dealCategoryController from '@/controllers/DealCategoryController/dealCategoryController';
+import {
+    addDealController,
+    editDealController,
+} from '@/controllers/DealController/dealController';
 import platFormController from '@/controllers/PlatFormController/platFormController';
 import express from 'express';
 
@@ -31,5 +35,9 @@ AdminRouter.post(
 AdminRouter.post('/brand/add', brandController.addBrandController);
 AdminRouter.post('/brand/edit', brandController.editBrandController);
 AdminRouter.post('/brand/delete', brandController.deleteBrandController);
+
+//  deal
+AdminRouter.post('/deal/add', addDealController);
+AdminRouter.post('/deal/edit', editDealController);
 
 export default AdminRouter;

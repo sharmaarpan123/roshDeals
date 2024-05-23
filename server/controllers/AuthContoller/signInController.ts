@@ -1,4 +1,4 @@
-import User from '@/models/User';
+import User from '@/database/models/User';
 import { errorResponse, successResponse } from '@/utilities/Responses';
 import catchAsync from '@/utilities/catchAsync';
 import { comparePassword } from '@/utilities/hashPassword';

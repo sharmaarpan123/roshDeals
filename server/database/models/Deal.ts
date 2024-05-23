@@ -10,16 +10,49 @@ const dealSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             require: String,
             ref: 'Brand',
+            validate: {
+                validator: async function (brandId: mongoose.Types.ObjectId) {
+                    const brand = await mongoose.models.Brand.findById(brandId);
+                    return !!brand; // Return true if the brand exists
+                },
+                message: (props) => `${props.value} is not a valid Brand ID!`,
+            },
         },
         platForm: {
             type: mongoose.Schema.Types.ObjectId,
             require: String,
             ref: 'PlatForm',
+            validate: {
+                validator: async function (
+                    platFormId: mongoose.Types.ObjectId,
+                ) {
+                    const platForm =
+                        await mongoose.models.PlatForm.findById(
+                            platFormId,
+                        ).lean();
+                    return !!platForm;
+                },
+                message: (props) =>
+                    `${props.value} is not a valid PlatForm ID!`,
+            },
         },
         dealCategory: {
             type: mongoose.Schema.Types.ObjectId,
             require: String,
             ref: 'DealCategory',
+            validate: {
+                validator: async function (
+                    DealCategoryId: mongoose.Types.ObjectId,
+                ) {
+                    const DealCategory =
+                        await mongoose.models.DealCategory.findById(
+                            DealCategoryId,
+                        ).lean();
+                    return !!DealCategory;
+                },
+                message: (props) =>
+                    `${props.value} is not a valid DealCategory ID!`,
+            },
         },
         productCategories: {
             type: [String],
@@ -43,6 +76,11 @@ const dealSchema = new mongoose.Schema(
         slotCompletedCount: {
             type: Number,
             required: true,
+            default: 0,
+        },
+        isSlotCompleted: {
+            type: Boolean,
+            default: false,
         },
         payMentReceived: {
             // when received from the brand
@@ -56,7 +94,7 @@ const dealSchema = new mongoose.Schema(
         },
         isActive: {
             type: Boolean,
-            default: false,
+            default: true,
         },
         isDeleted: {
             type: Boolean,

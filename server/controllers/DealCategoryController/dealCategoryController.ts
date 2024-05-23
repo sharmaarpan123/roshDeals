@@ -6,7 +6,9 @@ import {
 } from './schema';
 import catchAsync from '@/utilities/catchAsync';
 import { errorResponse, successResponse } from '@/utilities/Responses';
-import DealCategory from '@/models/DealCategory';
+import DealCategory from '@/database/models/DealCategory';
+import { filterSchema } from '@/utilities/ValidationSchema';
+import Deal from '@/database/models/Deal';
 
 const getAllDealCategoryController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
@@ -113,9 +115,61 @@ const deleteDealCategoryController = catchAsync(
         }
     },
 );
+
+const getActiveDealCategoriesController = catchAsync(
+    async (req: Request, res: Response): Promise<Response> => {
+        const { offset, limit } = filterSchema.parse(req.body);
+
+        const DealCategoriesData = await Deal.aggregate([
+            {
+                $match: {
+                    isDeleted: false,
+                    isActive: true,
+                    isSlotCompleted: false,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'dealcategories', // Collection name in your database
+                    localField: 'dealCategory',
+                    foreignField: '_id',
+                    as: 'dealCategoryData',
+                },
+            },
+            {
+                $unwind: '$dealCategoryData',
+            },
+            {
+                $group: {
+                    _id: '$dealCategoryData._id', // Group by the unique identifier of the brand document
+                    dealCategoryData: { $first: '$dealCategoryData' }, // Keep the first document in each group
+                },
+            },
+            {
+                $replaceRoot: {
+                    newRoot: '$dealCategoryData',
+                },
+            },
+            {
+                $skip: offset || 0,
+            },
+            {
+                $limit: limit || 10,
+            },
+        ]);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'All active Deal Category',
+                data: DealCategoriesData,
+            }),
+        );
+    },
+);
 export = {
     addDealCategoryController,
     editDealCategoryController,
     deleteDealCategoryController,
     getAllDealCategoryController,
+    getActiveDealCategoriesController,
 };

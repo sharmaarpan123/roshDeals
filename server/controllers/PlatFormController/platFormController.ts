@@ -1,4 +1,4 @@
-import PlatForm from '@/models/PlatForm';
+import PlatForm from '@/database/models/PlatForm';
 import { Request, Response } from 'express';
 import { addPlatFormSchema, editPlatFormSchema } from './schema';
 import catchAsync from '@/utilities/catchAsync';
@@ -55,6 +55,20 @@ const editPlatFormController = catchAsync(
         const body = editPlatFormSchema.parse(req.body);
 
         const { name, platFormId, image } = body;
+
+        if (name) {
+            const alreadyExists = await PlatForm.findOne({
+                name: { $regex: new RegExp(name, 'i') },
+            }).lean();
+
+            if (alreadyExists && alreadyExists._id.toString() !== platFormId) {
+                return res.status(400).json(
+                    errorResponse({
+                        message: 'This platform already exists',
+                    }),
+                );
+            }
+        }
 
         const UpdatedPlatForm = await PlatForm.findByIdAndUpdate(
             { _id: platFormId },

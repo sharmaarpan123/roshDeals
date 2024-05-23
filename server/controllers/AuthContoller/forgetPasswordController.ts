@@ -1,4 +1,4 @@
-import User from '@/models/User';
+import User from '@/database/models/User';
 import catchAsync from '@/utilities/catchAsync';
 import { randomOtp } from '@/utilities/utilitis';
 import { Response, Request } from 'express';
