@@ -5,6 +5,7 @@ import {
     editDealController,
 } from '@/controllers/DealController/dealController';
 import platFormController from '@/controllers/PlatFormController/platFormController';
+import PosterController from '@/controllers/PosterController/PosterController';
 import express from 'express';
 
 const AdminRouter = express.Router();
@@ -35,6 +36,19 @@ AdminRouter.post(
 AdminRouter.post('/brand/add', brandController.addBrandController);
 AdminRouter.post('/brand/edit', brandController.editBrandController);
 AdminRouter.post('/brand/delete', brandController.deleteBrandController);
+
+// category routes
+AdminRouter.post('/poster/add', PosterController.addPosterController);
+AdminRouter.post('/poster/edit', PosterController.editPosterController);
+AdminRouter.post('/poster/delete', PosterController.deletePosterController);
+AdminRouter.post(
+    '/poster/statusChange',
+    PosterController.statusChangeController,
+);
+AdminRouter.get(
+    '/poster/getAllPosters',
+    PosterController.getAllPosterController,
+);
 
 //  deal
 AdminRouter.post('/deal/add', addDealController);

@@ -38,7 +38,7 @@ const addBrandController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const body = addSchema.parse(req.body);
 
-        const { name } = body;
+        const { name, image } = body;
 
         const alreadyExists = await Brand.findOne({
             name: { $regex: new RegExp(name, 'i') },
@@ -54,6 +54,7 @@ const addBrandController = catchAsync(
 
         const newBrand = await Brand.create({
             name,
+            image,
         });
 
         const DealCategoryRes = await newBrand.save();

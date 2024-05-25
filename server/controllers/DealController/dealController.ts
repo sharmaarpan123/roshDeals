@@ -127,6 +127,14 @@ export const dealDetails = catchAsync(
 
         const DealRes = await Deal.findOne({ _id: dealId });
 
+        if (!DealRes) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'No Data Found',
+                }),
+            );
+        }
+
         return res.status(200).json(
             successResponse({
                 message: 'Deal Fetched',
@@ -146,6 +154,9 @@ export const activeDealsController = catchAsync(
             isSlotCompleted: false,
             ...(search && { productName: { $regex: search, $options: 'i' } }),
         })
+            .populate('brand')
+            .populate('dealCategory')
+            .populate('platForm')
             .sort({ createdAt: -1 })
             .skip(offset || 0)
             .limit(limit || 20);
