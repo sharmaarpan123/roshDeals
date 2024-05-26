@@ -7,27 +7,18 @@ import {
 import catchAsync from '@/utilities/catchAsync';
 import { errorResponse, successResponse } from '@/utilities/Responses';
 import Poster from '@/database/models/Poster';
-import { filterSchema } from '@/utilities/ValidationSchema';
 import { Request, Response } from 'express';
 import { validatingMongoObjectIds } from '@/utilities/validations';
 import { POSTER_ENUM } from '@/utilities/commonTypes';
 
 const getAllPosterController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
-        const { offset, limit, search } = filterSchema.parse(req.body);
-
-        const AllData = Poster.find({
-            ...(search && { name: { $regex: search, $options: 'i' } }),
-        })
+        const AllData = Poster.find()
             .populate('brand')
             .populate('deal')
-            .populate('dealCategory')
-            .skip(offset || 0)
-            .limit(limit || 20);
+            .populate('dealCategory');
 
-        const total = Poster.find({
-            ...(search && { name: { $regex: search, $options: 'i' } }),
-        }).countDocuments();
+        const total = Poster.find().countDocuments();
 
         const data = await Promise.all([AllData, total]);
 

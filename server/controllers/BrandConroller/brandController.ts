@@ -166,7 +166,7 @@ const getActiveBrandController = catchAsync(
             },
             {
                 $match: {
-                    'brandData.name': { $regex: search, $options: 'i' },
+                    'brandData.name': { $regex: search || '', $options: 'i' },
                 },
             },
             {

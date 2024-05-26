@@ -20,24 +20,16 @@ export const filterSchema = z
             ) {
                 return true;
             }
+
             if (
-                !(
-                    (data.offset || data.offset === 0) &&
-                    (data.limit || data.limit === 0)
-                )
+                !(data.offset || data.offset === 0) ||
+                !(data.limit || data.limit === 0)
             ) {
                 return false;
             }
-            if (
-                !(
-                    (data.limit || data.limit === 0) &&
-                    (data.offset || data.offset === 0)
-                )
-            ) {
-                return false;
-            }
+
             return true;
         },
 
-        { message: 'Please send offset and limit both or other wise not any' },
+        { message: 'Please send both offset and limit or neither' },
     );
