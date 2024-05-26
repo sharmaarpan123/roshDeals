@@ -146,59 +146,58 @@ const deleteBrandController = catchAsync(
 
 const getActiveBrandController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
-        const { offset, limit, search } = filterSchema.parse(req.body);
+    const { offset, limit, search } = filterSchema.parse(req.query);
 
-        const brandData = await Deal.aggregate([
-            {
-                $match: {
-                    isDeleted: false,
-                    isActive: true,
-                    isSlotCompleted: false,
-                },
+    const brandData = await Deal.aggregate([
+        {
+            $match: {
+                isDeleted: false,
+                isActive: true,
+                isSlotCompleted: false,
             },
-            {
-                $lookup: {
-                    from: 'brands', // Collection name in your database
-                    localField: 'brand',
-                    foreignField: '_id',
-                    as: 'brandData',
-                },
+        },
+        {
+            $lookup: {
+                from: 'brands', // Collection name in your database
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brandData',
             },
-            {
-                $match: {
-                    'brandData.name': { $regex: search, $options: 'i' },
-                },
+        },
+        {
+            $match: {
+                'brandData.name': { $regex: search || '', $options: 'i' },
             },
-            {
-                $unwind: '$brandData',
+        },
+        {
+            $unwind: '$brandData',
+        },
+        {
+            $group: {
+                _id: '$brandData._id', // Group by the unique identifier of the brand document
+                brandData: { $first: '$brandData' }, // Keep the first document in each group
             },
-            {
-                $group: {
-                    _id: '$brandData._id', // Group by the unique identifier of the brand document
-                    brandData: { $first: '$brandData' }, // Keep the first document in each group
-                },
+        },
+        {
+            $replaceRoot: {
+                newRoot: '$brandData',
             },
-            {
-                $replaceRoot: {
-                    newRoot: '$brandData',
-                },
-            },
-            {
-                $skip: offset || 0,
-            },
-            {
-                $limit: limit || 10,
-            },
-        ]);
+        },
+        {
+            $skip: offset || 0,
+        },
+        {
+            $limit: limit || 10,
+        },
+    ]);
 
-        return res.status(200).json(
-            successResponse({
-                message: 'All active Brands',
-                data: brandData,
-            }),
-        );
-    },
-);
+    return res.status(200).json(
+        successResponse({
+            message: 'All active Brands',
+            data: brandData,
+        }),
+    );
+});
 
 export = {
     addBrandController,
