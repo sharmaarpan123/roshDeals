@@ -9,6 +9,8 @@ import { errorResponse, successResponse } from '@/utilities/Responses';
 import Poster from '@/database/models/Poster';
 import { filterSchema } from '@/utilities/ValidationSchema';
 import { Request, Response } from 'express';
+import { validatingMongoObjectIds } from '@/utilities/validations';
+import { POSTER_ENUM } from '@/utilities/commonTypes';
 
 const getAllPosterController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
@@ -17,6 +19,9 @@ const getAllPosterController = catchAsync(
         const AllData = Poster.find({
             ...(search && { name: { $regex: search, $options: 'i' } }),
         })
+            .populate('brand')
+            .populate('deal')
+            .populate('dealCategory')
             .skip(offset || 0)
             .limit(limit || 20);
 
@@ -40,12 +45,40 @@ const addPosterController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const body = addSchema.parse(req.body);
 
-        const { name, title, image } = body;
+        const {
+            name,
+            title,
+            image,
+            brand,
+            deal,
+            dealCategory,
+            posterType,
+            redirectUrl,
+        } = body;
+
+        const inValidMongoIdMessage = await validatingMongoObjectIds({
+            brand,
+            dealCategory,
+            deal,
+        });
+
+        if (inValidMongoIdMessage) {
+            return res.status(400).json(
+                errorResponse({
+                    message: inValidMongoIdMessage,
+                }),
+            );
+        }
 
         const newPoster = await Poster.create({
             name,
             title,
             image,
+            posterType,
+            ...(posterType === POSTER_ENUM.REDIRECT && { redirectUrl }),
+            ...(posterType === POSTER_ENUM.DEAL && { deal }),
+            ...(posterType === POSTER_ENUM.DEALCATEGORY && { dealCategory }),
+            ...(posterType === POSTER_ENUM.BRAND && { brand }),
         });
 
         const PosterRes = await newPoster.save();
@@ -63,11 +96,67 @@ const editPosterController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const body = editSchema.parse(req.body);
 
-        const { name, title, posterId, image } = body;
+        const {
+            name,
+            title,
+            posterId,
+            image,
+            brand,
+            deal,
+            dealCategory,
+            posterType,
+            redirectUrl,
+        } = body;
+
+        const inValidMongoIdMessage = await validatingMongoObjectIds({
+            brand,
+            dealCategory,
+            deal,
+        });
+
+        if (inValidMongoIdMessage) {
+            return res.status(400).json(
+                errorResponse({
+                    message: inValidMongoIdMessage,
+                }),
+            );
+        }
 
         const updatedPoster = await Poster.findByIdAndUpdate(
             { _id: posterId },
-            { name, title, image },
+            {
+                name,
+                title,
+                image,
+                ...(posterType === POSTER_ENUM.REDIRECT && {
+                    posterType,
+                    redirectUrl,
+                    deal: null,
+                    brand: null,
+                    dealCategory: null,
+                }),
+                ...(posterType === POSTER_ENUM.DEAL && {
+                    posterType,
+                    redirectUrl: null,
+                    deal,
+                    brand: null,
+                    dealCategory: null,
+                }),
+                ...(posterType === POSTER_ENUM.BRAND && {
+                    posterType,
+                    redirectUrl: null,
+                    deal: null,
+                    brand,
+                    dealCategory: null,
+                }),
+                ...(posterType === POSTER_ENUM.DEALCATEGORY && {
+                    posterType,
+                    redirectUrl: null,
+                    deal: null,
+                    brand: null,
+                    dealCategory,
+                }),
+            },
             { new: true },
         );
 
