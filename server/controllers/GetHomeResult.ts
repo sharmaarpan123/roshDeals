@@ -107,7 +107,10 @@ export default catchAsync(async (req: Request, res: Response) => {
     const PosterData = Poster.find({
         isDeleted: false,
         isActive: true,
-    });
+    })
+        .populate('brand')
+        .populate('dealCategory')
+        .populate('deal');
 
     const homeData = await Promise.all([
         activelyDeals,

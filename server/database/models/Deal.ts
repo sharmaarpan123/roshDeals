@@ -61,6 +61,10 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        termsAndCondition: {
+            type: String,
+            required: true,
+        },
         actualPrice: {
             type: String,
             required: true,

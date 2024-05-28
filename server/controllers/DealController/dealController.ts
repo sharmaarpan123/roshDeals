@@ -21,6 +21,7 @@ export const addDealController = catchAsync(
             productName,
             slotAlloted,
             isActive,
+            termsAndCondition,
         } = body;
 
         const newDeal = await Deal.create({
@@ -33,6 +34,7 @@ export const addDealController = catchAsync(
             productCategories,
             productName,
             slotAlloted,
+            termsAndCondition,
             isActive: isActive === false ? false : true, // we want by default  active true  so if
             //on add time isActive is  false it will false other wise it will be all time true
             // we can edit on edit api
@@ -65,6 +67,7 @@ export const editDealController = catchAsync(
             productName,
             slotAlloted,
             isActive,
+            termsAndCondition,
         } = body;
 
         // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
@@ -96,6 +99,7 @@ export const editDealController = catchAsync(
                 productCategories,
                 productName,
                 slotAlloted,
+                termsAndCondition,
                 ...(isActive && { isActive }),
             },
             {

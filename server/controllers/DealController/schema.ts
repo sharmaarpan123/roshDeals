@@ -28,6 +28,7 @@ const addDealSchema = z.object({
         .string({ required_error: 'post url is required' })
         .trim()
         .refine((data) => isUrlValid(data), { message: 'Invalid post url' }),
+    termsAndCondition: z.string({ required_error: 'This field is required' }),
     actualPrice: z.string({ required_error: 'actual Price is required' }),
     isActive: z.boolean().optional(),
     cashBack: z.string({ required_error: 'cash Back Price is required' }),
@@ -68,6 +69,7 @@ const editDealSchema = z
         actualPrice: z.string().optional(),
         isActive: z.boolean().optional(),
         cashBack: z.string().optional(),
+        termsAndCondition: z.string().optional(),
         slotAlloted: z
             .number({ invalid_type_error: 'slot alloted should be numeric' })
             .optional(),
