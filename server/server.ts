@@ -22,6 +22,7 @@ import PlatFromRouter from './routes/PlatFromRouter';
 import BrandRouter from './routes/BrandRouter';
 import GetHomeResult from './controllers/GetHomeResult';
 import activeDealByBrandAndCategory from './controllers/getDeals/activeDealByBrandAndCategory';
+import UserRouter from './routes/UserRouter';
 declare global {
     namespace Express {
         export interface Request {
@@ -48,6 +49,7 @@ const init = async () => {
     app.use('/dealCategory', DealCategoryRouter);
     app.use('/platForm', PlatFromRouter);
     app.use('/brand', BrandRouter);
+    app.use('/user', UserRouter);
     app.get('/getHomeData', GetHomeResult);
     app.post('/getDealsByIds', activeDealByBrandAndCategory);
 

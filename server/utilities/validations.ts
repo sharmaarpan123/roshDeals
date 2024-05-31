@@ -2,17 +2,20 @@ import Brand from '@/database/models/Brand';
 import PlatForm from '@/database/models/PlatForm';
 import DealCategory from '@/database/models/DealCategory';
 import Deal from '@/database/models/Deal';
+import User from '@/database/models/User';
 
 export const validatingMongoObjectIds = async ({
     brand,
     dealCategory,
     platForm,
     deal,
+    user,
 }: {
     brand?: string;
     dealCategory?: string;
     platForm?: string;
     deal?: string;
+    user?: string;
 }) => {
     const validatingIdsArr = [];
 
@@ -20,6 +23,12 @@ export const validatingMongoObjectIds = async ({
         validatingIdsArr.push({
             collection: 'Brand',
             query: Brand.findOne({ _id: brand }),
+        });
+    }
+    if (user) {
+        validatingIdsArr.push({
+            collection: 'User',
+            query: User.findOne({ _id: brand }),
         });
     }
     if (dealCategory) {
