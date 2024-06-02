@@ -15,7 +15,12 @@ const getAllPosterController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const AllData = Poster.find()
             .populate('brand')
-            .populate('deal')
+            .populate({
+                path: 'deal',
+                populate: {
+                    path: 'brand dealCategory platForm',
+                },
+            })
             .populate('dealCategory');
 
         const total = Poster.find().countDocuments();

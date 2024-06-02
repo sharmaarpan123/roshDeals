@@ -110,7 +110,12 @@ export default catchAsync(async (req: Request, res: Response) => {
     })
         .populate('brand')
         .populate('dealCategory')
-        .populate('deal');
+        .populate({
+            path: 'deal',
+            populate: {
+                path: 'brand dealCategory platForm',
+            },
+        });
 
     const homeData = await Promise.all([
         activelyDeals,
