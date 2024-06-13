@@ -9,3 +9,9 @@ export enum POSTER_ENUM {
     DEALCATEGORY = 'dealCategory',
     DEAL = 'deal',
 }
+
+export enum ORDER_FORM_STATUS {
+    ACCEPPTED = 'accepted',
+    REJECTED = 'rejected',
+    PENDING = 'pending',
+}

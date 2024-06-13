@@ -5,6 +5,7 @@ export type RoleType = keyof typeof ROLE_TYPE_ENUM;
 
 export interface UserType {
     name: string;
+    _id: String;
     email: string;
     password: string;
     phoneNumber: string;
