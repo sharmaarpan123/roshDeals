@@ -11,7 +11,7 @@ export enum POSTER_ENUM {
 }
 
 export enum ORDER_FORM_STATUS {
-    ACCEPPTED = 'accepted',
+    ACCEPTED = 'accepted',
     REJECTED = 'rejected',
     PENDING = 'pending',
 }

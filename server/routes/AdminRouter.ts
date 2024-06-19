@@ -4,6 +4,7 @@ import {
     addDealController,
     editDealController,
 } from '@/controllers/DealController/dealController';
+import { acceptRejectOrder } from '@/controllers/Order/OrderController';
 import platFormController from '@/controllers/PlatFormController/platFormController';
 import PosterController from '@/controllers/PosterController/PosterController';
 import express from 'express';
@@ -53,5 +54,8 @@ AdminRouter.get(
 //  deal
 AdminRouter.post('/deal/add', addDealController);
 AdminRouter.post('/deal/edit', editDealController);
+
+// orders
+AdminRouter.post('/order/acceptOrder', acceptRejectOrder);
 
 export default AdminRouter;

@@ -19,7 +19,7 @@ const PaymentDetail = new mongoose.Schema(
         accountHolderName: { type: String },
         accountNumber: { type: String },
         IFSC: { type: String },
-        upiId: { type: String },
+        upiId: { type: String, required: true },
     },
     {
         timestamps: true,

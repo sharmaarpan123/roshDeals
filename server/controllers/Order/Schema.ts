@@ -1,6 +1,15 @@
 import { isUrlValid } from '@/utilities/utilitis';
 import { z } from 'zod';
 
+export const orderIdSchema = z.object({
+    orderId: z
+        .string({
+            required_error: 'Order id is required',
+        })
+        .trim()
+        .min(1, { message: 'Order Id have at least one character' }),
+});
+
 export const createOrderSchema = z.object({
     reviewerName: z
         .string({
@@ -8,7 +17,7 @@ export const createOrderSchema = z.object({
         })
         .trim()
         .min(1, { message: 'Reviewer should have at least one character' }),
-    orderId: z
+    orderIdOfPlatForm: z
         .string({
             required_error: 'Order id is required',
         })
@@ -29,3 +38,79 @@ export const createOrderSchema = z.object({
             message: 'Invalid Order Screenshot Url',
         }),
 });
+
+export const reviewFormSubmitSchema = z
+    .object({
+        deliveredScreenShot: z
+            .string({ required_error: 'Delivered Screenshot is required' })
+            .trim()
+            .refine((data) => isUrlValid(data), {
+                message: 'Invalid Order Screenshot Url',
+            }),
+        reviewScreenShot: z
+            .string()
+            .trim()
+            .refine((data) => isUrlValid(data), {
+                message: 'Invalid Order Screenshot Url',
+            })
+            .optional(),
+        reviewLink: z
+            .string()
+            .trim()
+            .refine((data) => isUrlValid(data), {
+                message: 'Invalid Order Screenshot Url',
+            })
+            .optional(),
+        sellerFeedback: z
+            .object(
+                {
+                    screenShot: z
+                        .string({
+                            required_error:
+                                'Seller FeedBack Screenshot is required',
+                        })
+                        .refine((data) => isUrlValid(data), {
+                            message: 'Invalid  seller FeedBack url',
+                        }),
+                    link: z
+                        .string({
+                            required_error: 'Seller FeedBack Link is required',
+                        })
+                        .refine((data) => isUrlValid(data), {
+                            message: 'Invalid  seller FeedBack url',
+                        }),
+                },
+                { invalid_type_error: 'InValid seller Feed Back' },
+            )
+            .optional(),
+    })
+    .merge(orderIdSchema)
+    .refine(
+        (data) => {
+            if (
+                (data?.reviewLink && !data?.reviewScreenShot) ||
+                (data?.reviewScreenShot && !data?.reviewLink)
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message:
+                'Please send both review Link and review Screenshot  or neither',
+        },
+    );
+
+export const OrderFromUpdateSchema = z
+    .object({
+        reviewerName: z.string().trim().optional(),
+        orderScreenShot: z
+            .string()
+            .trim()
+            .refine((data) => isUrlValid(data), {
+                message: 'Invalid Order Screenshot Url',
+            })
+            .optional(),
+        orderIdOfPlatForm: z.string().trim().optional(),
+    })
+    .merge(orderIdSchema);
