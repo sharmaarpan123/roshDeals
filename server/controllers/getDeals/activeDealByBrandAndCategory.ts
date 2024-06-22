@@ -16,12 +16,11 @@ export default catchAsync(async (req: Request, res: Response) => {
         ...(type === SearchEnumType.brand && { brand: id }),
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
     })
-        .skip(offset)
-        .limit(limit)
         .populate('brand')
         .populate('dealCategory')
-        .populate('platForm');
-
+        .populate('platForm')
+        .skip(offset)
+        .limit(limit);
     return res
         .status(200)
         .json(successResponse({ data: DealData, message: 'Deal Data' }));
