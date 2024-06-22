@@ -17,9 +17,11 @@ export const activeDealByBrandAndCategory = z
             invalid_type_error: `please send valid type to search`,
             required_error: 'Type is required',
         }),
+
         id: z
             .string({ required_error: 'Id is required to search' })
-            .min(1, { message: 'Id is required' }),
+            .min(1, { message: 'Id is required!' }),
     })
     .merge(filterSchemaObject)
+
     .refine(filterRefineFunction, filterRefineMessage);
