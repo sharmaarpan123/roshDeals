@@ -23,5 +23,4 @@ export const activeDealByBrandAndCategory = z
             .min(1, { message: 'Id is required!' }),
     })
     .merge(filterSchemaObject)
-
     .refine(filterRefineFunction, filterRefineMessage);
