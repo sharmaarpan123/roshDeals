@@ -186,7 +186,15 @@ export const reviewFromSubmitController = catchAsync(
 );
 
 export const OrderList = catchAsync(async (req: Request, res: Response) => {
-    const orders = await Order.find({ userId: req.user._id });
+    const orders = await Order.find({ userId: req.user._id }).populate({
+        path: 'dealId',
+        select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl payMentGiven',
+        populate: [
+            { path: 'brand', select: 'name image' },
+            { path: 'dealCategory', select: 'name' },
+            { path: 'platForm', select: 'name' },
+        ],
+    });
     return res.status(200).json(
         successResponse({
             message: 'Orders List.',

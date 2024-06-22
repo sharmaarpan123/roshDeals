@@ -17,7 +17,10 @@ export default catchAsync(async (req: Request, res: Response) => {
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
     })
         .skip(offset)
-        .limit(limit);
+        .limit(limit)
+        .populate('brand')
+        .populate('dealCategory')
+        .populate('platForm');
 
     return res
         .status(200)

@@ -13,9 +13,6 @@ import AdminRouter from './routes/AdminRouter';
 import { ROLE_TYPE_ENUM } from './utilities/commonTypes';
 import AuthMiddleware from './utilities/AuthMiddleware';
 import { UserType } from './database/models/User';
-import dealCategoryController from './controllers/DealCategoryController/dealCategoryController';
-import platFormController from './controllers/PlatFormController/platFormController';
-import brandController from './controllers/BrandConroller/brandController';
 import DealRouter from './routes/DealRouter';
 import DealCategoryRouter from './routes/DealCategoryRouter';
 import PlatFromRouter from './routes/PlatFromRouter';
@@ -24,10 +21,14 @@ import GetHomeResult from './controllers/GetHomeResult';
 import activeDealByBrandAndCategory from './controllers/getDeals/activeDealByBrandAndCategory';
 import UserRouter from './routes/UserRouter';
 import OrderRouter from './routes/OrderRouter';
+import fileUpload from './controllers/fileUpload';
+import { upload } from './utilities/multer';
 declare global {
     namespace Express {
         export interface Request {
             user: UserType;
+            file?: Multer.File;
+            image?: Blob;
         }
     }
 }
@@ -45,15 +46,21 @@ const init = async () => {
     await mongoInit();
 
     app.use('/auth', AuthRouter);
-    app.use('/admin', AuthMiddleware(ROLE_TYPE_ENUM.ADMIN), AdminRouter);
+    app.use('/admin', AuthMiddleware([ROLE_TYPE_ENUM.ADMIN]), AdminRouter);
     app.use('/deal', DealRouter);
     app.use('/dealCategory', DealCategoryRouter);
     app.use('/platForm', PlatFromRouter);
     app.use('/brand', BrandRouter);
     app.get('/getHomeData', GetHomeResult);
     app.post('/getDealsByIds', activeDealByBrandAndCategory);
-    app.use('/user', UserRouter);
-    app.use('/order', AuthMiddleware(ROLE_TYPE_ENUM.USER), OrderRouter);
+    app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
+    app.use('/order', AuthMiddleware([ROLE_TYPE_ENUM.USER]), OrderRouter);
+    app.use(
+        '/fileUpload',
+        AuthMiddleware(Object.values(ROLE_TYPE_ENUM).map((i) => i)),
+        upload.single('file'),
+        fileUpload,
+    );
 
     app.use(catchErrorHandler);
 

@@ -129,7 +129,9 @@ export const dealDetails = catchAsync(
         const body = getDeal.parse(req.params);
         const { dealId } = body;
 
-        const DealRes = await Deal.findOne({ _id: dealId });
+        const DealRes = await Deal.findOne({ _id: dealId })
+            .populate('dealCategory')
+            .populate('platForm');
 
         if (!DealRes) {
             return res.status(400).json(
