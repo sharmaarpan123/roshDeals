@@ -10,7 +10,7 @@
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
         "prepare": "husky",
         "prettier": "prettier --config .prettierrc.json --write server/**/*.ts",
-        "start": "node ./dist/server.js"
+        "start": "node ./dist/server/server.js"
     },
     "_moduleAliases": {
         "@": "dist"
