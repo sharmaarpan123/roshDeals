@@ -8,9 +8,9 @@ import {
 import { errorResponse, successResponse } from '@/utilities/Responses';
 import catchAsync from '@/utilities/catchAsync';
 import { Request, Response } from 'express';
-import serviceAccount from '../../firebaseConfig.json';
+import fireBaseStorage from '../../config/fireBaseStorage';
 
-initializeApp(serviceAccount);
+initializeApp(fireBaseStorage);
 
 const storage = getStorage();
 

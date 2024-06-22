@@ -138,7 +138,6 @@ export const OrderFromUpdate = catchAsync(
 
 export const reviewFromSubmitController = catchAsync(
     async (req: Request, res: Response) => {
-        console.log(req.body, 'bodu');
         const {
             orderId,
             reviewLink,
