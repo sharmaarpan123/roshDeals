@@ -11,6 +11,7 @@ export enum SearchEnumType {
 }
 
 export const activeDealByBrandAndCategory = z
+
     .object({
         type: z.nativeEnum(SearchEnumType, {
             invalid_type_error: 'please send valid type to search',
