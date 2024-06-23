@@ -4,7 +4,7 @@
     "description": "",
     "main": "./server/server.ts",
     "scripts": {
-        "build": "npm install -g typescript && tsc --project tsconfig.json",
+        "build": "rimraf dist && tsc --project tsconfig.json",
         "dev": "nodemon server/server.ts",
         "eslint": "eslint  \"server/**/*.ts\"",
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
