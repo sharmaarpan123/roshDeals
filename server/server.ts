@@ -45,6 +45,10 @@ const init = async () => {
 
     await mongoInit();
 
+    app.get('/health', (req, res) => res.json({
+        message: "I m fine"
+    }))
+
     app.use('/auth', AuthRouter);
     app.use('/admin', AuthMiddleware([ROLE_TYPE_ENUM.ADMIN]), AdminRouter);
     app.use('/deal', DealRouter);
