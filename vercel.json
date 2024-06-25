@@ -14,5 +14,6 @@
         }
     ],
     "outputDirectory": "dist",
-    "buildCommand": "npm run build"
+    "buildCommand": "npm run build",
+    "devCommand": "npm start"
 }
