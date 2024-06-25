@@ -13,5 +13,6 @@
             "dest": "dist/server/server.js"
         }
     ],
-    "outputDirectory": "dist"
+    "outputDirectory": "dist",
+    "buildCommand": "npm run build"
 }
