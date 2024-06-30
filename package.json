@@ -2,7 +2,7 @@
     "name": "roshdeals",
     "version": "1.0.0",
     "description": "",
-    "main": "./server/server.ts",
+    "main": "dist/server/server.js",
     "scripts": {
         "build": "rimraf dist && tsc --project tsconfig.json",
         "dev": "nodemon server/server.ts",
