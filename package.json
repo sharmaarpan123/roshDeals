@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/server/server.js",
     "scripts": {
-        "build": "rimraf dist && tsc --project tsconfig.json",
+        "build": "rimraf dist && tsc",
         "dev": "nodemon server/server.ts",
         "eslint": "eslint  \"server/**/*.ts\"",
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
