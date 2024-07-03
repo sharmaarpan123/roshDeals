@@ -1,1 +1,0 @@
-{"version":3,"file":"BrandRouter.js","sourceRoot":"","sources":["../../../server/routes/BrandRouter.ts"],"names":[],"mappings":";;;;;AAAA,mGAA2E;AAC3E,sDAA8B;AAE9B,MAAM,WAAW,GAAG,iBAAO,CAAC,MAAM,EAAE,CAAC;AAErC,WAAW,CAAC,IAAI,CAAC,eAAe,EAAE,yBAAe,CAAC,qBAAqB,CAAC,CAAC;AACzE,WAAW,CAAC,IAAI,CAAC,kBAAkB,EAAE,yBAAe,CAAC,wBAAwB,CAAC,CAAC;AAE/E,kBAAe,WAAW,CAAC"}

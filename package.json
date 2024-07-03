@@ -2,7 +2,8 @@
     "name": "roshdeals",
     "version": "1.0.0",
     "description": "",
-    "main": "dist/server/server.js",
+    "main": "dist/server/server/app.js",
+    "type": "module",
     "scripts": {
         "build": "rimraf dist && tsc",
         "dev": "nodemon server/server.ts",
@@ -10,7 +11,7 @@
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
         "prepare": "husky",
         "prettier": "prettier --config .prettierrc.json --write server/**/*.ts",
-        "start": "node dist/server/server.js"
+        "start": "node dist/server/server/app.js"
     },
     "_moduleAliases": {
         "@": "dist"
