@@ -7,10 +7,20 @@ const schema_1 = require("./schema");
 const catchAsync_1 = __importDefault(require("@/utilities/catchAsync"));
 const Responses_1 = require("@/utilities/Responses");
 const getAllPlatFormController = (0, catchAsync_1.default)(async (req, res) => {
-    const AllPlatForms = await PlatForm_1.default.find({ isDeleted: false });
+    const AllPlatForms = await PlatForm_1.default.find();
     return res.status(200).json((0, Responses_1.successResponse)({
         message: 'All PlatForms',
         data: AllPlatForms,
+    }));
+});
+const getPlatFormById = (0, catchAsync_1.default)(async (req, res) => {
+    const { platFormId } = schema_1.deletePlatFormSchema.parse(req.params);
+    const platFrom = await PlatForm_1.default.findOne({
+        _id: platFormId,
+    });
+    return res.status(200).json((0, Responses_1.successResponse)({
+        message: 'PlatForm details',
+        data: platFrom,
     }));
 });
 const addPlatFormController = (0, catchAsync_1.default)(async (req, res) => {
@@ -84,5 +94,6 @@ module.exports = {
     editPlatFormController,
     deletePlatFormController,
     getAllPlatFormController,
+    getPlatFormById,
 };
 //# sourceMappingURL=platFormController.js.map

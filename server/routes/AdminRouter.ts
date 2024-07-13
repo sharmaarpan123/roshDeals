@@ -18,6 +18,10 @@ AdminRouter.post(
     '/platForm/delete',
     platFormController.deletePlatFormController,
 );
+AdminRouter.get(
+    '/platForm/getById/:platFormId',
+    platFormController.getPlatFormById,
+);
 
 // category routes
 AdminRouter.post(
@@ -33,10 +37,19 @@ AdminRouter.post(
     dealCategoryController.deleteDealCategoryController,
 );
 
+AdminRouter.get(
+    '/dealCategory/getById/:dealCategoryId',
+    dealCategoryController.getDealCategoryByIdController,
+);
+
 // category routes
 AdminRouter.post('/brand/add', brandController.addBrandController);
 AdminRouter.post('/brand/edit', brandController.editBrandController);
 AdminRouter.post('/brand/delete', brandController.deleteBrandController);
+AdminRouter.get(
+    '/brand/getById/:brandId',
+    brandController.geBrandByIdController,
+);
 
 // category routes
 AdminRouter.post('/poster/add', PosterController.addPosterController);

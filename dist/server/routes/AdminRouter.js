@@ -15,14 +15,17 @@ const AdminRouter = express_1.default.Router();
 AdminRouter.post('/platForm/add', platFormController_1.default.addPlatFormController);
 AdminRouter.post('/platForm/edit', platFormController_1.default.editPlatFormController);
 AdminRouter.post('/platForm/delete', platFormController_1.default.deletePlatFormController);
+AdminRouter.get('/platForm/getById/:platFormId', platFormController_1.default.getPlatFormById);
 // category routes
 AdminRouter.post('/dealCategory/add', dealCategoryController_1.default.addDealCategoryController);
 AdminRouter.post('/dealCategory/edit', dealCategoryController_1.default.editDealCategoryController);
 AdminRouter.post('/dealCategory/delete', dealCategoryController_1.default.deleteDealCategoryController);
+AdminRouter.get('/dealCategory/getById/:dealCategoryId', dealCategoryController_1.default.getDealCategoryByIdController);
 // category routes
 AdminRouter.post('/brand/add', brandController_1.default.addBrandController);
 AdminRouter.post('/brand/edit', brandController_1.default.editBrandController);
 AdminRouter.post('/brand/delete', brandController_1.default.deleteBrandController);
+AdminRouter.get('/brand/getById/:brandId', brandController_1.default.geBrandByIdController);
 // category routes
 AdminRouter.post('/poster/add', PosterController_1.default.addPosterController);
 AdminRouter.post('/poster/edit', PosterController_1.default.editPosterController);

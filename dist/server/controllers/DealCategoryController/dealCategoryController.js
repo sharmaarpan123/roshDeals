@@ -15,6 +15,16 @@ const getAllDealCategoryController = (0, catchAsync_1.default)(async (req, res) 
         data: AllDealCategories,
     }));
 });
+const getDealCategoryByIdController = (0, catchAsync_1.default)(async (req, res) => {
+    const { dealCategoryId } = schema_1.deleteDealCategorySchema.parse(req.params);
+    const dealCategory = await DealCategory_1.default.findOne({
+        _id: dealCategoryId,
+    });
+    return res.status(200).json((0, Responses_1.successResponse)({
+        message: 'DealCategory details',
+        data: dealCategory,
+    }));
+});
 const addDealCategoryController = (0, catchAsync_1.default)(async (req, res) => {
     const body = schema_1.addDealCategorySchema.parse(req.body);
     const { name } = body;
@@ -120,5 +130,6 @@ module.exports = {
     deleteDealCategoryController,
     getAllDealCategoryController,
     getActiveDealCategoriesController,
+    getDealCategoryByIdController,
 };
 //# sourceMappingURL=dealCategoryController.js.map

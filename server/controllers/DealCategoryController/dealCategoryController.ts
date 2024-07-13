@@ -22,6 +22,21 @@ const getAllDealCategoryController = catchAsync(
     },
 );
 
+const getDealCategoryByIdController = catchAsync(
+    async (req: Request, res: Response): Promise<Response> => {
+        const { dealCategoryId } = deleteDealCategorySchema.parse(req.params);
+        const dealCategory = await DealCategory.findOne({
+            _id: dealCategoryId,
+        });
+        return res.status(200).json(
+            successResponse({
+                message: 'DealCategory details',
+                data: dealCategory,
+            }),
+        );
+    },
+);
+
 const addDealCategoryController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const body = addDealCategorySchema.parse(req.body);
@@ -172,4 +187,5 @@ export = {
     deleteDealCategoryController,
     getAllDealCategoryController,
     getActiveDealCategoriesController,
+    getDealCategoryByIdController,
 };

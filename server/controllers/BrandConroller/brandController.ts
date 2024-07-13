@@ -6,19 +6,34 @@ import Brand from '@/database/models/Brand';
 import { filterSchema } from '@/utilities/ValidationSchema';
 import Deal from '@/database/models/Deal';
 
+const geBrandByIdController = catchAsync(
+    async (req: Request, res: Response): Promise<Response> => {
+        const { brandId } = deleteSchema.parse(req.params);
+
+        const brandDetails = await Brand.findOne({
+            _id: brandId,
+        });
+
+        return res.status(200).json(
+            successResponse({
+                message: 'All Brands',
+                data: brandDetails,
+            }),
+        );
+    },
+);
+
 const getAllBrandController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
         const { offset, limit, search } = filterSchema.parse(req.body);
 
         const AllDAta = Brand.find({
-            isDeleted: false,
             ...(search && { name: { $regex: search, $options: 'i' } }),
         })
             .skip(offset || 0)
             .limit(limit || 20);
 
         const total = Brand.find({
-            isDeleted: false,
             ...(search && { name: { $regex: search, $options: 'i' } }),
         }).countDocuments();
 
@@ -206,4 +221,5 @@ export = {
     deleteBrandController,
     getAllBrandController,
     getActiveBrandController,
+    geBrandByIdController,
 };

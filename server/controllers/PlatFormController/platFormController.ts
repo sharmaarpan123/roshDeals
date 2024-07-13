@@ -1,16 +1,35 @@
 import PlatForm from '@/database/models/PlatForm';
 import { Request, Response } from 'express';
-import { addPlatFormSchema, editPlatFormSchema } from './schema';
+import {
+    addPlatFormSchema,
+    deletePlatFormSchema,
+    editPlatFormSchema,
+} from './schema';
 import catchAsync from '@/utilities/catchAsync';
 import { errorResponse, successResponse } from '@/utilities/Responses';
 
 const getAllPlatFormController = catchAsync(
     async (req: Request, res: Response): Promise<Response> => {
-        const AllPlatForms = await PlatForm.find({ isDeleted: false });
+        const AllPlatForms = await PlatForm.find();
         return res.status(200).json(
             successResponse({
                 message: 'All PlatForms',
                 data: AllPlatForms,
+            }),
+        );
+    },
+);
+
+const getPlatFormById = catchAsync(
+    async (req: Request, res: Response): Promise<Response> => {
+        const { platFormId } = deletePlatFormSchema.parse(req.params);
+        const platFrom = await PlatForm.findOne({
+            _id: platFormId,
+        });
+        return res.status(200).json(
+            successResponse({
+                message: 'PlatForm details',
+                data: platFrom,
             }),
         );
     },
@@ -129,4 +148,5 @@ export = {
     editPlatFormController,
     deletePlatFormController,
     getAllPlatFormController,
+    getPlatFormById,
 };

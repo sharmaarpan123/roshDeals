@@ -8,16 +8,24 @@ const Responses_1 = require("@/utilities/Responses");
 const Brand_1 = __importDefault(require("@/database/models/Brand"));
 const ValidationSchema_1 = require("@/utilities/ValidationSchema");
 const Deal_1 = __importDefault(require("@/database/models/Deal"));
+const geBrandByIdController = (0, catchAsync_1.default)(async (req, res) => {
+    const { brandId } = schema_1.deleteSchema.parse(req.params);
+    const brandDetails = await Brand_1.default.findOne({
+        _id: brandId,
+    });
+    return res.status(200).json((0, Responses_1.successResponse)({
+        message: 'All Brands',
+        data: brandDetails,
+    }));
+});
 const getAllBrandController = (0, catchAsync_1.default)(async (req, res) => {
     const { offset, limit, search } = ValidationSchema_1.filterSchema.parse(req.body);
     const AllDAta = Brand_1.default.find({
-        isDeleted: false,
         ...(search && { name: { $regex: search, $options: 'i' } }),
     })
         .skip(offset || 0)
         .limit(limit || 20);
     const total = Brand_1.default.find({
-        isDeleted: false,
         ...(search && { name: { $regex: search, $options: 'i' } }),
     }).countDocuments();
     const data = await Promise.all([AllDAta, total]);
@@ -149,5 +157,6 @@ module.exports = {
     deleteBrandController,
     getAllBrandController,
     getActiveBrandController,
+    geBrandByIdController,
 };
 //# sourceMappingURL=brandController.js.map
