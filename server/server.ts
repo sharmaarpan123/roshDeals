@@ -67,8 +67,7 @@ const init = async () => {
         upload.single('file'),
         fileUpload,
     );
- 
-     
+
     app.use(catchErrorHandler);
 
     app.listen(PORT || 8000, () => {
