@@ -2,14 +2,13 @@
     "name": "roshdeals",
     "version": "1.0.0",
     "description": "",
-    "main": "dist/server/server.js",
+    "main": "server/server.js",
     "type": "module",
     "scripts": {
-        "dev": "nodemon server/server.ts",
         "eslint": "eslint  \"server/**/*.ts\"",
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
         "prettier": "prettier --config .prettierrc.json --write server/**/*.ts",
-        "start": "nodemon dist/server/server.js"
+        "start": "nodemon server/server.js"
     },
     "_moduleAliases": {
         "@": "dist"

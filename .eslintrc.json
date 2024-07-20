@@ -10,30 +10,31 @@
     },
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
+      // "plugin:@typescript-eslint/recommended",
       "prettier"
     ],
-    "plugins": ["@typescript-eslint", "prettier", "security"],
-    "settings": {
-      "import/parsers": {
-        "@typescript-eslint/parser": [".ts"]
-      },
-      "import/resolver": {
-        "typescript": {}
-      }
-    },
+    "plugins": [ "prettier", "security"],
+    // "settings": {
+    //   "import/parsers": {
+    //     "@typescript-eslint/parser": [".ts"]
+    //   },
+    //   "import/resolver": {
+    //     "typescript": {}
+    //   }
+    // },
     "rules": {
-      "@typescript-eslint/no-namespace": "off",
+      // "@typescript-eslint/no-namespace": "off",
       "no-use-before-define": "off",
-      "@typescript-eslint/no-use-before-define": ["warn"],
-      "@typescript-eslint/triple-slash-reference": 0,
+      // "@typescript-eslint/no-use-before-define": 0,
+      // "@typescript-eslint/triple-slash-reference": 0,
       "implicit-arrow-linebreak": 0,
+      "no-undef": 0,
       "no-param-reassign": 0,
       "function-paren-newline": 0,
       "no-shadow": 0,
       "object-curly-newline": 0,
       "operator-linebreak": 0,
-      "@typescript-eslint/ban-types": 0,
+      // "@typescript-eslint/ban-types": 0,
       "keyword-spacing": 2,
       "prefer-regex-literals": 0,
       "no-unused-vars": [
@@ -47,7 +48,7 @@
       {
         "files": ["*.js", "*.ts"],
         "rules": {
-          "@typescript-eslint/no-var-requires": "off"
+          // "@typescript-eslint/no-var-requires": "off"
         }
       }
     ]

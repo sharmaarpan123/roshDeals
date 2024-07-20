@@ -4,7 +4,7 @@ import { randomOtp } from '../../utilities/utilitis.js';
 import { z } from 'zod';
 import forgetPasswordTemplate from '../../services/email/emailsTemplates/forgetpasswordTemplate.js';
 import NodeMailerTransPorter from '../../services/email/NodeMailerTransPorter.js';
-import { errorResponse, successResponse } from '../..//utilities/Responses.js';
+import { errorResponse, successResponse } from '../../utilities/Responses.js';
 const schema = z.object({
     email: z
         .string({

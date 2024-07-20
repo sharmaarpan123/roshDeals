@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import './init-aliases.js';
 import { config } from 'dotenv';
@@ -24,9 +23,6 @@ import OrderRouter from './routes/OrderRouter.js';
 import fileUpload from './controllers/fileUpload.js';
 import { upload } from './utilities/multer.js';
 const init = async () => {
-    if (typeof process === 'undefined') {
-        return new Error('This script requires Node.js environment');
-    }
     const PORT = process.env.PORT;
     const app = express();
     app.use(cors());
