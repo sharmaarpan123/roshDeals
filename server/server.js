@@ -36,6 +36,11 @@ const init = async () => {
             message: 'I m fine',
         }),
     );
+    app.get('/', (req, res) =>
+        res.json({
+            message: 'Server is running BC!',
+        }),
+    );
     app.use('/auth', AuthRouter);
     app.use('/admin', AuthMiddleware([ROLE_TYPE_ENUM.ADMIN]), AdminRouter);
     app.use('/deal', DealRouter);
