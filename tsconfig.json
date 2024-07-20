@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2022",
     "lib": [
-      "esnext"
+      "es2022"
     ],
-    "module": "CommonJS",
+   
+    "module": "es2022",
     "types": [
       "jest",
       "node"

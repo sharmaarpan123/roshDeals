@@ -3,14 +3,13 @@
     "version": "1.0.0",
     "description": "",
     "main": "dist/server/server.js",
+    "type": "module",
     "scripts": {
-        "build": "rimraf dist && tsc",
         "dev": "nodemon server/server.ts",
         "eslint": "eslint  \"server/**/*.ts\"",
         "eslint-fix": "eslint  \"server/**/*.ts\" --fix",
-        "prepare": "husky",
         "prettier": "prettier --config .prettierrc.json --write server/**/*.ts",
-        "start": "nodemon server/server.ts"
+        "start": "nodemon dist/server/server.js"
     },
     "_moduleAliases": {
         "@": "dist"

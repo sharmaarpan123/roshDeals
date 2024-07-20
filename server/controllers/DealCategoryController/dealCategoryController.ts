@@ -181,7 +181,7 @@ const getActiveDealCategoriesController = catchAsync(
         );
     },
 );
-export = {
+export default {
     addDealCategoryController,
     editDealCategoryController,
     deleteDealCategoryController,

@@ -237,7 +237,7 @@ const statusChangeController = catchAsync(
     },
 );
 
-export = {
+export default {
     addPosterController,
     editPosterController,
     deletePosterController,

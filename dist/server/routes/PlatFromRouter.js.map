@@ -1,0 +1,1 @@
+{"version":3,"file":"PlatFromRouter.js","sourceRoot":"","sources":["../../../server/routes/PlatFromRouter.ts"],"names":[],"mappings":"AAAA,OAAO,kBAAkB,MAAM,qDAAqD,CAAC;AACrF,OAAO,OAAO,MAAM,SAAS,CAAC;AAE9B,MAAM,cAAc,GAAG,OAAO,CAAC,MAAM,EAAE,CAAC;AAExC,cAAc,CAAC,GAAG,CACd,kBAAkB,EAClB,kBAAkB,CAAC,wBAAwB,CAC9C,CAAC;AAEF,eAAe,cAAc,CAAC"}

@@ -143,7 +143,7 @@ const deletePlatFormController = catchAsync(
         }
     },
 );
-export = {
+export default {
     addPlatFormController,
     editPlatFormController,
     deletePlatFormController,

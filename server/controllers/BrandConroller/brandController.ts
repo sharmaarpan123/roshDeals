@@ -215,7 +215,7 @@ const getActiveBrandController = catchAsync(
     },
 );
 
-export = {
+export default {
     addBrandController,
     editBrandController,
     deleteBrandController,

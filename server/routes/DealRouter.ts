@@ -1,7 +1,7 @@
 import {
     activeDealsController,
     dealDetails,
-} from '@/controllers/DealController/dealController';
+} from '../controllers/DealController/dealController';
 import express from 'express';
 
 const DealRouter = express.Router();
