@@ -3,7 +3,6 @@ import catchAsync from './catchAsync.js';
 export default (role) => {
     return catchAsync(async (req, res, next) => {
         const token = req?.headers?.authorization?.replace('Bearer ', '');
-        console.log(token , "token")
         const decodedUser = verifyJwt(token);
         let userIsAuthenticated = true;
         if (!decodedUser?.data) {
