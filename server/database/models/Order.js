@@ -16,7 +16,6 @@ const orderSchema = new mongoose.Schema(
             enum: ORDER_FORM_STATUS,
             default: ORDER_FORM_STATUS.PENDING,
         },
-        isReviewFormSubmitted: { type: Boolean, default: false },
     },
     {
         timestamps: true,

@@ -1,5 +1,10 @@
 import { isUrlValid } from '../../utilities/utilitis.js';
 import { z } from 'zod';
+import {
+    filterRefineFunction,
+    filterRefineMessage,
+    filterSchemaObject,
+} from '../../utilities/ValidationSchema.js';
 export const orderIdSchema = z.object({
     orderId: z
         .string({
@@ -8,6 +13,15 @@ export const orderIdSchema = z.object({
         .trim()
         .min(1, { message: 'Order Id have at least one character' }),
 });
+
+export const acceptRejectOrderSchema = orderIdSchema.merge(
+    z.object({
+        status: z.enum(['accepted', 'rejected'], {
+            message: 'inValid status',
+            required_error: 'status is required',
+        }),
+    }),
+);
 export const createOrderSchema = z.object({
     reviewerName: z
         .string({
@@ -91,4 +105,25 @@ export const OrderFromUpdateSchema = z
         orderIdOfPlatForm: z.string().trim().optional(),
     })
     .merge(orderIdSchema);
-//# sourceMappingURL=Schema.js.map
+
+export const allOrdersListSchema = filterSchemaObject
+    .merge(
+        z.object({
+            status: z
+                .enum(
+                    [
+                        'pending',
+                        'accepted',
+                        'rejected',
+                        'reviewFormSubmitted',
+                        '',
+                    ],
+                    {
+                        message: 'invalid Status',
+                    },
+                )
+                .optional(),
+            dealId: z.string().optional(),
+        }),
+    )
+    .refine(filterRefineFunction, filterRefineMessage);

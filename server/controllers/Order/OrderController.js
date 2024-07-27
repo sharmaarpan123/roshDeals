@@ -1,5 +1,7 @@
 import catchAsync from '../../utilities/catchAsync.js';
 import {
+    acceptRejectOrderSchema,
+    allOrdersListSchema,
     createOrderSchema,
     OrderFromUpdateSchema,
     orderIdSchema,
@@ -9,13 +11,15 @@ import Deal from '../../database/models/Deal.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import Order from '../../database/models/Order.js';
 import { ORDER_FORM_STATUS } from '../../utilities/commonTypes.js';
+import { populate } from 'dotenv';
 const checkSlotCompletedDeals = async (dealIds) =>
     Deal.find({
         _id: { $in: dealIds },
         $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
     });
 export const acceptRejectOrder = catchAsync(async (req, res) => {
-    const { orderId } = orderIdSchema.parse(req.body);
+    const { orderId, status } = acceptRejectOrderSchema.parse(req.body);
+
     const order = await Order.findOne({ _id: orderId });
     if (!order) {
         return res.status(400).json(
@@ -24,7 +28,57 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             }),
         );
     }
-    // if (order.orderFormStatus)
+
+    const updatedOrder = await Order.findOneAndUpdate(
+        { _id: orderId },
+        { orderFormStatus: status },
+        { new: true },
+    );
+
+    return res.status(200).json(
+        successResponse({
+            message: `order is ${status} successfully`,
+            data: updatedOrder,
+        }),
+    );
+});
+
+export const getAllOrders = catchAsync(async (req, res) => {
+    const { offset, limit, status, dealId } = allOrdersListSchema.parse(
+        req.body,
+    );
+
+    const orders = Order.find({
+        ...(status && { orderFormStatus: status }),
+        ...(dealId && { dealId }),
+    })
+        .populate({
+            path: 'dealId',
+            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
+            populate: [
+                { path: 'brand', select: 'name image' },
+                { path: 'dealCategory', select: 'name' },
+                { path: 'platForm', select: 'name' },
+            ],
+        })
+        .populate('userId')
+        .skip(offset || 0)
+        .limit(limit || 20);
+
+    const totalCount = Order.find({
+        ...(status && { orderFormStatus: status }),
+        ...(dealId && { dealId }),
+    }).countDocuments();
+
+    const data = await Promise.all([orders, totalCount]);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'orders list!',
+            data: data[0],
+            total: data[1],
+        }),
+    );
 });
 export const OrderCreateController = catchAsync(async (req, res) => {
     const { dealIds, orderIdOfPlatForm, orderScreenShot, reviewerName } =
@@ -139,7 +193,10 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
             deliveredScreenShot,
             reviewScreenShot,
             sellerFeedback,
-            isReviewFormSubmitted: true,
+            orderFormStatus: ORDER_FORM_STATUS.REVIEW_FORM_SUBMITTED,
+        },
+        {
+            new: true,
         },
     );
     return res.status(200).json(
@@ -152,7 +209,7 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
 export const OrderList = catchAsync(async (req, res) => {
     const orders = await Order.find({ userId: req.user._id }).populate({
         path: 'dealId',
-        select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl payMentGiven',
+        select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
         populate: [
             { path: 'brand', select: 'name image' },
             { path: 'dealCategory', select: 'name' },

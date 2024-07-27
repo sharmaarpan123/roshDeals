@@ -15,5 +15,6 @@ export var ORDER_FORM_STATUS;
     ORDER_FORM_STATUS['ACCEPTED'] = 'accepted';
     ORDER_FORM_STATUS['REJECTED'] = 'rejected';
     ORDER_FORM_STATUS['PENDING'] = 'pending';
+    ORDER_FORM_STATUS['REVIEW_FORM_SUBMITTED'] = 'reviewFormSubmitted';
 })(ORDER_FORM_STATUS || (ORDER_FORM_STATUS = {}));
 //# sourceMappingURL=commonTypes.js.map

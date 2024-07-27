@@ -1,11 +1,15 @@
 import { z } from 'zod';
 export const filterRefineFunction = (data) => {
-    if (!(data.offset || data.offset === 0) &&
-        !(data.limit || data.limit === 0)) {
+    if (
+        !(data.offset || data.offset === 0) &&
+        !(data.limit || data.limit === 0)
+    ) {
         return true;
     }
-    if (!(data.offset || data.offset === 0) ||
-        !(data.limit || data.limit === 0)) {
+    if (
+        !(data.offset || data.offset === 0) ||
+        !(data.limit || data.limit === 0)
+    ) {
         return false;
     }
     return true;
@@ -24,5 +28,8 @@ export const filterSchemaObject = z.object({
         .string({ invalid_type_error: 'search should be string type' })
         .optional(),
 });
-export const filterSchema = filterSchemaObject.refine(filterRefineFunction, filterRefineMessage);
+export const filterSchema = filterSchemaObject.refine(
+    filterRefineFunction,
+    filterRefineMessage,
+);
 //# sourceMappingURL=ValidationSchema.js.map
