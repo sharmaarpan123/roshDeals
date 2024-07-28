@@ -5,6 +5,7 @@ import {
     filterRefineMessage,
     filterSchemaObject,
 } from '../../utilities/ValidationSchema.js';
+import { ORDER_FORM_STATUS } from '../../utilities/commonTypes.js';
 export const orderIdSchema = z.object({
     orderId: z
         .string({
@@ -14,14 +15,40 @@ export const orderIdSchema = z.object({
         .min(1, { message: 'Order Id have at least one character' }),
 });
 
-export const acceptRejectOrderSchema = orderIdSchema.merge(
-    z.object({
-        status: z.enum(['accepted', 'rejected'], {
-            message: 'inValid status',
-            required_error: 'status is required',
+export const acceptRejectOrderSchema = orderIdSchema
+    .merge(
+        z.object({
+            status: z.enum(
+                [
+                    ORDER_FORM_STATUS.ACCEPTED,
+                    ORDER_FORM_STATUS.REJECTED,
+                    ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED,
+                    ORDER_FORM_STATUS.REVIEW_FORM_REJECTED,
+                ],
+                {
+                    message: 'inValid status',
+                    required_error: 'status is required',
+                },
+            ),
+            rejectReason: z.string().optional(),
         }),
-    }),
-);
+    )
+    .refine(
+        (data) => {
+            if (
+                !data?.rejectReason?.trim() &&
+                (data.status === ORDER_FORM_STATUS.REJECTED ||
+                    data.status === ORDER_FORM_STATUS.REVIEW_FORM_REJECTED)
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'On reject  , Reason is required',
+            path: ['rejectReason'],
+        },
+    );
 export const createOrderSchema = z.object({
     reviewerName: z
         .string({

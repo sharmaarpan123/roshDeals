@@ -6,6 +6,8 @@ import {
     filterSchemaObject,
 } from '../../utilities/ValidationSchema.js';
 
+
+
 const allDealsListSchema = filterSchemaObject
     .merge(
         z.object({
@@ -129,5 +131,7 @@ const editDealSchema = z
             .optional(),
     })
     .merge(getDeal);
+
+    
 export { addDealSchema, getDeal, editDealSchema, allDealsListSchema };
 //# sourceMappingURL=schema.js.map

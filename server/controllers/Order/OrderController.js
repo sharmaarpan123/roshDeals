@@ -1,24 +1,24 @@
+import Deal from '../../database/models/Deal.js';
+import Order from '../../database/models/Order.js';
 import catchAsync from '../../utilities/catchAsync.js';
+import { ORDER_FORM_STATUS } from '../../utilities/commonTypes.js';
+import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import {
     acceptRejectOrderSchema,
     allOrdersListSchema,
     createOrderSchema,
     OrderFromUpdateSchema,
-    orderIdSchema,
     reviewFormSubmitSchema,
 } from './Schema.js';
-import Deal from '../../database/models/Deal.js';
-import { errorResponse, successResponse } from '../../utilities/Responses.js';
-import Order from '../../database/models/Order.js';
-import { ORDER_FORM_STATUS } from '../../utilities/commonTypes.js';
-import { populate } from 'dotenv';
 const checkSlotCompletedDeals = async (dealIds) =>
     Deal.find({
         _id: { $in: dealIds },
         $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
     });
 export const acceptRejectOrder = catchAsync(async (req, res) => {
-    const { orderId, status } = acceptRejectOrderSchema.parse(req.body);
+    const { orderId, status, rejectReason } = acceptRejectOrderSchema.parse(
+        req.body,
+    );
 
     const order = await Order.findOne({ _id: orderId });
     if (!order) {
@@ -29,9 +29,24 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         );
     }
 
+    if (
+        (order.orderFormStatus === ORDER_FORM_STATUS.PENDING ||
+            order.orderFormStatus === ORDER_FORM_STATUS.REJECTED ||
+            order.orderFormStatus === ORDER_FORM_STATUS.ACCEPTED) &&
+        (status === ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED ||
+            status === ORDER_FORM_STATUS.REVIEW_FORM_REJECTED)
+    ) {
+        return res.status(400).json(
+            errorResponse({
+                message:
+                    "You can't reject or accept the review Form till user not submitted his review form",
+            }),
+        );
+    }
+
     const updatedOrder = await Order.findOneAndUpdate(
         { _id: orderId },
-        { orderFormStatus: status },
+        { orderFormStatus: status, rejectReason },
         { new: true },
     );
 
@@ -153,7 +168,12 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
     }
     const updatedOrderForm = await Order.findOneAndUpdate(
         { _id: orderId },
-        { orderIdOfPlatForm, reviewerName, orderScreenShot },
+        {
+            orderIdOfPlatForm,
+            reviewerName,
+            orderScreenShot,
+            orderFormStatus: ORDER_FORM_STATUS.PENDING,
+        },
         { new: true },
     );
     return res.status(200).json(

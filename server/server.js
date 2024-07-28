@@ -38,7 +38,7 @@ const init = async () => {
     );
     app.get('/', (req, res) =>
         res.json({
-            message: 'Server is running BC!',
+            message: 'Server is running!',
         }),
     );
     app.use('/auth', AuthRouter);
