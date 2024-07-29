@@ -10,11 +10,11 @@ import {
 import { validatingMongoObjectIds } from '../../utilities/validations.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
 
-export const dealPaymentStatusChangeController = catchAsync(
-    async (req, res) => {
-        
-    },
-);
+// export const dealPaymentStatusChangeController = catchAsync(
+//     async (req, res) => {
+
+//     },
+// );
 
 export const dealDetailsWithFilters = catchAsync(async (req, res) => {
     const { offset, limit, search, status, paymentStatus, isSlotCompleted } =

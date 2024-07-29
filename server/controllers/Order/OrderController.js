@@ -3,6 +3,7 @@ import Order from '../../database/models/Order.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { ORDER_FORM_STATUS } from '../../utilities/commonTypes.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import { filterSchema } from '../../utilities/ValidationSchema.js';
 import {
     acceptRejectOrderSchema,
     allOrdersListSchema,
@@ -190,6 +191,7 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
         deliveredScreenShot,
         reviewScreenShot,
         sellerFeedback,
+        paymentId,
     } = reviewFormSubmitSchema.parse(req.body);
     const order = await Order.findOne({ _id: orderId });
     if (!order) {
@@ -199,13 +201,27 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
             }),
         );
     }
-    if (order.orderFormStatus !== ORDER_FORM_STATUS.ACCEPTED) {
+
+    if (order.orderFormStatus === ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED) {
         return res.status(400).json(
             errorResponse({
-                message: 'Your order is not accepted yet!',
+                message: 'Your Review form is accepted , no need to update  ',
             }),
         );
     }
+
+    if (
+        order.orderFormStatus === ORDER_FORM_STATUS.REJECTED ||
+        order.orderFormStatus === ORDER_FORM_STATUS.PENDING
+    ) {
+        return res.status(400).json(
+            errorResponse({
+                message:
+                    "your order form is not accepted yet so you can't fill the review form",
+            }),
+        );
+    }
+
     const updatedOrder = await Order.findOneAndUpdate(
         { _id: orderId },
         {
@@ -213,6 +229,7 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
             deliveredScreenShot,
             reviewScreenShot,
             sellerFeedback,
+            paymentId,
             orderFormStatus: ORDER_FORM_STATUS.REVIEW_FORM_SUBMITTED,
         },
         {
@@ -227,15 +244,22 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 });
 export const OrderList = catchAsync(async (req, res) => {
-    const orders = await Order.find({ userId: req.user._id }).populate({
-        path: 'dealId',
-        select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
-        populate: [
-            { path: 'brand', select: 'name image' },
-            { path: 'dealCategory', select: 'name' },
-            { path: 'platForm', select: 'name' },
-        ],
-    });
+    console.log(req.query, 'query');
+    const { limit, offset } = filterSchema.parse(req.query);
+    const orders = await Order.find({ userId: req.user._id })
+        .populate({
+            path: 'dealId',
+            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
+            populate: [
+                { path: 'brand', select: 'name image' },
+                { path: 'dealCategory', select: 'name' },
+                { path: 'platForm', select: 'name' },
+            ],
+        })
+        .sort({ createdAt: -1 })
+        .skip(offset || 0)
+        .limit(limit || 10);
+
     return res.status(200).json(
         successResponse({
             message: 'Orders List.',

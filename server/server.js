@@ -48,7 +48,11 @@ const init = async () => {
     app.use('/platForm', PlatFromRouter);
     app.use('/brand', BrandRouter);
     app.get('/getHomeData', GetHomeResult);
-    app.post('/getDealsByIds', activeDealByBrandAndCategory);
+    app.post(
+        '/getDealsByIds',
+        AuthMiddleware([ROLE_TYPE_ENUM.USER]),
+        activeDealByBrandAndCategory,
+    );
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
     app.use('/order', AuthMiddleware([ROLE_TYPE_ENUM.USER]), OrderRouter);
     app.use(

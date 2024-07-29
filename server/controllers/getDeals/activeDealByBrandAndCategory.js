@@ -5,7 +5,7 @@ import { successResponse } from '../../utilities/Responses.js';
 export default catchAsync(async (req, res) => {
     const body = activeDealByBrandAndCategory.parse(req.body);
     const { type, id, offset, limit } = body;
-    const DealData = await Deal.find({
+    const DealData = Deal.find({
         isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
@@ -17,8 +17,27 @@ export default catchAsync(async (req, res) => {
         .populate('platForm')
         .skip(offset)
         .limit(limit);
-    return res
-        .status(200)
-        .json(successResponse({ data: DealData, message: 'Deal Data' }));
+
+    const total = Deal.find({
+        isDeleted: false,
+        isActive: true,
+        isSlotCompleted: false,
+        ...(type === SearchEnumType.brand && { brand: id }),
+        ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
+    })
+        .populate('brand')
+        .populate('dealCategory')
+        .populate('platForm')
+        .countDocuments();
+
+    const data = await Promise.all([DealData, total]);
+
+    return res.status(200).json(
+        successResponse({
+            data: data[0],
+            total: data[1],
+            message: 'Deal Data',
+        }),
+    );
 });
 //# sourceMappingURL=activeDealByBrandAndCategory.js.map

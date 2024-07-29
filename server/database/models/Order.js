@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema(
         reviewLink: { type: String },
         sellerFeedback: { type: String },
         rejectReason: { type: String },
+        paymentId: { type: String },
         orderFormStatus: {
             type: String,
             enum: ORDER_FORM_STATUS,

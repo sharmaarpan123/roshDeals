@@ -102,6 +102,12 @@ export const reviewFormSubmitSchema = z
         sellerFeedback: z
             .string({ invalid_type_error: 'InValid seller Feed Back' })
             .optional(),
+        paymentId: z
+            .string({
+                invalid_type_error: 'In valid Payment id',
+                required_error: 'payment id is required',
+            })
+            .min(1, { message: 'payment id is required' }),
     })
     .merge(orderIdSchema)
     .refine(

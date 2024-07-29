@@ -104,7 +104,7 @@ const deleteDealCategoryController = catchAsync(async (req, res) => {
 });
 const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
-    const DealCategoriesData = await Deal.aggregate([
+    const DealCategoriesData = Deal.aggregate([
         {
             $match: {
                 isDeleted: false,
@@ -124,12 +124,6 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
             $unwind: '$dealCategoryData',
         },
         {
-            $group: {
-                _id: '$dealCategoryData._id', // Group by the unique identifier of the brand document
-                dealCategoryData: { $first: '$dealCategoryData' }, // Keep the first document in each group
-            },
-        },
-        {
             $replaceRoot: {
                 newRoot: '$dealCategoryData',
             },
@@ -141,10 +135,19 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
             $limit: limit || 10,
         },
     ]);
+
+    const total = Deal.find({
+        isDeleted: false,
+        isActive: true,
+        isSlotCompleted: false,
+    }).countDocuments();
+
+    const data = await Promise.all([DealCategoriesData, total]);
     return res.status(200).json(
         successResponse({
             message: 'All active Deal Category',
-            data: DealCategoriesData,
+            data: data[0],
+            total: data[1],
         }),
     );
 });

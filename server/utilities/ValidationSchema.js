@@ -19,10 +19,20 @@ export const filterRefineMessage = {
 };
 export const filterSchemaObject = z.object({
     offset: z
-        .number({ invalid_type_error: 'offset Should be number' })
+        .union([
+            z.string().refine((data) => !isNaN(data), {
+                message: 'offset should be a number or a numeric string',
+            }),
+            z.number(),
+        ])
         .optional(),
     limit: z
-        .number({ invalid_type_error: 'limit Should be number' })
+        .union([
+            z.string().refine((data) => !isNaN(data), {
+                message: 'limit should be a number or a numeric string',
+            }),
+            z.number(),
+        ])
         .optional(),
     search: z
         .string({ invalid_type_error: 'search should be string type' })
