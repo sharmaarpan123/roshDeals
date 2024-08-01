@@ -6,6 +6,7 @@ import {
     allDealsListSchema,
     editDealSchema,
     getDeal,
+    getDealsWithBrandIdSchema,
 } from './schema.js';
 import { validatingMongoObjectIds } from '../../utilities/validations.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
@@ -210,5 +211,18 @@ export const activeDealsController = catchAsync(async (req, res) => {
             }),
         );
     }
+});
+
+export const getDealsWithBrandId = catchAsync(async (req, res) => {
+    const { brandId } = getDealsWithBrandIdSchema.parse(req.params);
+
+    const deals = await Deal.find({ ...(brandId && { brand: brandId }) });
+
+    return res.status(200).json(
+        successResponse({   
+            message: 'Deals Fetched of brand!',
+            data: deals,
+        }),
+    );
 });
 //# sourceMappingURL=dealController.js.map

@@ -7,7 +7,7 @@ const dealSchema = new mongoose.Schema(
         },
         brand: {
             type: mongoose.Schema.Types.ObjectId,
-            require: String,
+            required: true,
             ref: 'Brand',
             validate: {
                 validator: async function (brandId) {
@@ -19,7 +19,7 @@ const dealSchema = new mongoose.Schema(
         },
         platForm: {
             type: mongoose.Schema.Types.ObjectId,
-            require: String,
+            required: true,
             ref: 'PlatForm',
             validate: {
                 validator: async function (platFormId) {
@@ -35,7 +35,7 @@ const dealSchema = new mongoose.Schema(
         },
         dealCategory: {
             type: mongoose.Schema.Types.ObjectId,
-            require: String,
+            required: true,
             ref: 'DealCategory',
             validate: {
                 validator: async function (DealCategoryId) {

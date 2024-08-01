@@ -149,6 +149,8 @@ export const allOrdersListSchema = filterSchemaObject
                         'accepted',
                         'rejected',
                         'reviewFormSubmitted',
+                        'reviewFormAccepted',
+                        'reviewFormRejected',
                         '',
                     ],
                     {
@@ -156,7 +158,13 @@ export const allOrdersListSchema = filterSchemaObject
                     },
                 )
                 .optional(),
-            dealId: z.string().optional(),
+            dealId: z
+                .array(
+                    z.string({ invalid_type_error: 'dealId should be string' }),
+                    { invalid_type_error: 'deal Id should be arr' },
+                )
+                .optional(),
+            brandId: z.string().optional(),
         }),
     )
     .refine(filterRefineFunction, filterRefineMessage);

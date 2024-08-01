@@ -6,8 +6,6 @@ import {
     filterSchemaObject,
 } from '../../utilities/ValidationSchema.js';
 
-
-
 const allDealsListSchema = filterSchemaObject
     .merge(
         z.object({
@@ -131,7 +129,17 @@ const editDealSchema = z
             .optional(),
     })
     .merge(getDeal);
+const getDealsWithBrandIdSchema = z.object({
+    brandId: z
+        .string({ required_error: 'brand id is required' })
+        .min(1, { message: "'brand id is required'" }),
+});
 
-    
-export { addDealSchema, getDeal, editDealSchema, allDealsListSchema };
+export {
+    addDealSchema,
+    getDeal,
+    editDealSchema,
+    allDealsListSchema,
+    getDealsWithBrandIdSchema,
+};  
 //# sourceMappingURL=schema.js.map

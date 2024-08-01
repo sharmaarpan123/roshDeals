@@ -4,6 +4,7 @@ import {
     addDealController,
     dealDetailsWithFilters,
     editDealController,
+    getDealsWithBrandId,
 } from '../controllers/DealController/dealController.js';
 import {
     acceptRejectOrder,
@@ -65,9 +66,10 @@ AdminRouter.get(
 AdminRouter.post('/deal/add', addDealController);
 AdminRouter.post('/deal/edit', editDealController);
 AdminRouter.post('/deal/all/withFilters', dealDetailsWithFilters);
+AdminRouter.get('/deal/getDealWithBrandId/:brandId', getDealsWithBrandId);
 // orders
 AdminRouter.post('/order/acceptRejectOrder', acceptRejectOrder);
 AdminRouter.post('/orders/all', getAllOrders);
 
 export default AdminRouter;
-//# sourceMappingURL=AdminRouter.js.map
+// # sourceMappingURL=AdminRouter.js.map

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Deal from '../../database/models/Deal.js';
 import Order from '../../database/models/Order.js';
 import catchAsync from '../../utilities/catchAsync.js';
@@ -60,31 +61,84 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
 });
 
 export const getAllOrders = catchAsync(async (req, res) => {
-    const { offset, limit, status, dealId } = allOrdersListSchema.parse(
-        req.body,
-    );
+    const { offset, limit, status, dealId, brandId } =
+        allOrdersListSchema.parse(req.body);
 
-    const orders = Order.find({
-        ...(status && { orderFormStatus: status }),
-        ...(dealId && { dealId }),
-    })
-        .populate({
-            path: 'dealId',
-            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
-            populate: [
-                { path: 'brand', select: 'name image' },
-                { path: 'dealCategory', select: 'name' },
-                { path: 'platForm', select: 'name' },
-            ],
-        })
-        .populate('userId')
-        .skip(offset || 0)
-        .limit(limit || 20);
+    const aggregateArr = [
+        {
+            $match: {
+                ...(status && { orderFormStatus: status }),
+                ...(dealId?.length > 0 && {
+                    dealId: {
+                        $in: dealId?.map(
+                            (id) => new mongoose.Types.ObjectId(id),
+                        ),
+                    },
+                }),
+            },
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'dealId',
+                foreignField: '_id',
+                as: 'dealId',
+            },
+        },
+        { $unwind: '$dealId' },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.brand',
+                foreignField: '_id',
+                as: 'dealId.brand',
+            },
+        },
+        { $unwind: '$dealId.brand' },
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'dealId.dealCategory',
+                foreignField: '_id',
+                as: 'dealId.dealCategory',
+            },
+        },
+        { $unwind: '$dealId.dealCategory' },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'dealId.platForm',
+                foreignField: '_id',
+                as: 'dealId.platForm',
+            },
+        },
+        { $unwind: '$dealId.platForm' },
+        {
+            $match: {
+                ...(brandId && {
+                    'dealId.brand._id': new mongoose.Types.ObjectId(brandId),
+                }),
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userId',
+            },
+        },
+        { $unwind: '$userId' },
 
-    const totalCount = Order.find({
-        ...(status && { orderFormStatus: status }),
-        ...(dealId && { dealId }),
-    }).countDocuments();
+        { $skip: offset || 0 },
+        { $limit: limit || 20 },
+    ];
+
+    const orders = Order.aggregate(aggregateArr);
+
+    aggregateArr.push({ $count: 'total' });
+
+    const totalCount = Order.aggregate(aggregateArr);
 
     const data = await Promise.all([orders, totalCount]);
 
@@ -92,7 +146,7 @@ export const getAllOrders = catchAsync(async (req, res) => {
         successResponse({
             message: 'orders list!',
             data: data[0],
-            total: data[1],
+            total: data[1].length > 0 ? data[1][0].total : 0,
         }),
     );
 });
