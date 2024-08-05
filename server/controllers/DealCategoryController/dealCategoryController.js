@@ -124,6 +124,12 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
             $unwind: '$dealCategoryData',
         },
         {
+            $group: {
+                _id: '$dealCategory',
+                dealCategoryData: { $first: '$dealCategoryData' },
+            },
+        },
+        {
             $replaceRoot: {
                 newRoot: '$dealCategoryData',
             },
