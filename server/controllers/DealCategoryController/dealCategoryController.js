@@ -106,7 +106,7 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
     const DealCategoriesData = Deal.aggregate([
         {
-            $match: {
+            $match: { 
                 isDeleted: false,
                 isActive: true,
                 isSlotCompleted: false,
@@ -138,7 +138,7 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
             $skip: offset || 0,
         },
         {
-            $limit: limit || 10,
+            $limit: limit || 15,
         },
     ]);
 
