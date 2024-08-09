@@ -28,7 +28,7 @@ const init = async () => {
     app.use(cors());
     app.use(logger('dev'));
     app.use(express.json());
-    app.use(express.urlencoded({ extended: false , limit : "20mb" }));
+    app.use(express.urlencoded({ extended: false, limit: '4mb' }));
     app.use(express.static(path.join('public')));
     await mongoInit();
     app.get('/health', (req, res) =>
