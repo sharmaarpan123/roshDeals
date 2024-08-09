@@ -129,12 +129,20 @@ export const getAllOrders = catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$userId' },
-
-        { $skip: offset || 0 },
-        { $limit: limit || 20 },
+        { $sort: { createdAt: -1 } },
     ];
 
+    if (limit || offset) {
+        aggregateArr.push({ $skip: offset || 0 });
+        aggregateArr.push({ $limit: limit || 20 });
+    }
+
     const orders = Order.aggregate(aggregateArr);
+
+    if (limit || offset) {
+        aggregateArr.pop();
+        aggregateArr.pop();
+    }
 
     aggregateArr.push({ $count: 'total' });
 
