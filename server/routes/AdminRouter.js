@@ -2,6 +2,7 @@ import brandController from '../controllers/BrandConroller/brandController.js';
 import dealCategoryController from '../controllers/DealCategoryController/dealCategoryController.js';
 import {
     addDealController,
+    bulkAddDealController,
     dealDetailsWithFilters,
     editDealController,
     getDealsWithBrandId,
@@ -64,6 +65,7 @@ AdminRouter.get(
 );
 //  deal
 AdminRouter.post('/deal/add', addDealController);
+AdminRouter.post('/deal/bulk-add', bulkAddDealController);
 AdminRouter.post('/deal/edit', editDealController);
 AdminRouter.post('/deal/all/withFilters', dealDetailsWithFilters);
 AdminRouter.get('/deal/getDealWithBrandId/:brandId', getDealsWithBrandId);

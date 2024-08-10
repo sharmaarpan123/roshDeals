@@ -4,6 +4,7 @@ import catchAsync from '../../utilities/catchAsync.js';
 import {
     addDealSchema,
     allDealsListSchema,
+    BulkAddDealSchema,
     editDealSchema,
     getDeal,
     getDealsWithBrandIdSchema,
@@ -32,7 +33,8 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         .populate('dealCategory')
         .populate('platForm')
         .skip(offset || 0)
-        .limit(limit || 20);
+        .limit(limit || 20)
+        .sort({ createdAt: -1 });
 
     const totalCount = Deal.find({
         ...(search && { productName: { $regex: search, $options: 'i' } }),
@@ -90,6 +92,19 @@ export const addDealController = catchAsync(async (req, res) => {
         successResponse({
             message: 'Deal  Added successfully',
             data: DealRes,
+        }),
+    );
+});
+
+export const bulkAddDealController = catchAsync(async (req, res) => {
+    const bulkAddArr = BulkAddDealSchema.parse(req.body);
+
+    const newDeal = await Deal.insertMany(bulkAddArr);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'Deal  Added successfully',
+            data: newDeal,
         }),
     );
 });
@@ -219,7 +234,7 @@ export const getDealsWithBrandId = catchAsync(async (req, res) => {
     const deals = await Deal.find({ ...(brandId && { brand: brandId }) });
 
     return res.status(200).json(
-        successResponse({   
+        successResponse({
             message: 'Deals Fetched of brand!',
             data: deals,
         }),

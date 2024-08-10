@@ -34,7 +34,9 @@ const addDealSchema = z.object({
             required_error: 'Product Name is required',
         })
         .trim()
-        .min(1, { message: 'Product Name should have at least one character' }),
+        .min(1, {
+            message: 'Product Name should have at least one character',
+        }),
     brand: z.string({
         required_error: 'Brand Id is required',
     }),
@@ -49,13 +51,19 @@ const addDealSchema = z.object({
         })
         .trim(),
     productCategories: z.array(
-        z.string({ invalid_type_error: 'product category should be string' }),
+        z.string({
+            invalid_type_error: 'product category should be string',
+        }),
     ),
     postUrl: z
         .string({ required_error: 'post url is required' })
         .trim()
-        .refine((data) => isUrlValid(data), { message: 'Invalid post url' }),
-    termsAndCondition: z.string({ required_error: 'This field is required' }),
+        .refine((data) => isUrlValid(data), {
+            message: 'Invalid post url',
+        }),
+    termsAndCondition: z.string({
+        required_error: 'This field is required',
+    }),
     actualPrice: z
         .string({ required_error: 'actual Price is required' })
         .refine((data) => !isNaN(data), {
@@ -77,6 +85,12 @@ const addDealSchema = z.object({
         required_error: 'slot alloted is required',
     }),
 });
+
+const BulkAddDealSchema = z.array(addDealSchema, {
+    invalid_type_error: 'Bulk Add Data should be array',
+    required_error: 'Bulk Add is required',
+});
+
 const getDeal = z.object({
     dealId: z.string({ required_error: 'DealId is  required' }).trim(),
 });
@@ -95,7 +109,7 @@ const editDealSchema = z
         productCategories: z
             .array(
                 z.string({
-                    invalid_type_error: 'product category should be string',
+                    invalid_type_error: 'product category should be s   tring',
                 }),
             )
             .optional(),
@@ -141,5 +155,6 @@ export {
     editDealSchema,
     allDealsListSchema,
     getDealsWithBrandIdSchema,
-};  
+    BulkAddDealSchema,
+};
 //# sourceMappingURL=schema.js.map
