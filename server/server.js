@@ -1,4 +1,3 @@
-
 import './init-aliases.js';
 import { config } from 'dotenv';
 config();
@@ -22,6 +21,13 @@ import UserRouter from './routes/UserRouter.js';
 import OrderRouter from './routes/OrderRouter.js';
 import fileUpload from './controllers/fileUpload.js';
 import { upload } from './utilities/multer.js';
+import admin from 'firebase-admin';
+import fireBasePushNotification from '../config/fireBasePushNotification.js';
+
+admin.initializeApp({
+    credential: admin.credential.cert(fireBasePushNotification),
+});
+
 const init = async () => {
     const PORT = process.env.PORT;
     const app = express();
@@ -65,6 +71,36 @@ const init = async () => {
     app.listen(PORT || 8000, () => {
         console.log(`server start on the ${PORT}`);
     });
+
+    const message = {
+        notification: {
+            title: 'Test Notification',
+            body: 'This is a test notification',
+        },
+        token: 'dpSyLLEFRKyoIIc8Bys7Wl:APA91bGtHvYluZ6IY0qbi1cA3nl-NnIEx7WTmFEMn8PFGeLjkXdGkaMIvb2TtAlByifvO0LTmhg_ywSJ94ANaDoqgnG-IxYAB4geSWGkVLuBcEMX5XQnk-HUfvCz0XLJYoGoPWsyDqix',
+    };
+
+    // Generate an access token
+    // admin.credential
+    //     .cert(serviceAccount)
+    //     .getAccessToken()
+    //     .then((accessToken) => {
+    //         console.log('Access Token:', accessToken.access_token);
+    //     })
+    //     .catch((err) => {
+    //         console.error('Error generating access token:', err);
+    //     });
+
+    // //send message
+    // admin
+    //     .messaging()
+    //     .send(message)
+    //     .then((response) => {
+    //         console.log('Successfully sent message:', response);
+    //     })
+    //     .catch((error) => {
+    //         console.log('Error sending message:', error);
+    //     });
 };
 init();
 //# sourceMappingURL=server.js.map

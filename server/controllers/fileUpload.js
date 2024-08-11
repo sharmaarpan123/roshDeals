@@ -9,7 +9,7 @@ import { errorResponse, successResponse } from '../utilities/Responses.js';
 import catchAsync from '../utilities/catchAsync.js';
 import fireBaseStorage from '../../config/fireBaseStorage.js';
 initializeApp(fireBaseStorage);
-const storage = getStorage();
+const storage = getStorage();   
 export default catchAsync(async (req, res) => {
     if (!req.file) {
         return res.status(400).json(

@@ -9,7 +9,9 @@ import {
 } from '../controllers/DealController/dealController.js';
 import {
     acceptRejectOrder,
+    bulkPaymentStatusUpdate,
     getAllOrders,
+    paymentStatusUpdate,
 } from '../controllers/Order/OrderController.js';
 import platFormController from '../controllers/PlatFormController/platFormController.js';
 import PosterController from '../controllers/PosterController/PosterController.js';
@@ -72,6 +74,8 @@ AdminRouter.get('/deal/getDealWithBrandId/:brandId', getDealsWithBrandId);
 // orders
 AdminRouter.post('/order/acceptRejectOrder', acceptRejectOrder);
 AdminRouter.post('/orders/all', getAllOrders);
+AdminRouter.post('/order/paymentStatusUpdate', paymentStatusUpdate);
+AdminRouter.post('/order/bulkPaymentStatusUpdate', bulkPaymentStatusUpdate);
 
 export default AdminRouter;
 // # sourceMappingURL=AdminRouter.js.map

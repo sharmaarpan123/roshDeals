@@ -15,6 +15,28 @@ export const orderIdSchema = z.object({
         .min(1, { message: 'Order Id have at least one character' }),
 });
 
+export const bulkPaymentStatusUpdateSchema = z.object({
+    status: z.enum(['pending', 'paid']),
+    orderIds: z.array(
+        z
+            .string({
+                required_error: 'Order id is required',
+            })
+            .trim()
+            .min(1, { message: 'Order Id have at least one character' }),
+        {
+            invalid_type_error: 'orderIds field should be array',
+            required_error: 'Order Ids is required',
+        },
+    ),
+});
+
+export const paymentStatusUpdateSchema = orderIdSchema.merge(
+    z.object({
+        status: z.enum(['pending', 'paid']),
+    }),
+);
+
 export const acceptRejectOrderSchema = orderIdSchema
     .merge(
         z.object({

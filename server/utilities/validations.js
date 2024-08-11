@@ -3,7 +3,13 @@ import PlatForm from '../database/models/PlatForm.js';
 import DealCategory from '../database/models/DealCategory.js';
 import Deal from '../database/models/Deal.js';
 import User from '../database/models/User.js';
-export const validatingMongoObjectIds = async ({ brand, dealCategory, platForm, deal, user, }) => {
+export const validatingMongoObjectIds = async ({
+    brand,
+    dealCategory,
+    platForm,
+    deal,
+    user,
+}) => {
     const validatingIdsArr = [];
     if (brand) {
         validatingIdsArr.push({
@@ -35,13 +41,13 @@ export const validatingMongoObjectIds = async ({ brand, dealCategory, platForm, 
             query: Deal.findOne({ _id: deal }),
         });
     }
-    const validatingIdsArrRes = await Promise.all(validatingIdsArr.map((item) => item.query));
+    const validatingIdsArrRes = await Promise.all(
+        validatingIdsArr.map((item) => item.query),
+    );
     if (validatingIdsArrRes.includes(null)) {
         const ind = validatingIdsArrRes.findIndex((i) => !i);
         return `${validatingIdsArr[ind].collection} id is not valid`;
-    }
-    else {
+    } else {
         return false;
     }
 };
-//# sourceMappingURL=validations.js.map

@@ -8,8 +8,10 @@ import { filterSchema } from '../../utilities/ValidationSchema.js';
 import {
     acceptRejectOrderSchema,
     allOrdersListSchema,
+    bulkPaymentStatusUpdateSchema,
     createOrderSchema,
     OrderFromUpdateSchema,
+    paymentStatusUpdateSchema,
     reviewFormSubmitSchema,
 } from './Schema.js';
 const checkSlotCompletedDeals = async (dealIds) =>
@@ -17,6 +19,7 @@ const checkSlotCompletedDeals = async (dealIds) =>
         _id: { $in: dealIds },
         $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
     });
+
 export const acceptRejectOrder = catchAsync(async (req, res) => {
     const { orderId, status, rejectReason } = acceptRejectOrderSchema.parse(
         req.body,
@@ -55,6 +58,68 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
     return res.status(200).json(
         successResponse({
             message: `order is ${status} successfully`,
+            data: updatedOrder,
+        }),
+    );
+});
+
+export const paymentStatusUpdate = catchAsync(async (req, res) => {
+    const { orderId, status } = paymentStatusUpdateSchema.parse(req.body);
+
+    const order = await Order.findOne({ _id: orderId });
+
+    if (!order) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Not found any Order with This id',
+            }),
+        );
+    }
+
+    const updatedOrder = await Order.findOneAndUpdate(
+        { _id: orderId },
+        { paymentStatus: status },
+        { new: true },
+    );
+
+    return res.status(200).json(
+        successResponse({
+            message: `order payment status updated successfully`,
+            data: updatedOrder,
+        }),
+    );
+});
+
+export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
+    const { orderIds, status } = bulkPaymentStatusUpdateSchema.parse(req.body);
+
+    const order = await Order.findOne({ _id: { $in: orderIds } }, { _id: 1 });
+
+    if (!order) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Not found any Order with This id',
+            }),
+        );
+    }
+
+    if (orderIds.length !== order.length) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'some of your ids not valid',
+            }),
+        );
+    }
+
+    const updatedOrder = await Order.updateMany(
+        { _id: { $in: orderIds } },
+        { paymentStatus: status },
+        { new: true },
+    );
+
+    return res.status(200).json(
+        successResponse({
+            message: `orders payment status updated successfully`,
             data: updatedOrder,
         }),
     );

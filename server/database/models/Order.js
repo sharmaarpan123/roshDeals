@@ -13,6 +13,12 @@ const orderSchema = new mongoose.Schema(
         sellerFeedback: { type: String },
         rejectReason: { type: String },
         paymentId: { type: String },
+        paymentStatus: {
+            type: String,
+            enum: ['pending', 'paid'],
+            required: true,
+            default: 'pending',
+        },
         orderFormStatus: {
             type: String,
             enum: ORDER_FORM_STATUS,
