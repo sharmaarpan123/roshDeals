@@ -94,6 +94,16 @@ const BulkAddDealSchema = z.array(addDealSchema, {
 const getDeal = z.object({
     dealId: z.string({ required_error: 'DealId is  required' }).trim(),
 });
+
+export const paymentStatusChangeSchema = getDeal.merge(
+    z.object({
+        status: z.enum(['pending', 'paid'], {
+            invalid_type_error: 'In Valid status',
+            required_error: 'status is required',
+        }),
+    }),
+);
+
 const editDealSchema = z
     .object({
         productName: z

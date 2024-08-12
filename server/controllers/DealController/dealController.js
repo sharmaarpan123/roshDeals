@@ -8,15 +8,37 @@ import {
     editDealSchema,
     getDeal,
     getDealsWithBrandIdSchema,
+    paymentStatusChangeSchema,
 } from './schema.js';
 import { validatingMongoObjectIds } from '../../utilities/validations.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
 
-// export const dealPaymentStatusChangeController = catchAsync(
-//     async (req, res) => {
+export const dealPaymentStatusChangeController = catchAsync(
+    async (req, res) => {
+        const { dealId, status } = paymentStatusChangeSchema.parse(req.body);
+        const inValidMessage = await validatingMongoObjectIds({ deal: dealId });
 
-//     },
-// );
+        if (inValidMessage) {
+            return res.status(400).json(
+                errorResponse({
+                    message: inValidMessage,
+                }),
+            );
+        }
+        const updatedDeal = await Deal.findOneAndUpdate(
+            { _id: dealId },
+            { paymentStatus: status },
+            { new: true },
+        );
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Payment status updated successfully!',
+                data: updatedDeal,
+            }),
+        );
+    },
+);
 
 export const dealDetailsWithFilters = catchAsync(async (req, res) => {
     const { offset, limit, search, status, paymentStatus, isSlotCompleted } =

@@ -93,7 +93,7 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
     const { orderIds, status } = bulkPaymentStatusUpdateSchema.parse(req.body);
 
-    const order = await Order.findOne({ _id: { $in: orderIds } }, { _id: 1 });
+    const order = await Order.find({ _id: { $in: orderIds } }, { _id: 1 });
 
     if (!order) {
         return res.status(400).json(
@@ -102,6 +102,7 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
             }),
         );
     }
+    console.log(order, 'order');
 
     if (orderIds.length !== order.length) {
         return res.status(400).json(
@@ -394,4 +395,44 @@ export const OrderList = catchAsync(async (req, res) => {
         }),
     );
 });
-//# sourceMappingURL=OrderController.js.map
+export const UserEarning = catchAsync(async (req, res) => {
+    const earnings = await Order.aggregate([
+        {
+            $match: {
+                userId: new mongoose.Types.ObjectId(req.user._id),
+                paymentStatus: 'paid',
+            },
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'dealId',
+                foreignField: '_id',
+                as: 'deal',
+            },
+        },
+        {
+            $unwind: '$deal',
+        },
+        {
+            $group: {
+                _id: '$userId',
+                totalCashback: {
+                    $sum: {
+                        $toDouble: '$deal.cashBack',
+                    },
+                },
+            },
+        },
+    ]);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'Total Cashback Earned.',
+            others: {
+                totalCashback:
+                    earnings.length > 0 ? earnings[0].totalCashback : 0,
+            },
+        }),
+    );
+});

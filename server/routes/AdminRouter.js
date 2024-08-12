@@ -4,6 +4,7 @@ import {
     addDealController,
     bulkAddDealController,
     dealDetailsWithFilters,
+    dealPaymentStatusChangeController,
     editDealController,
     getDealsWithBrandId,
 } from '../controllers/DealController/dealController.js';
@@ -71,6 +72,11 @@ AdminRouter.post('/deal/bulk-add', bulkAddDealController);
 AdminRouter.post('/deal/edit', editDealController);
 AdminRouter.post('/deal/all/withFilters', dealDetailsWithFilters);
 AdminRouter.get('/deal/getDealWithBrandId/:brandId', getDealsWithBrandId);
+AdminRouter.post(
+    '/deal/updatePaymentStatus',
+    dealPaymentStatusChangeController,
+);
+
 // orders
 AdminRouter.post('/order/acceptRejectOrder', acceptRejectOrder);
 AdminRouter.post('/orders/all', getAllOrders);
