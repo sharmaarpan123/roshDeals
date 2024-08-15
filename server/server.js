@@ -78,7 +78,7 @@ const init = async () => {
             title: 'Test Notification',
             body: 'This is a test notification',
         },
-        token: 'dpSyLLEFRKyoIIc8Bys7Wl:APA91bGtHvYluZ6IY0qbi1cA3nl-NnIEx7WTmFEMn8PFGeLjkXdGkaMIvb2TtAlByifvO0LTmhg_ywSJ94ANaDoqgnG-IxYAB4geSWGkVLuBcEMX5XQnk-HUfvCz0XLJYoGoPWsyDqix',
+        token: 'eeKDexvWQOao7upv0oyDp6:APA91bH4Py0qQKrW8VxXq-J5YUlPIY56pJDPACqDv2VpveCMKTexAPbDg78xFJ9s4XUA3gpx6tvgKLRD62WW3VS6wKbb-cAlSfCpgiTSx_71rtDtt_XwyX1pnvMK1p2osgmiLZ9ODIuf',
     };
 
     // Generate an access token
