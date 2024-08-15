@@ -104,6 +104,15 @@ export const paymentStatusChangeSchema = getDeal.merge(
     }),
 );
 
+export const statusChangeSchema = getDeal.merge(
+    z.object({
+        status: z.boolean({
+            invalid_type_error: 'In Valid status',
+            required_error: 'status is required',
+        }),
+    }),
+);
+
 const editDealSchema = z
     .object({
         productName: z

@@ -9,6 +9,7 @@ import {
     getDeal,
     getDealsWithBrandIdSchema,
     paymentStatusChangeSchema,
+    statusChangeSchema,
 } from './schema.js';
 import { validatingMongoObjectIds } from '../../utilities/validations.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
@@ -40,17 +41,44 @@ export const dealPaymentStatusChangeController = catchAsync(
     },
 );
 
+export const dealStatusChangeController = catchAsync(async (req, res) => {
+    const { dealId, status } = statusChangeSchema.parse(req.body);
+    const inValidMessage = await validatingMongoObjectIds({ deal: dealId });
+
+    if (inValidMessage) {
+        return res.status(400).json(
+            errorResponse({
+                message: inValidMessage,
+            }),
+        );
+    }
+    const updatedDeal = await Deal.findOneAndUpdate(
+        { _id: dealId },
+        { isActive: status },
+        { new: true },
+    );
+
+    return res.status(200).json(
+        successResponse({
+            message: 'status updated successfully!',
+            data: updatedDeal,
+        }),
+    );
+});
+
 export const dealDetailsWithFilters = catchAsync(async (req, res) => {
     const { offset, limit, search, status, paymentStatus, isSlotCompleted } =
         allDealsListSchema.parse(req.body);
 
-    const dealData = Deal.find({
+    const query = {
         ...(search && { productName: { $regex: search, $options: 'i' } }),
         ...(status && { isActive: status === 'active' }),
         ...(paymentStatus && { paymentStatus }),
         ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
         ...(isSlotCompleted === 'uncompleted' && { isSlotCompleted: false }),
-    })
+    };
+
+    const dealData = Deal.find(query)
         .populate('brand')
         .populate('dealCategory')
         .populate('platForm')
@@ -58,13 +86,7 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         .limit(limit || 20)
         .sort({ createdAt: -1 });
 
-    const totalCount = Deal.find({
-        ...(search && { productName: { $regex: search, $options: 'i' } }),
-        ...(status && { isActive: status === 'active' }),
-        ...(paymentStatus && { paymentStatus }),
-        ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
-        ...(isSlotCompleted === 'uncompleted' && { isSlotCompleted: false }),
-    }).countDocuments();
+    const totalCount = Deal.find(query).countDocuments();
 
     const data = await Promise.all([dealData, totalCount]);
 
@@ -73,6 +95,22 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
             data: data[0],
             message: 'Deal Data',
             total: data[1],
+        }),
+    );
+});
+
+export const allDeals = catchAsync(async (req, res) => {
+    const dealData = await Deal.find(
+        { isActive: true },
+        { _id: 1, productName: 1 },
+    ).sort({
+        createdAt: -1,
+    });
+
+    return res.status(200).json(
+        successResponse({
+            data: dealData,
+            message: 'Deal Data',
         }),
     );
 });

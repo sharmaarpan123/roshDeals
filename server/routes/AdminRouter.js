@@ -2,9 +2,11 @@ import brandController from '../controllers/BrandConroller/brandController.js';
 import dealCategoryController from '../controllers/DealCategoryController/dealCategoryController.js';
 import {
     addDealController,
+    allDeals,
     bulkAddDealController,
     dealDetailsWithFilters,
     dealPaymentStatusChangeController,
+    dealStatusChangeController,
     editDealController,
     getDealsWithBrandId,
 } from '../controllers/DealController/dealController.js';
@@ -66,16 +68,23 @@ AdminRouter.get(
     '/poster/getAllPosters',
     PosterController.getAllPosterController,
 );
+AdminRouter.get(
+    '/poster/getById/:posterId',
+    PosterController.getPosterById,
+);
 //  deal
 AdminRouter.post('/deal/add', addDealController);
 AdminRouter.post('/deal/bulk-add', bulkAddDealController);
 AdminRouter.post('/deal/edit', editDealController);
 AdminRouter.post('/deal/all/withFilters', dealDetailsWithFilters);
+AdminRouter.get('/deal/all/allDeals', allDeals);
+
 AdminRouter.get('/deal/getDealWithBrandId/:brandId', getDealsWithBrandId);
 AdminRouter.post(
     '/deal/updatePaymentStatus',
     dealPaymentStatusChangeController,
 );
+AdminRouter.post('/deal/updateStatus', dealStatusChangeController);
 
 // orders
 AdminRouter.post('/order/acceptRejectOrder', acceptRejectOrder);

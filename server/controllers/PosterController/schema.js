@@ -63,7 +63,7 @@ const addSchema = z
     message: 'please send Brand Id',
 });
 const deleteSchema = z.object({
-    posterId: z.string({ required_error: 'brand Id is  required' }).trim(),
+    posterId: z.string({ required_error: 'poster Id is  required' }).trim(),
 });
 const editSchema = z
     .object({
