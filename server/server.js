@@ -72,6 +72,7 @@ const init = async () => {
         console.log(`server start on the ${PORT}`);
     });
 
+    //dummy message
     const message = {
         notification: {
             title: 'Test Notification',
@@ -81,26 +82,26 @@ const init = async () => {
     };
 
     // Generate an access token
-    // admin.credential
-    //     .cert(serviceAccount)
-    //     .getAccessToken()
-    //     .then((accessToken) => {
-    //         console.log('Access Token:', accessToken.access_token);
-    //     })
-    //     .catch((err) => {
-    //         console.error('Error generating access token:', err);
-    //     });
+    admin.credential
+        .cert(fireBasePushNotification)
+        .getAccessToken()
+        .then((accessToken) => {
+            console.log('Access Token:', accessToken.access_token);
+        })
+        .catch((err) => {
+            console.error('Error generating access token:', err);
+        });
 
-    // //send message
-    // admin
-    //     .messaging()
-    //     .send(message)
-    //     .then((response) => {
-    //         console.log('Successfully sent message:', response);
-    //     })
-    //     .catch((error) => {
-    //         console.log('Error sending message:', error);
-    //     });
+    //send message
+    admin
+        .messaging()
+        .send(message)
+        .then((response) => {
+            console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+            console.log('Error sending message:', error);
+        });
 };
 init();
 //# sourceMappingURL=server.js.map
