@@ -21,12 +21,7 @@ import UserRouter from './routes/UserRouter.js';
 import OrderRouter from './routes/OrderRouter.js';
 import fileUpload from './controllers/fileUpload.js';
 import { upload } from './utilities/multer.js';
-import admin from 'firebase-admin';
-import fireBasePushNotification from '../config/fireBasePushNotification.js';
 
-admin.initializeApp({
-    credential: admin.credential.cert(fireBasePushNotification),
-});
 
 const init = async () => {
     const PORT = process.env.PORT;
@@ -73,35 +68,10 @@ const init = async () => {
     });
 
     //dummy message
-    const message = {
-        notification: {
-            title: 'Test Notification',
-            body: 'This is a test notification',
-        },
-        token: 'eeKDexvWQOao7upv0oyDp6:APA91bH4Py0qQKrW8VxXq-J5YUlPIY56pJDPACqDv2VpveCMKTexAPbDg78xFJ9s4XUA3gpx6tvgKLRD62WW3VS6wKbb-cAlSfCpgiTSx_71rtDtt_XwyX1pnvMK1p2osgmiLZ9ODIuf',
-    };
-
-    // Generate an access token
-    admin.credential
-        .cert(fireBasePushNotification)
-        .getAccessToken()
-        .then((accessToken) => {
-            console.log('Access Token:', accessToken.access_token);
-        })
-        .catch((err) => {
-            console.error('Error generating access token:', err);
-        });
-
-    //send message
-    admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-            console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-            console.log('Error sending message:', error);
-        });
+   
+    
 };
 init();
+
+
 //# sourceMappingURL=server.js.map

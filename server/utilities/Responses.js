@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export const successResponse = ({ message, data, others, statusCode, total, }) => ({
     statusCode: statusCode || 200,
     success: true,

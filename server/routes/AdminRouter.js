@@ -19,7 +19,11 @@ import {
 import platFormController from '../controllers/PlatFormController/platFormController.js';
 import PosterController from '../controllers/PosterController/PosterController.js';
 import express from 'express';
+import { getAllUsersController } from '../controllers/userController/userController.js';
 const AdminRouter = express.Router();
+
+// user
+AdminRouter.post('/getAllUsers/withFilters', getAllUsersController);
 // platforms routes
 AdminRouter.post('/platForm/add', platFormController.addPlatFormController);
 AdminRouter.post('/platForm/edit', platFormController.editPlatFormController);
@@ -68,10 +72,7 @@ AdminRouter.get(
     '/poster/getAllPosters',
     PosterController.getAllPosterController,
 );
-AdminRouter.get(
-    '/poster/getById/:posterId',
-    PosterController.getPosterById,
-);
+AdminRouter.get('/poster/getById/:posterId', PosterController.getPosterById);
 //  deal
 AdminRouter.post('/deal/add', addDealController);
 AdminRouter.post('/deal/bulk-add', bulkAddDealController);

@@ -1,7 +1,7 @@
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
-import catchAsync from '../../../utilities/catchAsync.js';
+import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import catchAsync from '../../utilities/catchAsync.js';
 import { addBankDetailsSchema, editBankDetailsSchema, getDetails, } from './schema.js';
-import PaymentDetails from '../../../database/models/PaymentDetails.js';
+import PaymentDetails from '../../database/models/PaymentDetails.js';
 export const addPaymentDetails = catchAsync(async (req, res) => {
     const body = addBankDetailsSchema.parse(req.body);
     const { IFSC, accountHolderName, accountNumber, bankName, upiId, userId, } = body;
