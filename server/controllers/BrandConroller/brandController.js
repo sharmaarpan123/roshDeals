@@ -1,11 +1,16 @@
-import { addSchema, deleteSchema, editSchema } from './schema.js';
+import {
+    addSchema,
+    brandIdSchema,
+    editSchema,
+    updateStatusSchema,
+} from './schema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import Brand from '../../database/models/Brand.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
 import Deal from '../../database/models/Deal.js';
 const geBrandByIdController = catchAsync(async (req, res) => {
-    const { brandId } = deleteSchema.parse(req.params);
+    const { brandId } = brandIdSchema.parse(req.params);
     const brandDetails = await Brand.findOne({
         _id: brandId,
     });
@@ -17,10 +22,11 @@ const geBrandByIdController = catchAsync(async (req, res) => {
     );
 });
 const getAllBrandController = catchAsync(async (req, res) => {
-    const { offset, limit, search } = filterSchema.parse(req.body);
+    const { offset, limit, search, status } = filterSchema.parse(req.body);
     let AllDAta = Brand.find({
+        ...(status && { isActive: Boolean(+status) }),
         ...(search && { name: { $regex: search, $options: 'i' } }),
-    });
+    }).sort({ createdAt: -1 });
 
     if (typeof offset !== 'undefined') {
         AllDAta = AllDAta.skip(offset);
@@ -31,6 +37,7 @@ const getAllBrandController = catchAsync(async (req, res) => {
     }
 
     const total = Brand.find({
+        ...(status && { isActive: Boolean(+status) }),
         ...(search && { name: { $regex: search, $options: 'i' } }),
     }).countDocuments();
     const data = await Promise.all([AllDAta, total]);
@@ -103,21 +110,21 @@ const editBrandController = catchAsync(async (req, res) => {
         );
     }
 });
-const deleteBrandController = catchAsync(async (req, res) => {
-    const body = deleteSchema.parse(req.body);
-    const { brandId } = body;
-    const deletedData = await Brand.findByIdAndUpdate(
+const updateStatusController = catchAsync(async (req, res) => {
+    const body = updateStatusSchema.parse(req.body);
+    const { brandId, status } = body;
+    const updatedData = await Brand.findByIdAndUpdate(
         { _id: brandId },
         {
-            isDeleted: true,
+            isActive: status,
         },
-        { new: true },
+        { new: true, upsert: true },
     );
-    if (deletedData) {
+    if (updatedData) {
         return res.status(200).json(
             successResponse({
-                message: 'deleted successfully',
-                data: deletedData,
+                message: 'updated successfully',
+                data: updatedData,
             }),
         );
     } else {
@@ -134,7 +141,6 @@ const getActiveBrandController = catchAsync(async (req, res) => {
     const brandData = await Deal.aggregate([
         {
             $match: {
-                isDeleted: false,
                 isActive: true,
                 isSlotCompleted: false,
             },
@@ -183,7 +189,7 @@ const getActiveBrandController = catchAsync(async (req, res) => {
 export default {
     addBrandController,
     editBrandController,
-    deleteBrandController,
+    updateStatusController,
     getAllBrandController,
     getActiveBrandController,
     geBrandByIdController,

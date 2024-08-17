@@ -72,7 +72,7 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
 
     const query = {
         ...(search && { productName: { $regex: search, $options: 'i' } }),
-        ...(status && { isActive: status === 'active' }),
+        ...(status && { isActive: Boolean(+status) }),
         ...(paymentStatus && { paymentStatus }),
         ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
         ...(isSlotCompleted === 'uncompleted' && { isSlotCompleted: false }),
@@ -259,7 +259,6 @@ export const dealDetails = catchAsync(async (req, res) => {
 export const activeDealsController = catchAsync(async (req, res) => {
     const { limit, offset, search } = filterSchema.parse(req.body);
     const activelyDeals = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
         ...(search && { productName: { $regex: search, $options: 'i' } }),
@@ -271,7 +270,6 @@ export const activeDealsController = catchAsync(async (req, res) => {
         .skip(offset || 0)
         .limit(limit || 20);
     const total = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
         ...(search && { productName: { $regex: search, $options: 'i' } }),

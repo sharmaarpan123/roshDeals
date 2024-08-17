@@ -12,7 +12,6 @@ const schema = z.object({
 export default catchAsync(async (req, res) => {
     const { dealsFilter, brandFilter, dealCategoryFilter } = schema.parse(req.body);
     const activelyDeals = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
     })
@@ -24,7 +23,7 @@ export default catchAsync(async (req, res) => {
     const brandData = Deal.aggregate([
         {
             $match: {
-                isDeleted: false,
+            
                 isActive: true,
                 isSlotCompleted: false,
             },
@@ -61,7 +60,6 @@ export default catchAsync(async (req, res) => {
     const DealCategoriesData = Deal.aggregate([
         {
             $match: {
-                isDeleted: false,
                 isActive: true,
                 isSlotCompleted: false,
             },
@@ -96,7 +94,6 @@ export default catchAsync(async (req, res) => {
         },
     ]);
     const PosterData = Poster.find({
-        isDeleted: false,
         isActive: true,
     })
         .populate('brand')

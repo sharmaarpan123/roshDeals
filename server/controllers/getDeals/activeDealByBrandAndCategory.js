@@ -6,7 +6,6 @@ export default catchAsync(async (req, res) => {
     const body = activeDealByBrandAndCategory.parse(req.body);
     const { type, id, offset, limit } = body;
     const DealData = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
         ...(type === SearchEnumType.brand && { brand: id }),
@@ -19,7 +18,6 @@ export default catchAsync(async (req, res) => {
         .limit(limit);
 
     const total = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
         ...(type === SearchEnumType.brand && { brand: id }),

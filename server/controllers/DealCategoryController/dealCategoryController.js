@@ -1,15 +1,18 @@
-import {
-    addDealCategorySchema,
-    deleteDealCategorySchema,
-    editDealCategorySchema,
-} from './schema.js';
+import Deal from '../../database/models/Deal.js';
+import DealCategory from '../../database/models/DealCategory.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
-import DealCategory from '../../database/models/DealCategory.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
-import Deal from '../../database/models/Deal.js';
+import {
+    addDealCategorySchema,
+    DealCategoryIdSchema,
+    editDealCategorySchema,
+    updateStatusChangeSchema,
+} from './schema.js';
 const getAllDealCategoryController = catchAsync(async (req, res) => {
-    const AllDealCategories = await DealCategory.find({ isDeleted: false });
+    const AllDealCategories = await DealCategory.find({}).sort({
+        createdAt: -1,
+    });
     return res.status(200).json(
         successResponse({
             message: 'All DealCategory',
@@ -18,7 +21,7 @@ const getAllDealCategoryController = catchAsync(async (req, res) => {
     );
 });
 const getDealCategoryByIdController = catchAsync(async (req, res) => {
-    const { dealCategoryId } = deleteDealCategorySchema.parse(req.params);
+    const { dealCategoryId } = dealCategoryId.parse(req.params);
     const dealCategory = await DealCategory.findOne({
         _id: dealCategoryId,
     });
@@ -33,7 +36,7 @@ const addDealCategoryController = catchAsync(async (req, res) => {
     const body = addDealCategorySchema.parse(req.body);
     const { name } = body;
     const alreadyExists = await DealCategory.findOne({
-        name: { $regex: new RegExp(name, 'i') },
+        name,
     }).lean();
     if (alreadyExists) {
         return res.status(400).json(
@@ -76,20 +79,20 @@ const editDealCategoryController = catchAsync(async (req, res) => {
         );
     }
 });
-const deleteDealCategoryController = catchAsync(async (req, res) => {
-    const body = deleteDealCategorySchema.parse(req.body);
-    const { dealCategoryId } = body;
+const DealCategoryUpdateStatusController = catchAsync(async (req, res) => {
+    const body = updateStatusChangeSchema.parse(req.body);
+    const { dealCategoryId, status } = body;
     const UpdatedDealCategoryForm = await DealCategory.findByIdAndUpdate(
         { _id: dealCategoryId },
         {
-            isDeleted: true,
+            isActive: status,
         },
-        { new: true },
+        { new: true, upsert: true },
     );
     if (UpdatedDealCategoryForm) {
         return res.status(200).json(
             successResponse({
-                message: 'deleted successfully',
+                message: 'updated successfully',
                 data: UpdatedDealCategoryForm,
             }),
         );
@@ -106,8 +109,7 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
     const DealCategoriesData = Deal.aggregate([
         {
-            $match: { 
-                isDeleted: false,
+            $match: {
                 isActive: true,
                 isSlotCompleted: false,
             },
@@ -143,7 +145,6 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     ]);
 
     const total = Deal.find({
-        isDeleted: false,
         isActive: true,
         isSlotCompleted: false,
     }).countDocuments();
@@ -160,9 +161,9 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
 export default {
     addDealCategoryController,
     editDealCategoryController,
-    deleteDealCategoryController,
     getAllDealCategoryController,
     getActiveDealCategoriesController,
     getDealCategoryByIdController,
+    DealCategoryUpdateStatusController,
 };
 //# sourceMappingURL=dealCategoryController.js.map

@@ -37,6 +37,11 @@ export const filterSchemaObject = z.object({
     search: z
         .string({ invalid_type_error: 'search should be string type' })
         .optional(),
+    status: z
+        .enum(['0', '1', ''], {
+            invalid_type_error: 'in Valid status',
+        })
+        .optional(),
 });
 export const filterSchema = filterSchemaObject.refine(
     filterRefineFunction,

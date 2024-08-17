@@ -1,3 +1,4 @@
+import express from 'express';
 import brandController from '../controllers/BrandConroller/brandController.js';
 import dealCategoryController from '../controllers/DealCategoryController/dealCategoryController.js';
 import {
@@ -18,18 +19,26 @@ import {
 } from '../controllers/Order/OrderController.js';
 import platFormController from '../controllers/PlatFormController/platFormController.js';
 import PosterController from '../controllers/PosterController/PosterController.js';
-import express from 'express';
-import { getAllUsersController } from '../controllers/userController/userController.js';
+import {
+    activeInActiveUserController,
+    getAllUsersController,
+    getUserByIdController,
+    updateUserController,
+} from '../controllers/userController/userController.js';
 const AdminRouter = express.Router();
 
 // user
-AdminRouter.post('/getAllUsers/withFilters', getAllUsersController);
+AdminRouter.post('/user/getAllUsers/withFilters', getAllUsersController);
+AdminRouter.post('/user/updateStatus', activeInActiveUserController);
+AdminRouter.get('/user/getUserById/:userId', getUserByIdController);
+AdminRouter.post('/user/updateUser', updateUserController);
+
 // platforms routes
 AdminRouter.post('/platForm/add', platFormController.addPlatFormController);
 AdminRouter.post('/platForm/edit', platFormController.editPlatFormController);
 AdminRouter.post(
-    '/platForm/delete',
-    platFormController.deletePlatFormController,
+    '/platForm/updateStatus',
+    platFormController.platFormStatusChangeController,
 );
 AdminRouter.get(
     '/platForm/getById/:platFormId',
@@ -45,8 +54,8 @@ AdminRouter.post(
     dealCategoryController.editDealCategoryController,
 );
 AdminRouter.post(
-    '/dealCategory/delete',
-    dealCategoryController.deleteDealCategoryController,
+    '/dealCategory/updateStatus',
+    dealCategoryController.DealCategoryUpdateStatusController,
 );
 AdminRouter.get(
     '/dealCategory/getById/:dealCategoryId',
@@ -55,7 +64,7 @@ AdminRouter.get(
 // category routes
 AdminRouter.post('/brand/add', brandController.addBrandController);
 AdminRouter.post('/brand/edit', brandController.editBrandController);
-AdminRouter.post('/brand/delete', brandController.deleteBrandController);
+AdminRouter.post('/brand/updateStatus', brandController.updateStatusController);
 AdminRouter.get(
     '/brand/getById/:brandId',
     brandController.geBrandByIdController,

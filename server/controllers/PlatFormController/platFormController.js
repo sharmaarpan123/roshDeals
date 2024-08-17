@@ -1,13 +1,14 @@
 import PlatForm from '../../database/models/PlatForm.js';
 import {
     addPlatFormSchema,
-    deletePlatFormSchema,
+    platFormIdSchema,
     editPlatFormSchema,
+    updateStatusChangeSchema,
 } from './schema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 const getAllPlatFormController = catchAsync(async (req, res) => {
-    const AllPlatForms = await PlatForm.find();
+    const AllPlatForms = await PlatForm.find().sort({ createdAt: -1 });
     return res.status(200).json(
         successResponse({
             message: 'All PlatForms',
@@ -16,7 +17,7 @@ const getAllPlatFormController = catchAsync(async (req, res) => {
     );
 });
 const getPlatFormById = catchAsync(async (req, res) => {
-    const { platFormId } = deletePlatFormSchema.parse(req.params);
+    const { platFormId } = platFormIdSchema.parse(req.params);
     const platFrom = await PlatForm.findOne({
         _id: platFormId,
     });
@@ -87,15 +88,15 @@ const editPlatFormController = catchAsync(async (req, res) => {
         );
     }
 });
-const deletePlatFormController = catchAsync(async (req, res) => {
-    const body = editPlatFormSchema.parse(req.body);
-    const { platFormId } = body;
+const platFormStatusChangeController = catchAsync(async (req, res) => {
+    const body = updateStatusChangeSchema.parse(req.body);
+    const { platFormId, status } = body;
     const UpdatedPlatForm = await PlatForm.findByIdAndUpdate(
         { _id: platFormId },
         {
-            isDeleted: true,
+            isActive: status,
         },
-        { new: true },
+        { new: true, upsert: true },
     );
     if (UpdatedPlatForm) {
         return res.status(200).json(
@@ -116,7 +117,7 @@ const deletePlatFormController = catchAsync(async (req, res) => {
 export default {
     addPlatFormController,
     editPlatFormController,
-    deletePlatFormController,
+    platFormStatusChangeController,
     getAllPlatFormController,
     getPlatFormById,
 };

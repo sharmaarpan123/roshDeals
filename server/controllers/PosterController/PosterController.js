@@ -13,7 +13,7 @@ import { filterSchema } from '../../utilities/ValidationSchema.js';
 
 const getActivePosters = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
-    const AllData = Poster.find({ isActive: true, isDeleted: false })
+    const AllData = Poster.find({ isActive: true })
         .populate('brand')
         .populate({
             path: 'deal',
@@ -30,7 +30,6 @@ const getActivePosters = catchAsync(async (req, res) => {
 
     const total = Poster.find({
         isActive: true,
-        isDeleted: false,
     }).countDocuments();
     const data = await Promise.all([AllData, total]);
     return res.status(200).json(
@@ -211,13 +210,7 @@ const editPosterController = catchAsync(async (req, res) => {
 const deletePosterController = catchAsync(async (req, res) => {
     const body = deleteSchema.parse(req.body);
     const { posterId } = body;
-    const deletedData = await Poster.findByIdAndUpdate(
-        { _id: posterId },
-        {
-            isDeleted: true,
-        },
-        { new: true },
-    );
+    const deletedData = await Poster.findOneAndDelete({ _id: posterId });
     if (deletedData) {
         return res.status(200).json(
             successResponse({

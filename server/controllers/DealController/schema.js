@@ -10,7 +10,7 @@ const allDealsListSchema = filterSchemaObject
     .merge(
         z.object({
             status: z
-                .enum(['active', 'inactive', ''], {
+                .enum(['0', '1', ''], {
                     message: 'invalid Status',
                 })
                 .optional(),
