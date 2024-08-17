@@ -127,13 +127,13 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
 });
 
 export const getAllOrders = catchAsync(async (req, res) => {
-    const { offset, limit, status, dealId, brandId } =
+    const { offset, limit, dealId, brandId, orderFormStatus } =
         allOrdersListSchema.parse(req.body);
 
     const aggregateArr = [
         {
             $match: {
-                ...(status && { orderFormStatus: status }),
+                ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
                     dealId: {
                         $in: dealId?.map(

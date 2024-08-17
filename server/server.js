@@ -21,7 +21,7 @@ import UserRouter from './routes/UserRouter.js';
 import OrderRouter from './routes/OrderRouter.js';
 import fileUpload from './controllers/fileUpload.js';
 import { upload } from './utilities/multer.js';
-
+import { sendNotification } from './utilities/sendNotification.js';
 
 const init = async () => {
     const PORT = process.env.PORT;
@@ -68,10 +68,16 @@ const init = async () => {
     });
 
     //dummy message
-   
-    
+    // sendNotification({
+    //     notification: {
+    //         title: 'Test Notification',
+    //         body: 'This is a test notification',
+    //     },
+    //     tokens: [
+    //         'dnXSxSgwQZOfIpLGn097Ij:APA91bGau2K2xyKT2QL7rsiyQLF9FAG3Qh5Irg7sxvtsD9ukqgE0MWT7YNWdHTsqieGrlrDnscIDaRSP1rgg0Hco20I9yWMcutgCPdTdL9kzSAAkKb6q5SQ2tuvgyQtftoblq_ERBw3I',
+    //     ],
+    // });
 };
 init();
-
 
 //# sourceMappingURL=server.js.map

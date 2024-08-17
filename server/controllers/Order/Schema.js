@@ -21,7 +21,7 @@ export const bulkPaymentStatusUpdateSchema = z.object({
         z
             .string({
                 required_error: 'Order id is required',
-                invalid_type_error :"order is should be string"
+                invalid_type_error: 'order is should be string',
             })
             .trim()
             .min(1, { message: 'Order Id have at least one character' }),
@@ -165,7 +165,7 @@ export const OrderFromUpdateSchema = z
 export const allOrdersListSchema = filterSchemaObject
     .merge(
         z.object({
-            status: z
+            orderFormStatus: z
                 .enum(
                     [
                         'pending',

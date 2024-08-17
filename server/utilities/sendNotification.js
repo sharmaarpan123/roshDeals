@@ -1,10 +1,9 @@
 import admin from 'firebase-admin';
-import fireBasePushNotification from '../config/fireBasePushNotification.js';
+import fireBasePushNotification from '../../config/fireBasePushNotification.js';
 
 export const firebase = admin.initializeApp({
     credential: admin.credential.cert(fireBasePushNotification),
 });
-
 
 // Generate an access token
 admin.credential
@@ -17,11 +16,11 @@ admin.credential
         console.error('Error generating access token:', err);
     });
 
-const sendNotification = (message) => {
+export const sendNotification = (message) => {
     // send message
     admin
         .messaging()
-        .send(message)
+        .sendEachForMulticast(message)
         .then((response) => {
             console.log('Successfully sent message:', response);
         })
@@ -29,5 +28,3 @@ const sendNotification = (message) => {
             console.log('Error sending message:', error);
         });
 };
-
-
