@@ -25,7 +25,7 @@ export const getAllUsersController = catchAsync(async (req, res) => {
     let AllDAta = User.find(query).sort({ createdAt: -1 });
 
     if (typeof offset !== 'undefined') {
-        AllDAta = AllDAta.skip(offset);
+        AllDAta = AllDAta.skip(offset); 
     }
 
     if (typeof limit !== 'undefined') {
