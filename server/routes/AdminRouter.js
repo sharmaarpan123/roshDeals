@@ -24,7 +24,7 @@ import {
     getAllUsersController,
     getUserByIdController,
     updateUserController,
-} from '../controllers/userController/UserController.js'; 
+} from '../controllers/userController/Usercontroller.js'; 
 const AdminRouter = express.Router();
 
 // user
