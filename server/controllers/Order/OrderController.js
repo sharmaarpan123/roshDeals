@@ -14,6 +14,8 @@ import {
     paymentStatusUpdateSchema,
     reviewFormSubmitSchema,
 } from './Schema.js';
+import User from '../../database/models/User.js';
+import { sendNotification } from '../../utilities/sendNotification.js';
 const checkSlotCompletedDeals = async (dealIds) =>
     Deal.find({
         _id: { $in: dealIds },
@@ -54,6 +56,33 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         { orderFormStatus: status, rejectReason },
         { new: true },
     );
+
+    const user = await User.findOne(
+        { _id: updatedOrder.userId },
+        { fcmToken: 1 },
+    );
+
+    let message = '';
+
+    switch (status) {
+        case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
+            message = 'Your review form is accepted';
+            break;
+        case ORDER_FORM_STATUS.REJECTED:
+            message = 'Your review form is rejected';
+            break;
+        default:
+            message = 'your order is ' + status;
+    }
+
+    sendNotification({
+        notification: {
+            body: 'Order status',
+            title: message,
+            imageUrl: '/images/logo.jpeg',
+        },
+        tokens: [user.fcmToken],
+    });
 
     return res.status(200).json(
         successResponse({

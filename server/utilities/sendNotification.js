@@ -13,18 +13,19 @@ admin.credential
         console.log('Access Token:', accessToken.access_token);
     })
     .catch((err) => {
-        console.error('Error generating access token:', err);
+        // console.error('Error generating access token:', err);
     });
 
 export const sendNotification = (message) => {
+    console.log(message, 'message');
     // send message
     admin
         .messaging()
         .sendEachForMulticast(message)
         .then((response) => {
-            console.log('Successfully sent message:', response);
+            console.log('Successfully sent firebase message:', response);
         })
         .catch((error) => {
-            console.log('Error sending message:', error);
+            console.log('Error sending firebase message:', error);
         });
 };
