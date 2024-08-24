@@ -30,7 +30,7 @@ const init = async () => {
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
-    app.use(express.static(path.join('public')));
+    app.use(express.static(path.join('server/public')));
     await mongoInit();
     app.get('/health', (req, res) =>
         res.json({

@@ -79,7 +79,7 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         notification: {
             body: 'Order status',
             title: message,
-            imageUrl: '/images/logo.jpeg',
+            imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
         },
         tokens: [user.fcmToken],
     });
