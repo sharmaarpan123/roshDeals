@@ -23,7 +23,11 @@ export const sendNotification = (message) => {
         .messaging()
         .sendEachForMulticast(message)
         .then((response) => {
-            console.log('Successfully sent firebase message:', response);
+            console.log(
+                'Successfully sent firebase message:',
+                response,
+                response.responses[0].error,
+            );
         })
         .catch((error) => {
             console.log('Error sending firebase message:', error);

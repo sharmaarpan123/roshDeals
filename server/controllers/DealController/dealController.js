@@ -13,6 +13,9 @@ import {
 } from './schema.js';
 import { validatingMongoObjectIds } from '../../utilities/validations.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
+import { sendNotification } from '../../utilities/sendNotification.js';
+import User from '../../database/models/User.js';
+import Brand from '../../database/models/Brand.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -160,6 +163,27 @@ export const bulkAddDealController = catchAsync(async (req, res) => {
     const bulkAddArr = BulkAddDealSchema.parse(req.body);
 
     const newDeal = await Deal.insertMany(bulkAddArr);
+
+    const data = await Promise.all([
+        User.find({}, { fcmToken: 1, _id: 0 }),
+        Brand.findOne({
+            _id: bulkAddArr[0].brand,
+        }),
+    ]);
+
+    sendNotification({
+        notification: {
+            body: 'New Deals',
+            title: data[1].name + " brand 's deal  are Launched",
+            imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+        },
+        android: {
+            notification: {
+                imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            },
+        },
+        tokens: data[0].map((i) => i.fcmToken),
+    });
 
     return res.status(200).json(
         successResponse({

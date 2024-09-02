@@ -24,7 +24,8 @@ import {
     getAllUsersController,
     getUserByIdController,
     updateUserController,
-} from '../controllers/userController/Usercontroller.js'; 
+} from '../controllers/userController/Usercontroller.js';
+import { sendNotificationController } from '../controllers/NotificationController/NotificationCotroller.js';
 const AdminRouter = express.Router();
 
 // user
@@ -101,6 +102,10 @@ AdminRouter.post('/order/acceptRejectOrder', acceptRejectOrder);
 AdminRouter.post('/orders/all', getAllOrders);
 AdminRouter.post('/order/paymentStatusUpdate', paymentStatusUpdate);
 AdminRouter.post('/order/bulkPaymentStatusUpdate', bulkPaymentStatusUpdate);
+
+// notification
+
+AdminRouter.post('/notification/send', sendNotificationController);
 
 export default AdminRouter;
 // # sourceMappingURL=AdminRouter.js.map

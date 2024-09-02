@@ -66,10 +66,10 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
 
     switch (status) {
         case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
-            message = 'Your review form is accepted';
+            message = 'Your review form is acFcepted';
             break;
         case ORDER_FORM_STATUS.REJECTED:
-            message = 'Your review form is rejected';
+            message = 'Your order form is rejected';
             break;
         default:
             message = 'your order is ' + status;
@@ -80,6 +80,11 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             body: 'Order status',
             title: message,
             imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+        },
+        android: {
+            notification: {
+                imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            },
         },
         tokens: [user.fcmToken],
     });
