@@ -77,6 +77,15 @@ const init = async () => {
     //         'dnXSxSgwQZOfIpLGn097Ij:APA91bGau2K2xyKT2QL7rsiyQLF9FAG3Qh5Irg7sxvtsD9ukqgE0MWT7YNWdHTsqieGrlrDnscIDaRSP1rgg0Hco20I9yWMcutgCPdTdL9kzSAAkKb6q5SQ2tuvgyQtftoblq_ERBw3I',
     //     ],
     // });
+    // const message = {
+    //     notification: {
+    //         title: 'Test Notification',
+    //         body: 'This is a test notification',
+    //     },
+    //     token: 'dpSyLLEFRKyoIIc8Bys7Wl:APA91bGtHvYluZ6IY0qbi1cA3nl-NnIEx7WTmFEMn8PFGeLjkXdGkaMIvb2TtAlByifvO0LTmhg_ywSJ94ANaDoqgnG-IxYAB4geSWGkVLuBcEMX5XQnk-HUfvCz0XLJYoGoPWsyDqix',
+    // };
+
+ 
 };
 init();
 

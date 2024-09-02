@@ -30,9 +30,6 @@ export default catchAsync(async (req, res) => {
             `files/${req.file.originalname + new Date().getTime()}`,
         );
     }
-
-    console.log(req.file, 'file===============');
-    console.log(req.file.mimetype, 'type===================');
     const metadata = {
         contentType: req.file.mimetype,
     };
@@ -42,6 +39,7 @@ export default catchAsync(async (req, res) => {
         metadata,
     );
     const downloadURL = await getDownloadURL(snapshot.ref);
+    
     return res.status(200).json(
         successResponse({
             message: 'file uploaded',
