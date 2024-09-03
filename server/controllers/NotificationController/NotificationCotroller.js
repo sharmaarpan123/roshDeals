@@ -34,6 +34,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
     if (data.type === 'dealOrderStatus') {
         const tokens = await Order.find({
             orderFormStatus: data.orderStatus,
+            dealId: data.dealId,
         }).populate({ path: 'userId', select: 'fcmToken' });
 
         if (!tokens.length) {
