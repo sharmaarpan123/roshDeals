@@ -4,7 +4,7 @@ const PosterSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         title: { type: String, required: true },
-        image: { type: String },
+        image: { type: String  },
         posterType: {
             type: String,
             enum: POSTER_ENUM,

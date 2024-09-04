@@ -23,6 +23,7 @@ const geBrandByIdController = catchAsync(async (req, res) => {
 });
 const getAllBrandController = catchAsync(async (req, res) => {
     const { offset, limit, search, status } = filterSchema.parse(req.body);
+ 
     let AllDAta = Brand.find({
         ...(status && { isActive: Boolean(+status) }),
         ...(search && { name: { $regex: search, $options: 'i' } }),

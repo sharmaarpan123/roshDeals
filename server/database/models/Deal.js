@@ -5,6 +5,10 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        uniqueIdentifier: {
+            type: String,
+            required: true,
+        },
         brand: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,

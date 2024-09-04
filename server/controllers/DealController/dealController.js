@@ -133,6 +133,7 @@ export const addDealController = catchAsync(async (req, res) => {
         isActive,
         termsAndCondition,
         adminCommission,
+        uniqueIdentifier,
     } = body;
     const newDeal = await Deal.create({
         actualPrice,
@@ -146,6 +147,7 @@ export const addDealController = catchAsync(async (req, res) => {
         slotAlloted,
         termsAndCondition,
         adminCommission,
+        uniqueIdentifier,
         isActive: isActive === false ? false : true, // we want by default  active true  so if
         //on add time isActive is  false it will false other wise it will be all time true
         // we can edit on edit api
@@ -171,6 +173,10 @@ export const bulkAddDealController = catchAsync(async (req, res) => {
         }),
     ]);
 
+    const filterToken = data[0]
+        .filter((i) => i.fcmToken)
+        .map((i) => i.fcmToken);
+
     sendNotification({
         notification: {
             body: 'New Deals',
@@ -182,7 +188,7 @@ export const bulkAddDealController = catchAsync(async (req, res) => {
                 imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
             },
         },
-        tokens: data[0].map((i) => i.fcmToken),
+        tokens: filterToken,
     });
 
     return res.status(200).json(
@@ -208,6 +214,7 @@ export const editDealController = catchAsync(async (req, res) => {
         isActive,
         termsAndCondition,
         adminCommission,
+        uniqueIdentifier,
     } = body;
     // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
     const inValidMongoIdMessage = await validatingMongoObjectIds({
@@ -238,6 +245,7 @@ export const editDealController = catchAsync(async (req, res) => {
             slotAlloted,
             termsAndCondition,
             adminCommission,
+            uniqueIdentifier,
             ...(isActive && { isActive }),
         },
         {

@@ -84,6 +84,11 @@ const addDealSchema = z.object({
         invalid_type_error: 'slot alloted should be numeric',
         required_error: 'slot alloted is required',
     }),
+    uniqueIdentifier: z
+        .string({
+            required_error: 'unique Identifier is required',
+        })
+        .min(1, { message: 'unique Identifier  is required' }),
 });
 
 const BulkAddDealSchema = z.array(addDealSchema, {
@@ -160,6 +165,7 @@ const editDealSchema = z
         slotAlloted: z
             .number({ invalid_type_error: 'slot alloted should be numeric' })
             .optional(),
+        uniqueIdentifier: z.string().optional(),
     })
     .merge(getDeal);
 const getDealsWithBrandIdSchema = z.object({

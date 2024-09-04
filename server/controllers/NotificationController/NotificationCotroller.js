@@ -30,7 +30,6 @@ export const sendNotificationController = catchAsync(async (req, res) => {
         console.log(token, 'token');
         messageBody.tokens = token;
         await sendNotification(messageBody);
-        console.log('waited =================>');
         return res.status(200).json(
             successResponse({
                 message: 'notification sended successfully',
