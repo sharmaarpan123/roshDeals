@@ -16,13 +16,13 @@ admin.credential
         // console.error('Error generating access token:', err);
     });
 
-export const sendNotification = (message) => {
+export const sendNotification =   (message) => {
 
     try{
 
         console.log(message, 'message');
         // send message
-        admin
+        return admin
             .messaging()
             .sendEachForMulticast(message)
             .then((response) => {
