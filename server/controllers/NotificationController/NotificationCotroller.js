@@ -7,55 +7,56 @@ import { sendNotificationSchema } from './schema.js';
 
 export const sendNotificationController = catchAsync(async (req, res) => {
     const data = sendNotificationSchema.parse(req.body);
-    try {
-        const messageBody = {
+
+    const messageBody = {
+        notification: {
+            body: data.body,
+            title: data.title,
+            imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+        },
+        android: {
             notification: {
-                body: data.body,
-                title: data.title,
                 imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
             },
-            android: {
-                notification: {
-                    imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
-                },
-            },
-        };
+        },
+    };
 
-        if (data.type === 'all') {
-            const tokens = await User.find({}, { _id: 0, fcmToken: 1 });
-            console.log(tokens, 'tokens');
-            messageBody.tokens = tokens.map((item) => item.fcmToken);
-            await sendNotification(messageBody);
-            console.log('waited =================>');
-            return res.status(200).json(        
-                successResponse({
-                    message: 'notification sended successfully',
+    if (data.type === 'all') {
+        const tokens = await User.find({}, { _id: 0, fcmToken: 1 });
+        // console.log(tokens, 'tokens');
+        const token = tokens
+            .filter((item) => item.fcmToken)
+            .map((item) => item.fcmToken);
+        console.log(token, 'token');
+        messageBody.tokens = token;
+        await sendNotification(messageBody);
+        console.log('waited =================>');
+        return res.status(200).json(
+            successResponse({
+                message: 'notification sended successfully',
+            }),
+        );
+    }
+    if (data.type === 'dealOrderStatus') {
+        const tokens = await Order.find({
+            orderFormStatus: data.orderStatus,
+            dealId: data.dealId,
+        }).populate({ path: 'userId', select: 'fcmToken' });
+
+        if (!tokens.length) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'No order found with this status',
                 }),
             );
         }
-        if (data.type === 'dealOrderStatus') {
-            const tokens = await Order.find({
-                orderFormStatus: data.orderStatus,
-                dealId: data.dealId,
-            }).populate({ path: 'userId', select: 'fcmToken' });
 
-            if (!tokens.length) {
-                return res.status(400).json(
-                    errorResponse({
-                        message: 'No order found with this status',
-                    }),
-                );
-            }
-
-            messageBody.tokens = tokens.map((item) => item?.userId?.fcmToken);
-            sendNotification(messageBody);
-            return res.status(200).json(
-                successResponse({
-                    message: 'notification sended successfully',
-                }),
-            );
-        }
-    } catch (err) {
-        console.log('err--contr------>', err);
+        messageBody.tokens = tokens.map((item) => item?.userId?.fcmToken);
+        sendNotification(messageBody);
+        return res.status(200).json(
+            successResponse({
+                message: 'notification sended successfully',
+            }),
+        );
     }
 });

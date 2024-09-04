@@ -10,34 +10,25 @@ admin.credential
     .cert(fireBasePushNotification)
     .getAccessToken()
     .then((accessToken) => {
-        console.log('Access Token:', accessToken.access_token);
+        // console.log('Access Token:', accessToken.access_token);
     })
     .catch((err) => {
         // console.error('Error generating access token:', err);
     });
 
-export const sendNotification =   (message) => {
-
-    try{
-
-        console.log(message, 'message');
-        // send message
-        return admin
-            .messaging()
-            .sendEachForMulticast(message)
-            .then((response) => {
-                console.log(
-                    'Successfully sent firebase message:',
-                    response,
-                    response.responses[0].error,
-                );
-            })
-            .catch((error) => {
-                console.log('Error sending firebase message:', error);
-            });
-            
-        }catch(error){
-            console.log("sendNotification erro---",error)
-        }
-    }; 
-
+export const sendNotification = (message) => {
+    console.log(message, 'message');
+    // send message
+    return admin
+        .messaging()
+        .sendEachForMulticast(message)
+        .then((response) => {
+            console.log(
+                'Successfully sent firebase message:',
+                response,
+            );
+        })
+        .catch((error) => {
+            console.log('Error sending firebase message:', error);
+        });
+};
