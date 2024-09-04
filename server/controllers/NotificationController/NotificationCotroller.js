@@ -23,6 +23,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
 
     if (data.type === 'all') {
         const tokens = await User.find({}, { _id: 0, fcmToken: 1 });
+        console.log(tokens , "tokens")
         messageBody.tokens = tokens.map((item) => item.fcmToken);
         sendNotification(messageBody);
         return res.status(200).json(
