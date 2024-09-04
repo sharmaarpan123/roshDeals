@@ -17,19 +17,27 @@ admin.credential
     });
 
 export const sendNotification = (message) => {
-    console.log(message, 'message');
-    // send message
-    admin
-        .messaging()
-        .sendEachForMulticast(message)
-        .then((response) => {
-            console.log(
-                'Successfully sent firebase message:',
-                response,
-                response.responses[0].error,
-            );
-        })
-        .catch((error) => {
-            console.log('Error sending firebase message:', error);
-        });
-};
+
+    try{
+
+        console.log(message, 'message');
+        // send message
+        admin
+            .messaging()
+            .sendEachForMulticast(message)
+            .then((response) => {
+                console.log(
+                    'Successfully sent firebase message:',
+                    response,
+                    response.responses[0].error,
+                );
+            })
+            .catch((error) => {
+                console.log('Error sending firebase message:', error);
+            });
+            
+        }catch(error){
+            console.log("sendNotification erro---",error)
+        }
+    }; 
+

@@ -7,7 +7,7 @@ import { sendNotificationSchema } from './schema.js';
 
 export const sendNotificationController = catchAsync(async (req, res) => {
     const data = sendNotificationSchema.parse(req.body);
-
+  try{
     const messageBody = {
         notification: {
             body: data.body,
@@ -54,4 +54,8 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             }),
         );
     }
+  }catch(err){
+   console.log("err--contr------>",err)
+  }
+ 
 });
