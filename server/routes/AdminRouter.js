@@ -26,7 +26,12 @@ import {
     updateUserController,
 } from '../controllers/userController/Usercontroller.js';
 import { sendNotificationController } from '../controllers/NotificationController/NotificationCotroller.js';
+import { dashboardController } from '../controllers/AdminController/dashBoardController.js';
 const AdminRouter = express.Router();
+
+// dashboard
+
+AdminRouter.get('/dashboard', dashboardController);
 
 // user
 AdminRouter.post('/user/getAllUsers/withFilters', getAllUsersController);
