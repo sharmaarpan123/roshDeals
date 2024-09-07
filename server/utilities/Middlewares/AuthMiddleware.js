@@ -1,5 +1,5 @@
-import { verifyJwt } from './jwt.js';
-import catchAsync from './catchAsync.js';
+import { verifyJwt } from '../jwt.js';
+import catchAsync from '../catchAsync.js';
 export default (role) => {
     return catchAsync(async (req, res, next) => {
         const token = req?.headers?.authorization?.replace('Bearer ', '');

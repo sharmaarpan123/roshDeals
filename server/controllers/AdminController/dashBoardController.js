@@ -68,7 +68,7 @@ export const dashboardController = catchAsync(async (req, res) => {
                         ),
                     },
                 },
-            },
+            },  
             {
                 $lookup: {
                     from: 'deals',

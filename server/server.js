@@ -10,7 +10,7 @@ import mongoInit from './database/index.js';
 import catchErrorHandler from './utilities/catchErrorHandler.js';
 import AdminRouter from './routes/AdminRouter.js';
 import { ROLE_TYPE_ENUM } from './utilities/commonTypes.js';
-import AuthMiddleware from './utilities/AuthMiddleware.js';
+import AuthMiddleware from './utilities/Middlewares/AuthMiddleware.js';
 import DealRouter from './routes/DealRouter.js';
 import DealCategoryRouter from './routes/DealCategoryRouter.js';
 import PlatFromRouter from './routes/PlatFromRouter.js';
@@ -21,7 +21,7 @@ import UserRouter from './routes/UserRouter.js';
 import OrderRouter from './routes/OrderRouter.js';
 import fileUpload from './controllers/fileUpload.js';
 import { upload } from './utilities/multer.js';
-import { sendNotification } from './utilities/sendNotification.js';
+import SlowRateMiddleWare from './utilities/Middlewares/SlowRateMiddleWare.js';
 
 const init = async () => {
     const PORT = process.env.PORT;
@@ -59,6 +59,7 @@ const init = async () => {
     app.use(
         '/fileUpload',
         AuthMiddleware(Object.values(ROLE_TYPE_ENUM).map((i) => i)),
+        SlowRateMiddleWare(),
         upload.single('file'),
         fileUpload,
     );
@@ -84,8 +85,6 @@ const init = async () => {
     //     },
     //     token: 'dpSyLLEFRKyoIIc8Bys7Wl:APA91bGtHvYluZ6IY0qbi1cA3nl-NnIEx7WTmFEMn8PFGeLjkXdGkaMIvb2TtAlByifvO0LTmhg_ywSJ94ANaDoqgnG-IxYAB4geSWGkVLuBcEMX5XQnk-HUfvCz0XLJYoGoPWsyDqix',
     // };
-
- 
 };
 init();
 

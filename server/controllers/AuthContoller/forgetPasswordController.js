@@ -36,6 +36,11 @@ const forgetPasswordController = catchAsync(async (req, res) => {
         subject: 'ROSH DEALS - Reset Your Password ',
         html: forgetPasswordTemplate(otp),
     };
+    // return res.status(200).json(
+    //     successResponse({
+    //         message: 'devloping mode',
+    //     }),
+    // );
     transporter.sendMail(mailOptions, (error) => {
         if (error) {
             return res.status(400).json(

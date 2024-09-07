@@ -3,10 +3,15 @@ import resetPasswordController from '../controllers/AuthContoller/resetPassword.
 import signInController from '../controllers/AuthContoller/signInController.js';
 import signupController from '../controllers/AuthContoller/signupConrollers.js';
 import express from 'express';
+import SlowRateMiddleWare from '../utilities/Middlewares/SlowRateMiddleWare.js';
 const AuthRouter = express.Router();
 AuthRouter.post('/signUp', signupController);
 AuthRouter.post('/signIn', signInController);
-AuthRouter.post('/forgetPassword', forgetPasswordController);
+AuthRouter.post(
+    '/forgetPassword',
+    SlowRateMiddleWare(),
+    forgetPasswordController,
+);
 AuthRouter.post('/resetPassword', resetPasswordController);
 export default AuthRouter;
 //# sourceMappingURL=AuthRouter.js.map
