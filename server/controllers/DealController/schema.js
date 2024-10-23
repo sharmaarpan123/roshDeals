@@ -89,6 +89,7 @@ const addDealSchema = z.object({
             required_error: 'unique Identifier is required',
         })
         .min(1, { message: 'unique Identifier  is required' }),
+    imageUrl: z.string().optional(),
 });
 
 const BulkAddDealSchema = z.array(addDealSchema, {
@@ -166,6 +167,7 @@ const editDealSchema = z
             .number({ invalid_type_error: 'slot alloted should be numeric' })
             .optional(),
         uniqueIdentifier: z.string().optional(),
+        imageUrl: z.string().optional(),
     })
     .merge(getDeal);
 const getDealsWithBrandIdSchema = z.object({

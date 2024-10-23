@@ -60,6 +60,9 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        imageUrl: {
+            type: String,
+        },
         termsAndCondition: {
             type: String,
             required: true,
