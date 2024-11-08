@@ -31,7 +31,7 @@ const AdminRouter = express.Router();
 
 // dashboard
 
-AdminRouter.get('/dashboard', dashboardController);
+AdminRouter.post('/dashboard', dashboardController);
 
 // user
 AdminRouter.post('/user/getAllUsers/withFilters', getAllUsersController);

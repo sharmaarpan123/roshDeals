@@ -2,8 +2,37 @@ import Order from '../../database/models/Order.js';
 import User from '../../database/models/User.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { successResponse } from '../../utilities/Responses.js';
+import { dashboardReportSchema } from './Schema.js';
+
+const getLastWeekStartDateFromToday = () => {
+    const last7thDate = new Date().getDate() - 7;
+    const dateOf7thDay = new Date(new Date().setDate(last7thDate));
+    return new Date(dateOf7thDay.setHours(0, 0, 0, 0));
+};
+
+const getPrevious12thMonthFromToday = () => {
+    const previous12thMonthNumber = new Date().getMonth() - 12;
+    return new Date(
+        new Date(new Date().setMonth(previous12thMonthNumber))
+            // set month
+            .setHours(0, 0, 0, 0),
+    ); // set housrs
+};
+
+const getPrevious30ThDateFromToday = () => {
+    const previous30Day = new Date().getDate() - 30;
+    return new Date(
+        new Date(new Date().setDate(previous30Day)).setHours(0, 0, 0, 0), // set house
+    );
+};
 
 export const dashboardController = catchAsync(async (req, res) => {
+    const {
+        endDate,
+        startDate,
+        revenueReportType = 'yearly',
+    } = dashboardReportSchema.parse(req.body);
+
     const queryS = [];
 
     queryS.push(User.find({}).countDocuments()); // total users
@@ -62,13 +91,33 @@ export const dashboardController = catchAsync(async (req, res) => {
             {
                 $match: {
                     paymentStatus: 'paid',
-                    createdAt: {
-                        $gte: new Date(
-                            new Date().setMonth(new Date().getMonth() - 12),
-                        ),
-                    },
+                    // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
+                    ...(!startDate &&
+                        revenueReportType === 'yearly' && {
+                            createdAt: {
+                                $gte: getPrevious12thMonthFromToday(),
+                            },
+                        }),
+                    ...(!startDate &&
+                        revenueReportType === 'monthly' && {
+                            createdAt: {
+                                $gte: getPrevious30ThDateFromToday(),
+                            },
+                        }),
+                    ...(!startDate &&
+                        revenueReportType === 'weekly' && {
+                            createdAt: {
+                                $gte: getLastWeekStartDateFromToday(),
+                            },
+                        }),
+                    ...(startDate && {
+                        createdAt: {
+                            $gte: new Date(startDate),
+                            $lte: new Date(endDate),
+                        },
+                    }),
                 },
-            },  
+            },
             {
                 $lookup: {
                     from: 'deals',
@@ -91,7 +140,13 @@ export const dashboardController = catchAsync(async (req, res) => {
                 $project: {
                     adminCommission: 1,
                     yearMonth: {
-                        $dateToString: { format: '%Y-%m', date: '$createdAt' },
+                        $dateToString: {
+                            format:
+                                !startDate && revenueReportType === 'yearly'
+                                    ? '%Y-%m'
+                                    : '%Y-%m-%d',
+                            date: '$createdAt',
+                        },
                     },
                 },
             },
@@ -105,7 +160,7 @@ export const dashboardController = catchAsync(async (req, res) => {
                 $sort: { _id: 1 },
             },
         ]),
-    );
+    ); // revenue report
 
     const data = await Promise.all(queryS);
 
@@ -118,7 +173,7 @@ export const dashboardController = catchAsync(async (req, res) => {
                 unPaidOrders: data[2],
                 totalRevenue: data[4] && data[4][0]?.totalEarnings,
                 orderStatus: data[3],
-                MonthsEarning: data[5],
+                revenueGraphData: data[5],
             },
         }),
     );
