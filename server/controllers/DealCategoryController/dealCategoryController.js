@@ -9,6 +9,9 @@ import {
     editDealCategorySchema,
     updateStatusChangeSchema,
 } from './schema.js';
+
+
+
 const getAllDealCategoryController = catchAsync(async (req, res) => {
     const AllDealCategories = await DealCategory.find({}).sort({
         createdAt: -1,

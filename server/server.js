@@ -17,9 +17,13 @@ import OrderRouter from './routes/OrderRouter.js';
 import PlatFromRouter from './routes/PlatFromRouter.js';
 import UserRouter from './routes/UserRouter.js';
 import catchErrorHandler from './utilities/catchErrorHandler.js';
-import { ROLE_TYPE_ENUM } from './utilities/commonTypes.js';
+import {
+    ADMIN_ROLE_TYPE_ENUM,
+    ROLE_TYPE_ENUM,
+} from './utilities/commonTypes.js';
 import AuthMiddleware from './utilities/Middlewares/AuthMiddleware.js';
 import { upload } from './utilities/multer.js';
+import getInitialCacheValues from './utilities/getInitialCacheValues.js';
 config();
 
 const init = async () => {
@@ -31,6 +35,7 @@ const init = async () => {
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
     app.use(express.static(path.join('server/public')));
     await mongoInit();
+    await getInitialCacheValues();
     app.get('/health', (req, res) =>
         res.json({
             message: 'I m fine',
@@ -42,7 +47,14 @@ const init = async () => {
         }),
     );
     app.use('/auth', AuthRouter);
-    app.use('/admin', AuthMiddleware([ROLE_TYPE_ENUM.ADMIN]), AdminRouter);
+    app.use(
+        '/admin',
+        AuthMiddleware([
+            ADMIN_ROLE_TYPE_ENUM.ADMIN,
+            ADMIN_ROLE_TYPE_ENUM.SUBADMIN,
+        ]),
+        AdminRouter,
+    );
     app.use('/deal', DealRouter);
     app.use('/dealCategory', DealCategoryRouter);
     app.use('/platForm', PlatFromRouter);

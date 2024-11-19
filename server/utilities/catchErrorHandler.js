@@ -1,6 +1,30 @@
 import { ZodError } from 'zod';
 export default (err, _req, res, _next) => {
     console.log(err, 'error catch async ');
+
+    if (
+        err?.errorResponse?.errmsg.includes(
+            'E11000 duplicate key error collection:',
+        )
+    ) {
+        let duplicateKey;
+        let duplicateValue;
+
+        const arr = Object.keys(err?.errorResponse?.keyValue);
+
+        duplicateKey = arr[0];
+        duplicateValue = err?.errorResponse?.keyValue[arr[0]];
+
+        return res.status(404).json({
+            success: false,
+            statusCode: 409,
+            duplicateValue,
+            duplicateKey,
+            message: value + ' for the ' + key + ' is already exists',
+            errorInfo: err,
+            type: 'validationError',
+        });
+    }
     if (err.name === 'CastError') {
         return res.status(404).json({
             success: false,

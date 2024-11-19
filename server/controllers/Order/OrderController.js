@@ -136,7 +136,6 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
             }),
         );
     }
-    console.log(order, 'order');
 
     if (orderIds.length !== order.length) {
         return res.status(400).json(
@@ -406,7 +405,6 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 });
 export const OrderList = catchAsync(async (req, res) => {
-    console.log(req.query, 'query');
     const { limit, offset } = filterSchema.parse(req.query);
     const orders = await Order.find({ userId: req.user._id })
         .populate({

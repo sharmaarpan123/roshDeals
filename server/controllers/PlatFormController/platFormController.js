@@ -7,6 +7,7 @@ import {
 } from './schema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import { filterSchema } from '../../utilities/ValidationSchema.js';
 const getAllPlatFormController = catchAsync(async (req, res) => {
     const AllPlatForms = await PlatForm.find().sort({ createdAt: -1 });
     return res.status(200).json(
@@ -16,6 +17,34 @@ const getAllPlatFormController = catchAsync(async (req, res) => {
         }),
     );
 });
+
+const getAllPlatFormWithFiltersController = catchAsync(async (req, res) => {
+    const { limit, offset, search, status } = filterSchema.parse(req.query);
+
+    const AllPlatForms = PlatForm.find({
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+        ...(status && { isActive: Boolean(+status) }),
+    })
+        .skip(offset || 0)
+        .limit(limit || 10)
+        .sort({ createdAt: -1 });
+
+    const totalCount = PlatForm.find({
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+        ...(status && { isActive: Boolean(+status) }),
+    }).countDocuments();
+
+    const data = await Promise.all([AllPlatForms, totalCount]);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'All PlatForms',
+            data: data[0],
+            total: data[1],
+        }),
+    );
+});
+
 const getPlatFormById = catchAsync(async (req, res) => {
     const { platFormId } = platFormIdSchema.parse(req.params);
     const platFrom = await PlatForm.findOne({
@@ -120,5 +149,6 @@ export default {
     platFormStatusChangeController,
     getAllPlatFormController,
     getPlatFormById,
+    getAllPlatFormWithFiltersController,
 };
 //# sourceMappingURL=platFormController.js.map

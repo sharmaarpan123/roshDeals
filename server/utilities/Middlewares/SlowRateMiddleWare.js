@@ -37,7 +37,7 @@ export default (arg) => {
                 }),
             );
         } else if (isAlreadyRequested < slowAfter) {
-            const updated = redis.setex(ip, expTime, isAlreadyRequested + 1); // not using the await just to send  the response  is less time
+             redis.setex(ip, expTime, isAlreadyRequested + 1); // not using the await just to send  the response  is less time
             return next();
         } else if (
             isAlreadyRequested >= slowAfter &&
@@ -55,4 +55,4 @@ export default (arg) => {
         return next();
     });
 };
-//# sourceMappingURL=AuthMiddleware.js.map
+

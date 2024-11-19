@@ -8,7 +8,13 @@ export default (role) => {
         if (!decodedUser?.data) {
             userIsAuthenticated = false;
         }
-        const roleIsAccepted = decodedUser?.data?.roles?.map((item) => role.includes(item));
+
+        const roleIsAccepted = decodedUser?.data?.roles?.some((item) =>
+            role.includes(item),
+        );
+
+
+
         if (!roleIsAccepted) {
             userIsAuthenticated = false;
         }
@@ -22,4 +28,3 @@ export default (role) => {
         next();
     });
 };
-//# sourceMappingURL=AuthMiddleware.js.map
