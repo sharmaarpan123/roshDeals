@@ -35,7 +35,7 @@ const init = async () => {
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
     app.use(express.static(path.join('server/public')));
     await mongoInit();
-    await getInitialCacheValues();
+     getInitialCacheValues();
     app.get('/health', (req, res) =>
         res.json({
             message: 'I m fine',
