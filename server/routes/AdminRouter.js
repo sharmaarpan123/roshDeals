@@ -28,11 +28,12 @@ import {
     getAllUsersController,
     getUserByIdController,
     updateUserController,
-} from '../controllers/userController/Usercontroller.js';
+} from '../controllers/AdminController/userController/Usercontroller.js';
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
 import AdminDealCategoryController from '../controllers/AdminController/dealCategory/DealCategoryController.js';
 import adminBrandController from '../controllers/AdminController/Brand/BrandController.js';
+import chatController from '../controllers/AdminController/ChatController/ChatController.js';
 const AdminRouter = express.Router();
 
 // dashboard
@@ -436,6 +437,26 @@ AdminRouter.post(
         key: permissionsLevelKey.canAdd,
     }),
     sendNotificationController,
+);
+
+// support chat
+
+AdminRouter.post(
+    '/support/ChatList',
+    AdminAccessMiddleware({
+        uniqueSlug: 'supportChat',
+        key: permissionsLevelKey.canView,
+    }),
+    chatController.getChatList,
+);
+
+AdminRouter.post(
+    '/support/ChatHistory',
+    AdminAccessMiddleware({
+        uniqueSlug: 'supportChat',
+        key: permissionsLevelKey.canView,
+    }),
+    chatController.getChatHistory,
 );
 
 export default AdminRouter;

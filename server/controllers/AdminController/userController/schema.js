@@ -3,7 +3,7 @@ import {
     filterRefineFunction,
     filterRefineMessage,
     filterSchemaObject,
-} from '../../utilities/ValidationSchema.js';
+} from '../../../utilities/ValidationSchema.js';
 
 export const userIdSchema = z.object({
     userId: z.string({ required_error: 'userId required' }),

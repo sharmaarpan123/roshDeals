@@ -1,6 +1,7 @@
 import Admin from '../../../database/models/Admin.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
+import { setSubAdminCaches } from '../../../utilities/getInitialCacheValues.js';
 import { hashPassword } from '../../../utilities/hashPassword.js';
 import {
     successResponse,
@@ -91,6 +92,8 @@ class subAdminController {
 
         const data = await newSubAdmin.save();
 
+        setSubAdminCaches(); // updating the admin cache
+
         return res.status(200).json(
             successResponse({
                 data,
@@ -112,6 +115,15 @@ class subAdminController {
                 new: true,
             },
         );
+
+        if (
+            restBody?.permissions &&
+            updatedAdmin?.permissions &&
+            JSON.stringify(restBody?.permissions) !==
+                JSON.stringify(updatedAdmin?.permissions)
+        ) {
+            setSubAdminCaches(); // updating the admin cache
+        }
 
         return res.status(200).json(
             successResponse({

@@ -1,3 +1,6 @@
+import Admin from '../database/models/Admin.js';
+import redis from '../lib/redis.js';
+
 export function randomOtp() {
     const randomNum = Math.random() * 9000;
     return Math.floor(1000 + randomNum);
@@ -21,3 +24,17 @@ export const waitRequest = (waitTiming) =>
             resolve('ok');
         }, waitTiming);
     });
+
+export const getAllAdminsFromCache = async () => {
+    const redisData = await redis.get('admins');
+
+    const redisParseData = JSON.parse(redisData || "[]");
+
+    if (!redisParseData?.length) {
+        const allAdmins = await Admin.find({ isActive: true });
+
+        return allAdmins;
+    } else {
+        return redisParseData;
+    }
+};

@@ -1,7 +1,7 @@
-import User from '../../database/models/User.js';
-import catchAsync from '../../utilities/catchAsync.js';
-import { hashPassword } from '../../utilities/hashPassword.js';
-import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import User from '../../../database/models/User.js';
+import catchAsync from '../../../utilities/catchAsync.js';
+import { hashPassword } from '../../../utilities/hashPassword.js';
+import { errorResponse, successResponse } from '../../../utilities/Responses.js';
 import {
     activeInActiveSchema,
     getAllUserSchema,
