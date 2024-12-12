@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { requiredBoolean } from '../../utilities/ValidationSchema';
 const addDealCategorySchema = z.object({
     name: z
         .string({
@@ -6,6 +7,7 @@ const addDealCategorySchema = z.object({
         })
         .trim()
         .min(1, { message: 'name should have at least one character' }),
+    isExchangeDeal: requiredBoolean('Is Exchange Deal'),
 });
 const DealCategoryIdSchema = z.object({
     dealCategoryId: z
@@ -19,5 +21,10 @@ const updateStatusChangeSchema = z
     .merge(DealCategoryIdSchema);
 const editDealCategorySchema =
     addDealCategorySchema.merge(DealCategoryIdSchema);
-export { addDealCategorySchema, editDealCategorySchema, DealCategoryIdSchema , updateStatusChangeSchema };
+export {
+    addDealCategorySchema,
+    editDealCategorySchema,
+    DealCategoryIdSchema,
+    updateStatusChangeSchema,
+};
 //# sourceMappingURL=schema.js.map

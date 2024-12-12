@@ -4,6 +4,7 @@ import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import {
     optionalEmailString,
     optionalPhoneNUmber,
+    requiredString,
 } from '../../utilities/ValidationSchema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { comparePassword } from '../../utilities/hashPassword.js';

@@ -10,8 +10,6 @@ import {
     updateStatusChangeSchema,
 } from './schema.js';
 
-
-
 const getAllDealCategoryController = catchAsync(async (req, res) => {
     const AllDealCategories = await DealCategory.find({}).sort({
         createdAt: -1,
@@ -37,7 +35,7 @@ const getDealCategoryByIdController = catchAsync(async (req, res) => {
 });
 const addDealCategoryController = catchAsync(async (req, res) => {
     const body = addDealCategorySchema.parse(req.body);
-    const { name } = body;
+    const { name, isExchangeDeal } = body;
     const alreadyExists = await DealCategory.findOne({
         name,
     }).lean();
@@ -50,6 +48,7 @@ const addDealCategoryController = catchAsync(async (req, res) => {
     }
     const newDealCategory = await DealCategory.create({
         name,
+        isExchangeDeal,
     });
     const DealCategoryRes = await newDealCategory.save();
     return res.status(200).json(

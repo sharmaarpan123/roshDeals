@@ -20,6 +20,8 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
+
+    referralId: requiredString('referral Id'),
     email: z
         .string({
             required_error: 'Email is required',
@@ -47,7 +49,7 @@ const schema = z.object({
 });
 const signupController = catchAsync(async (req, res) => {
     const body = schema.parse(req.body);
-    const { name, email, password, phoneNumber, fcmToken } = body;
+    const { name, email, password, phoneNumber, fcmToken, referralId } = body;
     const isAlreadyExists = await User.findOne(
         {
             $or: [{ email }, { phoneNumber }],
@@ -70,6 +72,7 @@ const signupController = catchAsync(async (req, res) => {
         email,
         password: hashedPassword,
         phoneNumber,
+        referralId,
     });
     await user.save();
     const updatedUser = await User.findOneAndUpdate(

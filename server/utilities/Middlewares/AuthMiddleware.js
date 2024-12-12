@@ -4,6 +4,13 @@ export default (role) => {
     return catchAsync(async (req, res, next) => {
         const token = req?.headers?.authorization?.replace('Bearer ', '');
         const decodedUser = verifyJwt(token);
+        if (decodedUser?.clientSideDecodedToken) {
+            return res.status(401).json({
+                success: false,
+                message: 'Aee! jada chalak samjata hai tu apne app ko',
+            });
+        }
+
         let userIsAuthenticated = true;
         if (!decodedUser?.data) {
             userIsAuthenticated = false;
@@ -12,8 +19,6 @@ export default (role) => {
         const roleIsAccepted = decodedUser?.data?.roles?.some((item) =>
             role.includes(item),
         );
-
-
 
         if (!roleIsAccepted) {
             userIsAuthenticated = false;

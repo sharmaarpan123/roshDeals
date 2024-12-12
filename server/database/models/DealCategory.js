@@ -3,6 +3,7 @@ const dealCategorySchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         isActive: { type: Boolean, default: true },
+        isExchangeDeal: { type: Boolean, default: false },
     },
     {
         timestamps: true,

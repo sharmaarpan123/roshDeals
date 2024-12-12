@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        referralId: {
+            type: String,
+        },
         phoneNumber: {
             type: String,
             required: true,

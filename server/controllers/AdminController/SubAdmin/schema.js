@@ -35,7 +35,7 @@ class subAdminValidation {
         permissions: z.array(this.permissionSchema()).optional(),
     });
     updateSubAdminSchema = z.object({
-        adminId: optionalString('Admin id'),
+        adminId: requiredString('Admin id'),
         name: optionalString('Name'),
         phoneNumber: optionalPhoneNUmber(),
         email: optionalEmailString(),

@@ -6,7 +6,7 @@ export const requiredString = (key) => {
             required_error: key + ' is required',
         })
         .trim()
-        .min(1, { message: key + 'name should have at least one character' });
+        .min(1, { message: key + ' should have at least one character' });
 };
 
 export const requiredBoolean = (key) => {
@@ -54,7 +54,7 @@ export const optionalString = () => {
 export const requiredEmailString = (key = '') => {
     return z
         .string({
-            required_error: key + 'Email is required',
+            required_error: key + ' Email is required',
         })
         .trim()
         .email('Please send a valid' + key + 'email')
