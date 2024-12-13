@@ -21,6 +21,9 @@ const adminSchema = new mongoose.Schema(
             unique: true,
             required: true,
         },
+        uniqueId: {
+            type: String,
+        },
         password: {
             type: String,
             required: true,

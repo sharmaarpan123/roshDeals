@@ -1,5 +1,6 @@
 import User from '../../database/models/User.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import { requiredString } from '../../utilities/ValidationSchema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { hashPassword } from '../../utilities/hashPassword.js';
 import { jwtGen } from '../../utilities/jwt.js';
@@ -20,7 +21,6 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
-
     referralId: requiredString('referral Id'),
     email: z
         .string({

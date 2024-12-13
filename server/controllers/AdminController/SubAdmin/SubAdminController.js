@@ -9,6 +9,12 @@ import {
 } from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import subAdminValidationSchema from './schema.js';
+import { v4 as uuidv4 } from 'uuid';
+
+function generateAlphabeticUUID() {
+    const uuid = uuidv4(); // Generates a UUID
+    return uuid.replace(/[^A-Za-z]/g, '').slice(0, 5); // Keep only alphabets and limit to 12 chars
+}
 
 class subAdminController {
     getSubAdminListWithFilter = catchAsync(async (req, res) => {
@@ -82,12 +88,33 @@ class subAdminController {
                 }),
             );
         }
+
         const hashedPassword = await hashPassword(validatedBody?.password);
+
+        let uniqueCode;
+
+        // make sure unique code is not repeated in db
+        const findingUniqueCodeDoNotRepeat = async () => {
+            uniqueCode = `${validatedBody?.name}-${generateAlphabeticUUID()}`;
+            const uniqueCodeExists = await Admin.findOne(
+                {
+                    uniqueId: uniqueCode,
+                },
+                { uniqueId },
+            );
+
+            if (uniqueCodeExists?.referralId) {
+                await findingUniqueCodeDoNotRepeat();
+            }
+        };
+
+        await findingUniqueCodeDoNotRepeat();
 
         const newSubAdmin = await Admin.create({
             roles: [ADMIN_ROLE_TYPE_ENUM.SUBADMIN],
             ...validatedBody,
             password: hashedPassword,
+            ...(uniqueId && { uniqueId: uniqueCode }),
         });
 
         const data = await newSubAdmin.save();

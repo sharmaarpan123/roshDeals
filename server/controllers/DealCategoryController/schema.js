@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { requiredBoolean } from '../../utilities/ValidationSchema';
+import { requiredBoolean } from '../../utilities/ValidationSchema.js';
 const addDealCategorySchema = z.object({
     name: z
         .string({

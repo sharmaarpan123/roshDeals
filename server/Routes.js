@@ -35,6 +35,7 @@ export default (app) => {
         AuthMiddleware([
             ADMIN_ROLE_TYPE_ENUM.ADMIN,
             ADMIN_ROLE_TYPE_ENUM.SUBADMIN,
+            // ADMIN_ROLE_TYPE_ENUM.SUPERADMIN,
         ]),
         AdminRouter,
     );
