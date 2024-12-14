@@ -2,27 +2,28 @@ import express from 'express';
 import AdminModuleController from '../controllers/AdminController/AdminModule/AdminModuleController.js';
 import { dashboardController } from '../controllers/AdminController/dashBoardController.js';
 import subAdminController from '../controllers/AdminController/SubAdmin/SubAdminController.js';
-import brandController from '../controllers/BrandConroller/brandController.js';
-import dealCategoryController from '../controllers/DealCategoryController/dealCategoryController.js';
+import brandController from '../controllers/AdminController/BrandConroller/brandController.js';
+import dealCategoryController from '../controllers/AdminController/DealCategoryController/dealCategoryController.js';
 import {
     addDealController,
     allDeals,
     bulkAddDealController,
+    dealDetails,
     dealDetailsWithFilters,
     dealPaymentStatusChangeController,
     dealStatusChangeController,
     editDealController,
     getDealsWithBrandId,
-} from '../controllers/DealController/dealController.js';
-import { sendNotificationController } from '../controllers/NotificationController/NotificationCotroller.js';
+} from '../controllers/AdminController/DealController/dealController.js';
+import { sendNotificationController } from '../controllers/AdminController/NotificationController/NotificationCotroller.js';
 import {
     acceptRejectOrder,
     bulkPaymentStatusUpdate,
     getAllOrders,
     paymentStatusUpdate,
-} from '../controllers/Order/OrderController.js';
-import platFormController from '../controllers/PlatFormController/platFormController.js';
-import PosterController from '../controllers/PosterController/PosterController.js';
+} from '../controllers/AdminController/Order/OrderController.js';
+import platFormController from '../controllers/AdminController/PlatFormController/platFormController.js';
+import PosterController from '../controllers/AdminController/PosterController/PosterController.js';
 import {
     activeInActiveUserController,
     getAllUsersController,
@@ -367,6 +368,15 @@ AdminRouter.get(
         key: permissionsLevelKey.canViewList,
     }),
     allDeals,
+);
+
+AdminRouter.get(
+    '/deal/detail/:dealId',
+    AdminAccessMiddleware({
+        uniqueSlug: 'deal',
+        key: permissionsLevelKey.canView,
+    }),
+    dealDetails,
 );
 
 AdminRouter.get(

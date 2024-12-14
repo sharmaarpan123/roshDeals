@@ -56,6 +56,7 @@ const dealSchema = new mongoose.Schema(
         productCategories: {
             type: [String],
         },
+        exchangeDealProducts: { type: [String] },
         postUrl: {
             type: String,
             required: true,

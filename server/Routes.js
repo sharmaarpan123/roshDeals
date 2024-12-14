@@ -1,14 +1,14 @@
 import fileUpload from './controllers/fileUpload.js';
-import activeDealByBrandAndCategory from './controllers/getDeals/activeDealByBrandAndCategory.js';
-import GetHomeResult from './controllers/GetHomeResult.js';
+// import activeDealByBrandAndCategory from './controllers/UserContorller/getDeals/activeDealByBrandAndCategory.js';
+// import GetHomeResult from './controllers/UserContorller/GetHomeResult.js';
 import './init-aliases.js';
 import AdminRouter from './routes/AdminRouter.js';
 import AuthRouter from './routes/AuthRouter.js';
-import BrandRouter from './routes/BrandRouter.js';
-import DealCategoryRouter from './routes/DealCategoryRouter.js';
-import DealRouter from './routes/DealRouter.js';
-import OrderRouter from './routes/OrderRouter.js';
-import PlatFromRouter from './routes/PlatFromRouter.js';
+// import BrandRouter from './routes/BrandRouter.js';
+// import DealCategoryRouter from './routes/DealCategoryRouter.js';
+// import DealRouter from './routes/DealRouter.js';
+// import OrderRouter from './routes/OrderRouter.js';
+// import PlatFromRouter from './routes/PlatFromRouter.js';
 import UserRouter from './routes/UserRouter.js';
 import catchErrorHandler from './utilities/catchErrorHandler.js';
 import {
@@ -39,18 +39,18 @@ export default (app) => {
         ]),
         AdminRouter,
     );
-    app.use('/deal', DealRouter);
-    app.use('/dealCategory', DealCategoryRouter);
-    app.use('/platForm', PlatFromRouter);
-    app.use('/brand', BrandRouter);
-    app.get('/getHomeData', GetHomeResult);
-    app.post(
-        '/getDealsByIds',
-        AuthMiddleware([ROLE_TYPE_ENUM.USER]),
-        activeDealByBrandAndCategory,
-    );
+    // app.use('/deal', DealRouter);
+    // app.use('/dealCategory', DealCategoryRouter);
+    // app.use('/platForm', PlatFromRouter);
+    // app.use('/brand', BrandRouter);
+    // app.get('/getHomeData', GetHomeResult);
+    // app.post(
+    //     '/getDealsByIds',
+    //     AuthMiddleware([ROLE_TYPE_ENUM.USER]),
+    //     activeDealByBrandAndCategory,
+    // );
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
-    app.use('/order', AuthMiddleware([ROLE_TYPE_ENUM.USER]), OrderRouter);
+    // app.use('/order', AuthMiddleware([ROLE_TYPE_ENUM.USER]), OrderRouter);
     app.use(
         '/fileUpload',
         AuthMiddleware(Object.values(ROLE_TYPE_ENUM).map((i) => i)),
