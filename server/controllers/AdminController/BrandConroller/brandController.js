@@ -7,8 +7,7 @@ import {
 import catchAsync from '../../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../../utilities/Responses.js';
 import Brand from '../../../database/models/Brand.js';
-import { filterSchema } from '../../../utilities/ValidationSchema.js';
-import Deal from '../../../database/models/Deal.js';
+
 const geBrandByIdController = catchAsync(async (req, res) => {
     const { brandId } = brandIdSchema.parse(req.params);
     const brandDetails = await Brand.findOne({
@@ -21,35 +20,6 @@ const geBrandByIdController = catchAsync(async (req, res) => {
         }),
     );
 });
-// const getAllBrandController = catchAsync(async (req, res) => {
-//     const { offset, limit, search, status } = filterSchema.parse(req.body);
- 
-//     let AllDAta = Brand.find({
-//         ...(status && { isActive: Boolean(+status) }),
-//         ...(search && { name: { $regex: search, $options: 'i' } }),
-//     }).sort({ createdAt: -1 });
-
-//     if (typeof offset !== 'undefined') {
-//         AllDAta = AllDAta.skip(offset);
-//     }
-
-//     if (typeof limit !== 'undefined') {
-//         AllDAta = AllDAta.limit(limit);
-//     }
-
-//     const total = Brand.find({
-//         ...(status && { isActive: Boolean(+status) }),
-//         ...(search && { name: { $regex: search, $options: 'i' } }),
-//     }).countDocuments();
-//     const data = await Promise.all([AllDAta, total]);
-//     return res.status(200).json(
-//         successResponse({
-//             message: 'All Brands',
-//             data: data[0],
-//             total: data[1],
-//         }),
-//     );
-// });
 const addBrandController = catchAsync(async (req, res) => {
     const body = addSchema.parse(req.body);
     const { name, image } = body;
@@ -137,62 +107,11 @@ const updateStatusController = catchAsync(async (req, res) => {
         );
     }
 });
-// const getActiveBrandController = catchAsync(async (req, res) => {
-//     const { offset, limit, search } = filterSchema.parse(req.body);
-//     const brandData = await Deal.aggregate([
-//         {
-//             $match: {
-//                 isActive: true,
-//                 isSlotCompleted: false,
-//             },
-//         },
-//         {
-//             $lookup: {
-//                 from: 'brands', // Collection name in your database
-//                 localField: 'brand',
-//                 foreignField: '_id',
-//                 as: 'brandData',
-//             },
-//         },
-//         {
-//             $match: {
-//                 'brandData.name': { $regex: search || '', $options: 'i' },
-//             },
-//         },
-//         {
-//             $unwind: '$brandData',
-//         },
-//         {
-//             $group: {
-//                 _id: '$brandData._id', // Group by the unique identifier of the brand document
-//                 brandData: { $first: '$brandData' }, // Keep the first document in each group
-//             },
-//         },
-//         {
-//             $replaceRoot: {
-//                 newRoot: '$brandData',
-//             },
-//         },
-//         {
-//             $skip: offset || 0,
-//         },
-//         {
-//             $limit: limit || 10,
-//         },
-//     ]);
-//     return res.status(200).json(
-//         successResponse({
-//             message: 'All active Brands',
-//             data: brandData,
-//         }),
-//     );
-// });
+
 export default {
     addBrandController,
     editBrandController,
     updateStatusController,
-    // getAllBrandController,
-    // getActiveBrandController,
     geBrandByIdController,
 };
-//# sourceMappingURL=brandController.js.map
+

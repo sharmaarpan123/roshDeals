@@ -2,7 +2,7 @@ import {
     addPaymentDetails,
     editPaymentDetails,
     getPaymentDetails,
-} from '../controllers/paymentDeails/paymentDeails.js';
+} from '../controllers/UserContorller/paymentDeails/paymentDeails.js';
 import PosterController from '../controllers/UserContorller/PosterController/PosterController.js';
 import express from 'express';
 import UserController from '../controllers/UserContorller/UserController.js';

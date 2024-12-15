@@ -6,17 +6,11 @@ import {
     updateStatusChangeSchema,
 } from './schema.js';
 import catchAsync from '../../../utilities/catchAsync.js';
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
+import {
+    errorResponse,
+    successResponse,
+} from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
-// const getAllPlatFormController = catchAsync(async (req, res) => {
-//     const AllPlatForms = await PlatForm.find().sort({ createdAt: -1 });
-//     return res.status(200).json(
-//         successResponse({
-//             message: 'All PlatForms',
-//             data: AllPlatForms,
-//         }),
-//     );
-// });
 
 const getAllPlatFormWithFiltersController = catchAsync(async (req, res) => {
     const { limit, offset, search, status } = filterSchema.parse(req.query);
@@ -147,7 +141,6 @@ export default {
     addPlatFormController,
     editPlatFormController,
     platFormStatusChangeController,
-    // getAllPlatFormController,
     getPlatFormById,
     getAllPlatFormWithFiltersController,
 };

@@ -91,8 +91,8 @@ const addDealSchema = z
             })
             .min(1, { message: 'unique Identifier  is required' }),
         imageUrl: z.string().optional(),
-        exchangeDealProducts: z.array([z.string()]).optional(),
         isExchangeDeal: z.boolean().optional(),
+        exchangeDealProducts: z.array(z.string()).optional(),
     })
     .refine(
         (data) => {
@@ -108,7 +108,7 @@ const addDealSchema = z
         {
             message:
                 'If your deal is exchange deal , then please provide the exchange deals products fields',
-            path: 'exchangeDealProducts',
+            path: ['exchangeDealProducts'],
         },
     );
 
@@ -188,7 +188,7 @@ const editDealSchema = z
             .optional(),
         uniqueIdentifier: z.string().optional(),
         imageUrl: z.string().optional(),
-        exchangeDealProducts: z.array([z.string()]).optional(),
+        exchangeDealProducts: z.array(z.string()).optional(),
         isExchangeDeal: z.boolean().optional(),
     })
     .merge(getDeal)
@@ -206,7 +206,7 @@ const editDealSchema = z
         {
             message:
                 'If your deal is exchange deal , then please provide the exchange deals products fields',
-            path: 'exchangeDealProducts',
+            path: ['exchangeDealProducts'],
         },
     );
 const getDealsWithBrandIdSchema = z.object({
