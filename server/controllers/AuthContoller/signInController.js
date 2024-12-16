@@ -1,3 +1,4 @@
+import Admin from '../../database/models/Admin.js';
 import User from '../../database/models/User.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import catchAsync from '../../utilities/catchAsync.js';
@@ -64,6 +65,15 @@ const signInController = catchAsync(async (req, res) => {
             errorResponse({
                 message:
                     'Your account has been deactivated by the admin ,  please contact your admin',
+            }),
+        );
+    }
+    const adminCheck = await Admin.findOne({ uniqueId: currentAdminReference });
+
+    if (!adminCheck?._id || !adminCheck.isActive) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Your Reference Code is In valid',
             }),
         );
     }
