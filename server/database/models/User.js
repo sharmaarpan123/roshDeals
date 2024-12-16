@@ -15,9 +15,6 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        referralId: {
-            type: String,
-        },
         phoneNumber: {
             type: String,
             required: true,
@@ -25,6 +22,14 @@ const userSchema = new mongoose.Schema(
         otp: {
             type: String,
             default: '',
+        },
+        currentAdminReference: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+        },
+        historyAdminReferences: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: 'Admin',
         },
         roles: {
             type: [String],

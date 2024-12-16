@@ -1,5 +1,8 @@
 import Deal from '../../../database/models/Deal.js';
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
+import {
+    errorResponse,
+    successResponse,
+} from '../../../utilities/Responses.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import {
     addDealSchema,
@@ -134,7 +137,9 @@ export const addDealController = catchAsync(async (req, res) => {
         adminCommission,
         uniqueIdentifier,
         imageUrl,
+        refundDays,
         exchangeDealProducts,
+        finalCashBackForUser,
     } = body;
     const newDeal = await Deal.create({
         actualPrice,
@@ -150,7 +155,9 @@ export const addDealController = catchAsync(async (req, res) => {
         adminCommission,
         uniqueIdentifier,
         imageUrl,
+        refundDays,
         exchangeDealProducts,
+        finalCashBackForUser,
         isActive: isActive === false ? false : true, // we want by default  active true  so if
         //on add time isActive is  false it will false other wise it will be all time true
         // we can edit on edit api

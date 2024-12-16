@@ -76,6 +76,10 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        finalCashBackForUser: {
+            type: String,
+            required: true,
+        },
         adminCommission: {
             type: String,
             required: true,
@@ -102,6 +106,10 @@ const dealSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true,
+        },
+        refundDays: {
+            type: String,
+            required: true,
         },
     },
     {

@@ -85,6 +85,18 @@ const addDealSchema = z
             invalid_type_error: 'slot alloted should be numeric',
             required_error: 'slot alloted is required',
         }),
+        finalCashBackForUser: z
+            .string({
+                invalid_type_error: 'invalid Final Cash Back For User',
+                required_error: 'Final Cash Back For User is required',
+            })
+            .min(1, { message: 'Final Cash Back For User is required' }),
+        refundDays: z
+            .string({
+                invalid_type_error: 'invalid refundDays',
+                required_error: 'refundDays is required',
+            })
+            .min(1, { message: 'Slot Alloted is required' }),
         uniqueIdentifier: z
             .string({
                 required_error: 'unique Identifier is required',
@@ -92,6 +104,10 @@ const addDealSchema = z
             .min(1, { message: 'unique Identifier  is required' }),
         imageUrl: z.string().optional(),
         isExchangeDeal: z.boolean().optional(),
+        refundDays: z.number({
+            required_error: 'Please add refundDays field',
+            invalid_type_error: 'refundDays field  should be numeric',
+        }),
         exchangeDealProducts: z.array(z.string()).optional(),
     })
     .refine(
