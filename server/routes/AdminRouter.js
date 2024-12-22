@@ -32,12 +32,13 @@ import {
 } from '../controllers/AdminController/userController/Usercontroller.js';
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
-import AdminDealCategoryController from '../controllers/AdminController/dealCategory/DealCategoryController.js';
-import adminBrandController from '../controllers/AdminController/Brand/BrandController.js';
 import chatController from '../controllers/AdminController/ChatController/ChatController.js';
 const AdminRouter = express.Router();
 
 // dashboard
+
+const canAdminAccess = true;
+const canSubAdminAccess = true;
 
 AdminRouter.post(
     '/dashboard',
@@ -55,6 +56,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canAdd,
+        canAdminAccess,
     }),
     subAdminController.addSubAdminController,
 );
@@ -63,6 +65,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
     }),
     subAdminController.getSubAdminListWithFilter,
 );
@@ -71,6 +74,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
     }),
     subAdminController.getSubAdminById,
 );
@@ -79,6 +83,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
     }),
     subAdminController.updateSubAdminController,
 );
@@ -167,6 +172,8 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'platForm',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     platFormController.getAllPlatFormWithFiltersController,
 );
@@ -202,7 +209,7 @@ AdminRouter.get(
         uniqueSlug: 'dealCategory',
         key: permissionsLevelKey.canViewList,
     }),
-    AdminDealCategoryController.getAllDealCategoryWithFilters,
+    dealCategoryController.getAllDealCategoryWithFilters,
 );
 
 AdminRouter.post(
@@ -245,7 +252,7 @@ AdminRouter.post(
         uniqueSlug: 'brand',
         key: permissionsLevelKey.canViewList,
     }),
-    adminBrandController.getAllBrandWithCFilters,
+    brandController.getAllBrandWithCFilters,
 );
 AdminRouter.post(
     '/brand/add',

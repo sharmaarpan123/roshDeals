@@ -15,11 +15,11 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
-    currentAdminReference: z
-        .string({
-            required_error: 'Current  Reference Code is required',
-        })
-        .min(1, { message: 'Current Reference Code is required' }),
+    // currentAdminReference: z
+    //     .string({
+    //         required_error: 'Current  Reference Code is required',
+    //     })
+    //     .min(1, { message: 'Current Reference Code is required' }),
     password: z
         .string({
             required_error: 'Password is required',
@@ -40,7 +40,10 @@ const schema = z.object({
 });
 const signInController = catchAsync(async (req, res) => {
     schema.parse(req.body);
-    const { password, phoneNumber, fcmToken, currentAdminReference } = req.body;
+    const { password, phoneNumber, fcmToken
+         
+        // ,currentAdminReference
+     } = req.body;
     const user = await User.findOne({
         phoneNumber,
     });
@@ -68,15 +71,15 @@ const signInController = catchAsync(async (req, res) => {
             }),
         );
     }
-    const adminCheck = await Admin.findOne({ uniqueId: currentAdminReference });
+    // const adminCheck = await Admin.findOne({ uniqueId: currentAdminReference });
 
-    if (!adminCheck?._id || !adminCheck.isActive) {
-        return res.status(400).json(
-            errorResponse({
-                message: 'Your Reference Code is In valid',
-            }),
-        );
-    }
+    // if (!adminCheck?._id || !adminCheck.isActive) {
+    //     return res.status(400).json(
+    //         errorResponse({
+    //             message: 'Your Reference Code is In valid',
+    //         }),
+    //     );
+    // }
 
     const updatedUser = await User.findOneAndUpdate(
         {
@@ -87,9 +90,9 @@ const signInController = catchAsync(async (req, res) => {
                 fcmToken: fcmToken,
                 currentAdminReference: currentAdminReference,
             },
-            $addToSet: {
-                historyAdminReferences: currentAdminReference, // Adds the value only if it doesn't already exist
-            },
+            // $addToSet: {
+            //     historyAdminReferences: currentAdminReference, // Adds the value only if it doesn't already exist
+            // },
         },
         {
             new: true,

@@ -1,5 +1,10 @@
 export let ROLE_TYPE_ENUM = { ADMIN: 'admin', USER: 'user' };
-export let ADMIN_ROLE_TYPE_ENUM = { ADMIN: 'admin', SUBADMIN: 'subadmin' , SUPERADMIN: "superadmin" };
+export let ADMIN_ROLE_TYPE_ENUM = {
+    SUPERADMIN: 'superAdmin',
+    SUPERSUBADMIN: 'superSubAdmin',
+    ADMIN: 'admin',
+    SUBADMIN: 'subadmin',
+};
 
 export let POSTER_ENUM = {
     REDIRECT: 'redirect',

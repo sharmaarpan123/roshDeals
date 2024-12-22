@@ -7,6 +7,7 @@ import {
 import catchAsync from '../../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../../utilities/Responses.js';
 import Brand from '../../../database/models/Brand.js';
+import { filterSchema } from '../../../utilities/ValidationSchema.js';
 
 const geBrandByIdController = catchAsync(async (req, res) => {
     const { brandId } = brandIdSchema.parse(req.params);
@@ -107,11 +108,41 @@ const updateStatusController = catchAsync(async (req, res) => {
         );
     }
 });
+const getAllBrandWithCFilters = catchAsync(async (req, res) => {
+    const { offset, limit, search, status } = filterSchema.parse(req.body);
+
+    let AllDAta = Brand.find({
+        ...(status && { isActive: Boolean(+status) }),
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+    }).sort({ createdAt: -1 });
+
+    if (typeof offset !== 'undefined') {
+        AllDAta = AllDAta.skip(offset);
+    }
+
+    if (typeof limit !== 'undefined') {
+        AllDAta = AllDAta.limit(limit);
+    }
+
+    const total = Brand.find({
+        ...(status && { isActive: Boolean(+status) }),
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+    }).countDocuments();
+    const data = await Promise.all([AllDAta, total]);
+    return res.status(200).json(
+        successResponse({
+            message: 'All Brands',
+            data: data[0],
+            total: data[1],
+        }),
+    );
+});
 
 export default {
     addBrandController,
     editBrandController,
     updateStatusController,
     geBrandByIdController,
+    getAllBrandWithCFilters
 };
 

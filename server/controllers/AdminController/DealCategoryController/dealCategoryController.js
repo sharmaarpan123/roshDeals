@@ -4,6 +4,7 @@ import {
     errorResponse,
     successResponse,
 } from '../../../utilities/Responses.js';
+import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import {
     addDealCategorySchema,
     DealCategoryIdSchema,
@@ -98,11 +99,40 @@ const DealCategoryUpdateStatusController = catchAsync(async (req, res) => {
         );
     }
 });
+const getAllDealCategoryWithFilters = catchAsync(async (req, res) => {
+    const { limit, offset, search, status } = filterSchema.parse(req.query);
+
+    const AllDealCategories = DealCategory.find({
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+        ...(status && { isActive: Boolean(+status) }),
+    })
+        .sort({
+            createdAt: -1,
+        })
+        .skip(offset || 0)
+        .limit(limit || 10);
+
+    const total = DealCategory.find({
+        ...(search && { name: { $regex: search, $options: 'i' } }),
+        ...(status && { isActive: Boolean(+status) }),
+    }).countDocuments();
+
+    const data = await Promise.all([AllDealCategories, total]);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'All DealCategory',
+            data: data[0],
+            total: data[1],
+        }),
+    );
+});
 
 export default {
     addDealCategoryController,
     editDealCategoryController,
     getDealCategoryByIdController,
     DealCategoryUpdateStatusController,
+    getAllDealCategoryWithFilters
 };
 //# sourceMappingURL=dealCategoryController.js.map

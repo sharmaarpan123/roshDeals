@@ -65,9 +65,10 @@ class subAdminController {
     });
 
     addSubAdminController = catchAsync(async (req, res) => {
-        const validatedBody = subAdminValidationSchema.addSubAdminSchema.parse(
-            req.body,
-        );
+        const validatedBody = subAdminValidationSchema.addSubAdminSchema.parse({
+            ...req.body,
+            roles: req?.user?.roles,
+        });
 
         const isAlreadyExists = await Admin.findOne(
             {

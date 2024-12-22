@@ -9,6 +9,7 @@ import {
     requiredPhoneNumber,
     requiredString,
 } from '../../../utilities/ValidationSchema.js';
+import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 
 class subAdminValidation {
     permissionSchema = () => {
@@ -26,14 +27,29 @@ class subAdminValidation {
         adminId: requiredString('Admin Id'),
     });
 
-    addSubAdminSchema = z.object({
-        name: requiredString('Name'),
-        phoneNumber: requiredPhoneNumber(),
-        email: requiredEmailString(),
-        password: requiredPassword(),
-        fcmToken: optionalString(),
-        permissions: z.array(this.permissionSchema()).optional(),
-    });
+    addSubAdminSchema = z
+        .object({
+            name: requiredString('Name'),
+            phoneNumber: requiredPhoneNumber(),
+            email: requiredEmailString(),
+            password: requiredPassword(),
+            fcmToken: optionalString(),
+            permissions: z.array(this.permissionSchema()).optional(),
+            apiAccessorRoles: z.array(),
+            roles: z.nativeEnum(ADMIN_ROLE_TYPE_ENUM, {
+                invalid_type_error: 'inValid roles type',
+            }),
+        })
+        .refine((data) => {
+            if (
+                !data?.apiAccessorRoles?.includes(
+                    ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN,
+                ) &&
+                data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN) || 
+                data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
+            ) {
+            }
+        });
     updateSubAdminSchema = z.object({
         adminId: requiredString('Admin id'),
         name: optionalString('Name'),
