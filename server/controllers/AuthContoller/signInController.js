@@ -88,7 +88,7 @@ const signInController = catchAsync(async (req, res) => {
         {
             $set: {
                 fcmToken: fcmToken,
-                currentAdminReference: currentAdminReference,
+                // currentAdminReference: currentAdminReference,
             },
             // $addToSet: {
             //     historyAdminReferences: currentAdminReference, // Adds the value only if it doesn't already exist
