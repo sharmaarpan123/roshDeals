@@ -10,6 +10,7 @@ import mongoInit from './database/index.js';
 import './init-aliases.js';
 import Routes from './Routes.js';
 import getInitialCacheValues from './utilities/getInitialCacheValues.js';
+import { fileURLToPath } from 'url';
 
 config();
 
@@ -17,6 +18,7 @@ const init = async () => {
     const PORT = process.env.PORT;
     const app = express();
     const server = http.createServer(app);
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
     app.use(cors());
     app.use(logger('dev'));
     app.use(express.json());
