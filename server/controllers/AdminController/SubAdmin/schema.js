@@ -40,16 +40,37 @@ class subAdminValidation {
                 invalid_type_error: 'inValid roles type',
             }),
         })
-        .refine((data) => {
-            if (
-                !data?.apiAccessorRoles?.includes(
-                    ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN,
-                ) &&
-                data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN) || 
-                data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
-            ) {
-            }
-        });
+        .refine(
+            (data) => {
+                // super sub admin can't create super admin
+                if (
+                    data?.apiAccessorRoles?.includes(
+                        ADMIN_ROLE_TYPE_ENUM?.SUPERSUBADMIN,
+                    ) &&
+                    data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
+                ) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: "super sub admin can't create super admin",
+                path: ['roles'],
+            },
+        )
+        .refine(
+            (data) => {
+                if (
+                    !data?.apiAccessorRoles?.includes(
+                        ADMIN_ROLE_TYPE_ENUM?.SUPERSUBADMIN,
+                    ) &&
+                    data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
+                ) {
+                    return;
+                }
+            },
+            { message: "super sub admin can't create super admin" },
+        );
     updateSubAdminSchema = z.object({
         adminId: requiredString('Admin id'),
         name: optionalString('Name'),
