@@ -24,8 +24,10 @@ const init = async () => {
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
-    app.use('/*', express.static(path.join('server/public')));
-    // app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
+    // app.use('/*', express.static(path.join('server/public')));
+    app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
+    app.use('/images', express.static(path.join(process.cwd(), 'server/public', 'images')));
+
 
     await mongoInit();
     getInitialCacheValues();
