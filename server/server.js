@@ -11,6 +11,7 @@ import './init-aliases.js';
 import Routes from './Routes.js';
 import getInitialCacheValues from './utilities/getInitialCacheValues.js';
 import { fileURLToPath } from 'url';
+import { readFile } from 'fs';
 
 config();
 
@@ -23,8 +24,24 @@ const init = async () => {
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
-    app.use(express.static(path.join('server/public')));
-    app.use('/.well-known', express.static(path.join(process.cwd(), 'public', 'public/.well-known')));
+    // app.use(express.static(path.join('server/public')));
+    // app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
+
+    app.get('/.well-known/assetlinks.json', async (req, res) => {
+        const publicPath = path.join(process.cwd(), 'server/public/.well-known/assetlinks.json');
+
+        console.log('found path', publicPath);
+
+        readFile(publicPath, (err, file) => {
+            if (err) {
+                console.error(err);
+                res.send(JSON.stringify(err)).status(500);
+                return;
+            }
+
+            res.json(JSON.parse(file)).status(200);
+        })
+    })
 
     await mongoInit();
     getInitialCacheValues();
