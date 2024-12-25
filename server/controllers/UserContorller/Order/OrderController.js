@@ -179,7 +179,7 @@ export const OrderList = catchAsync(async (req, res) => {
     const orders = await Order.find({ userId: req.user._id })
         .populate({
             path: 'dealId',
-            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus',
+            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
             populate: [
                 { path: 'brand', select: 'name image' },
                 { path: 'dealCategory', select: 'name' },
