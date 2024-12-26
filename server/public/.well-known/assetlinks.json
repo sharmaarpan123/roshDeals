@@ -1,0 +1,12 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.RoashDeals",
+    "sha256_cert_fingerprints":
+    [
+      "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+      "E5:25:63:F5:D2:6C:58:BB:4E:4D:54:32:5C:3E:E8:BF:33:5D:F4:85:F7:5D:DC:C3:F3:0E:64:7F:0A:4D:19:06"
+  ]
+  }
+}]

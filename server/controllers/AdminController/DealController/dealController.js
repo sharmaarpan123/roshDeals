@@ -227,6 +227,8 @@ export const editDealController = catchAsync(async (req, res) => {
         uniqueIdentifier,
         imageUrl,
         exchangeDealProducts,
+        finalCashBackForUser,
+        refundDays
     } = body;
     // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
     const inValidMongoIdMessage = await validatingMongoObjectIds({
@@ -260,6 +262,8 @@ export const editDealController = catchAsync(async (req, res) => {
             uniqueIdentifier,
             imageUrl,
             exchangeDealProducts,
+            finalCashBackForUser,
+            refundDays,
 
             ...(isActive && { isActive }),
         },

@@ -10,6 +10,8 @@ import mongoInit from './database/index.js';
 import './init-aliases.js';
 import Routes from './Routes.js';
 import getInitialCacheValues from './utilities/getInitialCacheValues.js';
+import { fileURLToPath } from 'url';
+import { readFile } from 'fs';
 
 config();
 
@@ -17,11 +19,16 @@ const init = async () => {
     const PORT = process.env.PORT;
     const app = express();
     const server = http.createServer(app);
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
     app.use(cors());
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false, limit: '4mb' }));
-    app.use(express.static(path.join('server/public')));
+    // app.use('/*', express.static(path.join('server/public')));
+    app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
+    app.use('/images', express.static(path.join(process.cwd(), 'server/public', 'images')));
+
+
     await mongoInit();
     getInitialCacheValues();
 
