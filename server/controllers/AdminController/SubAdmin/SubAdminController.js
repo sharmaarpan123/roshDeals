@@ -36,7 +36,7 @@ class subAdminController {
         let AllDAta = Admin.find({
             ...(search && { name: { $regex: search, $options: 'i' } }),
             ...(isAdminAccessingApi && {
-                // if admin access this api show only subAdmin link to him
+                // if admin access this api show only subAdmin linked to him
                 _id: { $in: [subAdminList?.map((i) => i.subAdminId)] },
             }),
         })
@@ -53,6 +53,10 @@ class subAdminController {
 
         const total = Admin.find({
             ...(search && { name: { $regex: search, $options: 'i' } }),
+            ...(isAdminAccessingApi && {
+                // if admin access this api show only subAdmin linked to him
+                _id: { $in: [subAdminList?.map((i) => i.subAdminId)] },
+            }),
         }).countDocuments();
         const data = await Promise.all([AllDAta, total]);
         return res.status(200).json(
