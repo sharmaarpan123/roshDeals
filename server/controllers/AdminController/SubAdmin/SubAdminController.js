@@ -1,4 +1,5 @@
 import Admin from '../../../database/models/Admin.js';
+import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 import { setSubAdminCaches } from '../../../utilities/getInitialCacheValues.js';
@@ -20,8 +21,24 @@ class subAdminController {
     getSubAdminListWithFilter = catchAsync(async (req, res) => {
         const { offset, limit, search } = filterSchema.parse(req.query);
 
+        const isAdminAccessingApi = req?.user?.roles?.includes(
+            ADMIN_ROLE_TYPE_ENUM.ADMIN,
+        );
+
+        let subAdminList;
+
+        if (isAdminAccessingApi) {
+            subAdminList = await AdminSubAdminLinker.find({
+                adminId: req?.user?._id,
+            });
+        }
+
         let AllDAta = Admin.find({
             ...(search && { name: { $regex: search, $options: 'i' } }),
+            ...(isAdminAccessingApi && {
+                // if admin access this api show only subAdmin link to him
+                _id: { $in: [subAdminList?.map((i) => i.subAdminId)] },
+            }),
         })
             .populate('permissions.moduleId')
             .sort({ createdAt: -1 });
@@ -65,10 +82,15 @@ class subAdminController {
     });
 
     addSubAdminController = catchAsync(async (req, res) => {
-        const validatedBody = subAdminValidationSchema.addSubAdminSchema.parse({
+        const body = {
             ...req.body,
-            roles: req?.user?.roles,
-        });
+            apiAccessorRoles: req?.user?.roles,
+        };
+
+        console.log(body, 'body');
+
+        const validatedBody =
+            subAdminValidationSchema.addSubAdminSchema.parse(body);
 
         const isAlreadyExists = await Admin.findOne(
             {
@@ -101,38 +123,84 @@ class subAdminController {
                 {
                     uniqueId: uniqueCode,
                 },
-                { uniqueId },
+                { uniqueId: 1, _id: 0 },
             );
 
-            if (uniqueCodeExists?.referralId) {
+            if (uniqueCodeExists?.uniqueId) {
                 await findingUniqueCodeDoNotRepeat();
             }
         };
 
         await findingUniqueCodeDoNotRepeat();
 
-        const newSubAdmin = await Admin.create({
-            roles: [ADMIN_ROLE_TYPE_ENUM.SUBADMIN],
+        const newSubAdmin = new Admin({
             ...validatedBody,
             password: hashedPassword,
-            ...(uniqueId && { uniqueId: uniqueCode }),
+            ...(uniqueCode && { uniqueId: uniqueCode }),
         });
 
-        const data = await newSubAdmin.save();
+        await newSubAdmin.save();
+
+        if (
+            validatedBody?.roles?.includes(ADMIN_ROLE_TYPE_ENUM?.SUBADMIN) &&
+            req?.user?.roles?.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN)
+        ) {
+            // if admin is creating subAdmin then make the entries in the admin linkers
+            const adminSubAdminLink = new AdminSubAdminLinker({
+                subAdminId: newSubAdmin?._id,
+                adminId: req?.user?._id,
+            });
+
+            await adminSubAdminLink.save();
+        }
 
         setSubAdminCaches(); // updating the admin cache
 
         return res.status(200).json(
             successResponse({
-                data,
-                message: 'sub admin successfully created',
+                data: newSubAdmin,
+                message: 'Successfully created',
             }),
         );
     });
 
     updateSubAdminController = catchAsync(async (req, res) => {
         const { adminId, ...restBody } =
-            subAdminValidationSchema.updateSubAdminSchema.parse(req.body);
+            subAdminValidationSchema.updateSubAdminSchema.parse({
+                ...req.body,
+                apiAccessorRoles: req?.user?.roles,
+            });
+
+        const isAlreadyExists = await Admin.findOne(
+            {
+                $or: [
+                    { email: restBody?.email },
+                    { phoneNumber: restBody?.phoneNumber },
+                ],
+            },
+            {
+                phoneNumber: 1,
+                email: 1,
+            },
+        );
+
+        if (
+            isAlreadyExists &&
+            ((isAlreadyExists?.email === restBody?.email &&
+                isAlreadyExists._id.toString() !== adminId) ||
+                (isAlreadyExists?.phoneNumber === restBody?.phoneNumber &&
+                    isAlreadyExists._id.toString() !== adminId))
+        ) {
+            return res.status(400).json(
+                errorResponse({
+                    message: `${(isAlreadyExists?.email === restBody?.email && 'This Email ') || 'This Phone Number '} is already exists`,
+                }),
+            );
+        }
+
+        if (restBody?.password) {
+            restBody.password = await hashPassword(restBody?.password);
+        }
 
         const updatedAdmin = await Admin.findOneAndUpdate(
             {
@@ -156,7 +224,7 @@ class subAdminController {
         return res.status(200).json(
             successResponse({
                 data: updatedAdmin,
-                message: 'sub admin successfully created',
+                message: 'Successfully updated',
             }),
         );
     });

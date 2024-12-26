@@ -36,7 +36,7 @@ export const optionalPhoneNUmber = (key = '') =>
         })
         .optional();
 
-export const requiredPhoneNumber = (key) =>
+export const requiredPhoneNumber = (key = '') =>
     z
         .string({
             required_error: key + ' Phone Number is required',
@@ -82,6 +82,33 @@ export const requiredPassword = () =>
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
                     data,
                 ),
+            {
+                message:
+                    'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
+            },
+        );
+
+export const optionalPassword = () =>
+    z
+        .string()
+        .optional()
+        .refine(
+            (data) => {
+                if (!data) {
+                    return true;
+                }
+                if (
+                    data &&
+                    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
+                        data,
+                    )
+                ) {
+                    return false;
+                }
+
+                return true;
+            },
+
             {
                 message:
                     'Password Must have Lowercase, Uppercase, Number, Symbol or special char',

@@ -8,8 +8,6 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
 
         const admins = await getAllAdminsFromCache();
 
-
-
         const admin = admins?.find((item) => item?._id === adminId);
 
         const sendNotPermittedRes = () => {
@@ -19,10 +17,8 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
                 }),
             );
         };
-        console.log('log' , admin)
 
         if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERADMIN)) {
-            console.log('log')
             // where the king enters
             return next();
         } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERSUBADMIN)) {

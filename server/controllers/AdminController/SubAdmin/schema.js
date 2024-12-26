@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
     optionalEmailString,
+    optionalPassword,
     optionalPhoneNUmber,
     optionalString,
     requiredBoolean,
@@ -10,6 +11,34 @@ import {
     requiredString,
 } from '../../../utilities/ValidationSchema.js';
 import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
+
+const adminRoleCreateRefineFunction =
+    ({ editMode = false }) =>
+    (data) => {
+        if (editMode && !data?.roles) {
+            return true;
+        } else if (
+            data?.apiAccessorRoles?.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
+        ) {
+            // super admin can add every role
+            return true;
+        } else if (
+            data?.apiAccessorRoles?.includes(
+                ADMIN_ROLE_TYPE_ENUM?.SUPERSUBADMIN,
+            ) &&
+            !data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
+        ) {
+            // super sub admin can only can't add super admin
+            return true;
+        } else if (
+            data?.apiAccessorRoles?.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN) &&
+            data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUBADMIN)
+        ) {
+            // admin can only add sub admin
+            return true;
+        }
+        return false;
+    };
 
 class subAdminValidation {
     permissionSchema = () => {
@@ -35,51 +64,33 @@ class subAdminValidation {
             password: requiredPassword(),
             fcmToken: optionalString(),
             permissions: z.array(this.permissionSchema()).optional(),
-            apiAccessorRoles: z.array(),
-            roles: z.nativeEnum(ADMIN_ROLE_TYPE_ENUM, {
-                invalid_type_error: 'inValid roles type',
-            }),
+            apiAccessorRoles: z.array(z.string()),
+            isActive: z.boolean({ required_error: 'Status is required' }),
+            roles: z
+                .array(z.nativeEnum(ADMIN_ROLE_TYPE_ENUM))
+                .min(1, { message: 'Role is required' }),
         })
-        .refine(
-            (data) => {
-                // super sub admin can't create super admin
-                if (
-                    data?.apiAccessorRoles?.includes(
-                        ADMIN_ROLE_TYPE_ENUM?.SUPERSUBADMIN,
-                    ) &&
-                    data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
-                ) {
-                    return false;
-                }
-                return true;
-            },
-            {
-                message: "super sub admin can't create super admin",
-                path: ['roles'],
-            },
-        )
-        .refine(
-            (data) => {
-                if (
-                    !data?.apiAccessorRoles?.includes(
-                        ADMIN_ROLE_TYPE_ENUM?.SUPERSUBADMIN,
-                    ) &&
-                    data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
-                ) {
-                    return;
-                }
-            },
-            { message: "super sub admin can't create super admin" },
-        );
-    updateSubAdminSchema = z.object({
-        adminId: requiredString('Admin id'),
-        name: optionalString('Name'),
-        phoneNumber: optionalPhoneNUmber(),
-        email: optionalEmailString(),
-        password: optionalString(),
-        fcmToken: optionalString(),
-        permissions: z.array(this.permissionSchema()).optional(),
-    });
+        .refine(adminRoleCreateRefineFunction({ editMode: false }), {
+            message: "You don't have permission to create this role!",
+            path: ['roles'],
+        });
+    updateSubAdminSchema = z
+        .object({
+            adminId: requiredString('Admin id'),
+            name: optionalString('Name'),
+            phoneNumber: optionalPhoneNUmber(),
+            email: optionalEmailString(),
+            password: optionalPassword(),
+            fcmToken: optionalString(),
+            permissions: z.array(this.permissionSchema()).optional(),
+            apiAccessorRoles: z.array(z.string()),
+            isActive: z.boolean().optional(),
+            roles: z.array(z.nativeEnum(ADMIN_ROLE_TYPE_ENUM)).optional(),
+        })
+        .refine(adminRoleCreateRefineFunction({ editMode: true }), {
+            message: "You don't have permission to create this role!",
+            path: ['roles'],
+        });
 }
 
 const subAdminValidationSchema = new subAdminValidation();

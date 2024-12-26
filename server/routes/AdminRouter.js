@@ -33,6 +33,7 @@ import {
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
 import chatController from '../controllers/AdminController/ChatController/ChatController.js';
+import { adminMeQueryController } from '../controllers/AdminController/meQuery.js';
 const AdminRouter = express.Router();
 
 // dashboard
@@ -40,11 +41,14 @@ const AdminRouter = express.Router();
 const canAdminAccess = true;
 const canSubAdminAccess = true;
 
+AdminRouter.post('/me', adminMeQueryController);
+
 AdminRouter.post(
     '/dashboard',
     AdminAccessMiddleware({
         uniqueSlug: 'dashboard',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
     }),
     dashboardController,
 );

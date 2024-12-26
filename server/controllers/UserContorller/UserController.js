@@ -35,8 +35,8 @@ class controller {
 
         const allAdminsData = await getAllAdminsFromCache();
 
-        return res.status(401).json(
-            errorResponse({
+        return res.status(200).json(
+            successResponse({
                 message: 'User Details',
                 data: {
                     userData: user,

@@ -1,3 +1,4 @@
+import { adminMeQueryController } from './controllers/AdminController/meQuery.js';
 import fileUpload from './controllers/fileUpload.js';
 import './init-aliases.js';
 import AdminRouter from './routes/AdminRouter.js';
@@ -32,6 +33,7 @@ export default (app) => {
     );
 
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
+   
     app.use(
         '/fileUpload',
         AuthMiddleware(Object.values(ROLE_TYPE_ENUM).map((i) => i)),
