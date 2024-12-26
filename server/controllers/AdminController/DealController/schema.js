@@ -71,11 +71,30 @@ const addDealSchema = z
                 message: 'actual price should be numeric',
             }),
         isActive: z.boolean().optional(),
-        cashBack: z
-            .string({ required_error: 'cash Back Price is required' })
-            .refine((data) => !isNaN(data), {
-                message: 'Cash back should be numeric',
-            }),
+        lessAmount: z.string().refine(
+            (data) => {
+                if (data && isNaN(data)) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: 'Less Amount should be numeric',
+                path: ['lessAmount'],
+            },
+        ),
+        commissionValue: z.string().refine(
+            (data) => {
+                if (data && isNaN(data)) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: 'Commission Value should be numeric',
+                path: ['commissionValue'],
+            },
+        ),
         adminCommission: z
             .string({ required_error: 'Admin commission required' })
             .refine((data) => !isNaN(data), {
@@ -109,6 +128,7 @@ const addDealSchema = z
             invalid_type_error: 'refundDays field  should be numeric',
         }),
         exchangeDealProducts: z.array(z.string()).optional(),
+        isCommissionDeal: z.boolean().optional(),
     })
     .refine(
         (data) => {
@@ -125,6 +145,35 @@ const addDealSchema = z
             message:
                 'If your deal is exchange deal , then please provide the exchange deals products fields',
             path: ['exchangeDealProducts'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (!data?.lessAmount && !data?.commissionValue) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please send either commission or lessAmount value',
+            path: ['lessAmount'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                (data?.isCommissionDeal && !data?.commissionValue) ||
+                (!data?.isCommissionDeal && data?.commissionValue)
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message:
+                'if your deal is commission based please send both  value commissionValue and isCommissionDeal value ',
+
+            path: ['commissionValue'],
         },
     );
 
@@ -186,12 +235,30 @@ const editDealSchema = z
             })
             .optional(),
         isActive: z.boolean().optional(),
-        cashBack: z
-            .string()
-            .refine((data) => !isNaN(data), {
-                message: 'cash back should be numeric',
-            })
-            .optional(),
+        lessAmount: z.string().refine(
+            (data) => {
+                if (data && isNaN(data)) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: 'Less Amount should be numeric',
+                path: ['lessAmount'],
+            },
+        ),
+        commissionValue: z.string().refine(
+            (data) => {
+                if (data && isNaN(data)) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: 'Commission Value should be numeric',
+                path: ['commissionValue'],
+            },
+        ),
         adminCommission: z
             .string({ required_error: 'Admin commission required' })
             .refine((data) => !isNaN(data), {
@@ -213,8 +280,9 @@ const editDealSchema = z
             })
             .min(1, { message: 'Final Cash Back For User is required' }),
         refundDays: z
-        .number({ invalid_type_error: 'Refund Days should be numeric' })
-        .optional(),    
+            .number({ invalid_type_error: 'Refund Days should be numeric' })
+            .optional(),
+        isCommissionDeal: z.boolean().optional(),
     })
     .merge(getDeal)
     .refine(
@@ -232,6 +300,34 @@ const editDealSchema = z
             message:
                 'If your deal is exchange deal , then please provide the exchange deals products fields',
             path: ['exchangeDealProducts'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (!data?.lessAmount && !data?.commissionValue) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please send either commission or lessAmount value',
+            path: ['lessAmount'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                (data?.isCommissionDeal && !data?.commissionValue) ||
+                (!data?.isCommissionDeal && data?.commissionValue)
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message:
+                'if your deal is commission based please send both  value commissionValue and isCommissionDeal value ',
+            path: ['commissionValue'],
         },
     );
 const getDealsWithBrandIdSchema = z.object({

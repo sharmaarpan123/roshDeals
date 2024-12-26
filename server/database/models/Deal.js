@@ -56,7 +56,7 @@ const dealSchema = new mongoose.Schema(
         productCategories: {
             type: [String],
         },
-        exchangeDealProducts: { type: [String],required: false, },
+        exchangeDealProducts: { type: [String] },
         postUrl: {
             type: String,
             required: true,
@@ -72,9 +72,15 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        cashBack: {
+        lessAmount: {
             type: String,
-            required: false,
+        },
+        isCommissionDeal: {
+            type: Boolean,
+            default: false,
+        },
+        commissionValue: {
+            type: String,
         },
         finalCashBackForUser: {
             type: String,

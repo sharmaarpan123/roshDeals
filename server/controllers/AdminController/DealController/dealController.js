@@ -125,7 +125,7 @@ export const addDealController = catchAsync(async (req, res) => {
     const {
         actualPrice,
         brand,
-        cashBack,
+        lessAmount,
         dealCategory,
         platForm,
         postUrl,
@@ -140,11 +140,13 @@ export const addDealController = catchAsync(async (req, res) => {
         refundDays,
         exchangeDealProducts,
         finalCashBackForUser,
+        commissionValue,
+        isCommissionDeal,
     } = body;
     const newDeal = await Deal.create({
         actualPrice,
         brand,
-        cashBack,
+        lessAmount,
         dealCategory,
         platForm,
         postUrl,
@@ -158,6 +160,8 @@ export const addDealController = catchAsync(async (req, res) => {
         refundDays,
         exchangeDealProducts,
         finalCashBackForUser,
+        commissionValue,
+        isCommissionDeal,
         isActive: isActive === false ? false : true, // we want by default  active true  so if
         //on add time isActive is  false it will false other wise it will be all time true
         // we can edit on edit api
@@ -214,7 +218,7 @@ export const editDealController = catchAsync(async (req, res) => {
         dealId,
         actualPrice,
         brand,
-        cashBack,
+        lessAmount,
         dealCategory,
         platForm,
         postUrl,
@@ -228,7 +232,9 @@ export const editDealController = catchAsync(async (req, res) => {
         imageUrl,
         exchangeDealProducts,
         finalCashBackForUser,
-        refundDays
+        refundDays,
+        commissionValue,
+        isCommissionDeal,
     } = body;
     // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
     const inValidMongoIdMessage = await validatingMongoObjectIds({
@@ -250,7 +256,7 @@ export const editDealController = catchAsync(async (req, res) => {
         {
             actualPrice,
             brand,
-            cashBack,
+            lessAmount,
             dealCategory,
             platForm,
             postUrl,
@@ -264,8 +270,9 @@ export const editDealController = catchAsync(async (req, res) => {
             exchangeDealProducts,
             finalCashBackForUser,
             refundDays,
-
-            ...(isActive && { isActive }),
+            commissionValue,
+            isCommissionDeal,
+            ...(typeof isActive === 'boolean' && { isActive }),
         },
         {
             new: true,
