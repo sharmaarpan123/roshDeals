@@ -206,6 +206,15 @@ const editDealSchema = z
         imageUrl: z.string().optional(),
         exchangeDealProducts: z.array(z.string()).optional(),
         isExchangeDeal: z.boolean().optional(),
+        finalCashBackForUser: z
+            .string({
+                invalid_type_error: 'invalid Final Cash Back For User',
+                required_error: 'Final Cash Back For User is required',
+            })
+            .min(1, { message: 'Final Cash Back For User is required' }),
+        refundDays: z
+        .number({ invalid_type_error: 'Refund Days should be numeric' })
+        .optional(),    
     })
     .merge(getDeal)
     .refine(
