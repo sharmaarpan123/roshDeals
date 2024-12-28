@@ -170,6 +170,10 @@ export const filterSchemaObject = z.object({
         .string()
         .nullable()  // explicitly allow null values
         .optional(),
+    selectedDate: z
+        .string()
+        .nullable()  // explicitly allow null values
+        .optional(),
 });
 export const filterSchema = filterSchemaObject.refine(
     filterRefineFunction,

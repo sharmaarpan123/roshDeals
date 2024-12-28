@@ -175,8 +175,14 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const { limit, offset } = filterSchema.parse(req.query);
-    const orders = await Order.find({ userId: req.user._id })
+    const { limit, offset ,selectedDate} = filterSchema.parse(req.query);
+    const dateFilter = selectedDate ? {
+        createdAt: {
+            $gte: new Date(selectedDate),
+            $lt: new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1)),
+        },
+    } : {};
+    const orders = await Order.find({ userId: req.user._id, ...dateFilter })
         .populate({
             path: 'dealId',
             select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
