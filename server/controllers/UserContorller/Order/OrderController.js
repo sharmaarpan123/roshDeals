@@ -221,7 +221,7 @@ export const UserEarning = catchAsync(async (req, res) => {
                 _id: '$userId',
                 totalCashback: {
                     $sum: {
-                        $toDouble: '$deal.cashBack',
+                        $toDouble: '$deal.finalCashBackForUser',
                     },
                 },
             },
