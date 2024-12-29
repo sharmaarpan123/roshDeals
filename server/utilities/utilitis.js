@@ -70,3 +70,7 @@ export const isSuperAdminAccessingApi = (req) =>
         : null;
 
 export const getAccessorId = (req) => req?.user?._id;
+export const toUTC = (date) => {
+    const offsetMinutes = 330; // IST is UTC+5:30
+    return new Date(date.getTime() - offsetMinutes * 60 * 1000);
+};

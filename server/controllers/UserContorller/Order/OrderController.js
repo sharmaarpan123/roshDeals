@@ -13,6 +13,7 @@ import {
     OrderFromUpdateSchema,
     reviewFormSubmitSchema,
 } from './Schema.js';
+import { toUTC } from '../../../utilities/utilitis.js';
 
 const checkSlotCompletedDeals = async (dealIds) =>
     Deal.find({
@@ -175,8 +176,17 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const { limit, offset } = filterSchema.parse(req.query);
-    const orders = await Order.find({ userId: req.user._id })
+    const { limit, offset ,selectedDate} = filterSchema.parse(req.query);
+    const dateFilter = selectedDate
+        ? {
+              createdAt: {
+                  $gte: toUTC(new Date(selectedDate)), // Start of the day in UTC
+                  $lt: toUTC(new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1))), // End of the day in UTC
+              },
+          }
+        : {};
+
+    const orders = await Order.find({ userId: req.user._id, ...dateFilter })
         .populate({
             path: 'dealId',
             select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
@@ -221,7 +231,7 @@ export const UserEarning = catchAsync(async (req, res) => {
                 _id: '$userId',
                 totalCashback: {
                     $sum: {
-                        $toDouble: '$deal.cashBack',
+                        $toDouble: '$deal.finalCashBackForUser',
                     },
                 },
             },

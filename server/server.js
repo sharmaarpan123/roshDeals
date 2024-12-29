@@ -27,7 +27,7 @@ const init = async () => {
     // app.use('/*', express.static(path.join('server/public')));
     app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
     app.use('/images', express.static(path.join(process.cwd(), 'server/public', 'images')));
-
+    app.get('/', (req, res) => {res.sendFile(path.join(process.cwd(), 'server/public', 'deep-link.html'))});
 
     await mongoInit();
     getInitialCacheValues();
