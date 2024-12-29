@@ -1,7 +1,12 @@
 import User from '../../../database/models/User.js';
 import catchAsync from '../../../utilities/catchAsync.js';
+import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 import { hashPassword } from '../../../utilities/hashPassword.js';
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
+import {
+    errorResponse,
+    successResponse,
+} from '../../../utilities/Responses.js';
+import { isAdminOrSubAdminAccessingApi } from '../../../utilities/utilitis.js';
 import {
     activeInActiveSchema,
     getAllUserSchema,
@@ -11,6 +16,9 @@ import {
 
 export const getAllUsersController = catchAsync(async (req, res) => {
     const { offset, limit, search, status } = getAllUserSchema.parse(req.body);
+
+    const adminId = isAdminOrSubAdminAccessingApi(req);
+
     const query = {
         ...(status && { isActive: Boolean(+status) }),
         ...(search && {
@@ -20,12 +28,15 @@ export const getAllUsersController = catchAsync(async (req, res) => {
                 { phoneNumber: { $regex: search, $options: 'i' } },
             ],
         }),
+        ...(adminId && {
+            historyAdminReferences: adminId,
+        }),
     };
 
     let AllDAta = User.find(query).sort({ createdAt: -1 });
 
     if (typeof offset !== 'undefined') {
-        AllDAta = AllDAta.skip(offset); 
+        AllDAta = AllDAta.skip(offset);
     }
 
     if (typeof limit !== 'undefined') {

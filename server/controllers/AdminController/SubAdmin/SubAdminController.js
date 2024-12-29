@@ -8,14 +8,12 @@ import {
     successResponse,
     errorResponse,
 } from '../../../utilities/Responses.js';
+import {
+    getAccessorId,
+    isSuperAdminAccessingApi,
+} from '../../../utilities/utilitis.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import subAdminValidationSchema from './schema.js';
-import { v4 as uuidv4 } from 'uuid';
-
-function generateAlphabeticUUID() {
-    const uuid = uuidv4(); // Generates a UUID
-    return uuid.replace(/[^A-Za-z]/g, '').slice(0, 5); // Keep only alphabets and limit to 12 chars
-}
 
 class subAdminController {
     getSubAdminListWithFilter = catchAsync(async (req, res) => {
@@ -85,13 +83,48 @@ class subAdminController {
         );
     });
 
+    checkIsUserNameExists = catchAsync(async (req, res) => {
+        const { userName } = req.body;
+
+        if (!userName || !(userName && userName?.trim())) {
+            return res.status(400).json(
+                errorResponse({
+                    message: `User Name is required`,
+                }),
+            );
+        }
+
+        const isAlreadyExists = await Admin.findOne(
+            {
+                userName,
+            },
+            {
+                userName: 1,
+            },
+        );
+
+        if (isAlreadyExists) {
+            return res.status(400).json(
+                errorResponse({
+                    message: `This User Name is already exists`,
+                    others: { data: { userName } },
+                }),
+            );
+        } else {
+            return res.status(200).json(
+                successResponse({
+                    message: `You can try this User Name!`,
+                    others: { data: { userName } },
+                }),
+            );
+        }
+    });
+
     addSubAdminController = catchAsync(async (req, res) => {
         const body = {
             ...req.body,
             apiAccessorRoles: req?.user?.roles,
         };
-
-        console.log(body, 'body');
 
         const validatedBody =
             subAdminValidationSchema.addSubAdminSchema.parse(body);
@@ -101,46 +134,38 @@ class subAdminController {
                 $or: [
                     { email: validatedBody?.email },
                     { phoneNumber: validatedBody?.phoneNumber },
+                    {
+                        userName: validatedBody?.userName,
+                    },
                 ],
             },
             {
                 phoneNumber: 1,
                 email: 1,
+                userName: 1,
             },
         );
         if (isAlreadyExists) {
             return res.status(400).json(
                 errorResponse({
-                    message: `${(isAlreadyExists?.email === validatedBody?.email && 'This Email ') || 'This Phone Number '} is already exists`,
+                    message: `${
+                        isAlreadyExists?.email === validatedBody?.email
+                            ? 'This Email '
+                            : isAlreadyExists?.phoneNumber ===
+                                validatedBody?.phoneNumber
+                              ? 'This Phone Number '
+                              : 'This User Name '
+                    }
+                     is already exists`,
                 }),
             );
         }
 
         const hashedPassword = await hashPassword(validatedBody?.password);
 
-        let uniqueCode;
-
-        // make sure unique code is not repeated in db
-        const findingUniqueCodeDoNotRepeat = async () => {
-            uniqueCode = `${validatedBody?.name}-${generateAlphabeticUUID()}`;
-            const uniqueCodeExists = await Admin.findOne(
-                {
-                    uniqueId: uniqueCode,
-                },
-                { uniqueId: 1, _id: 0 },
-            );
-
-            if (uniqueCodeExists?.uniqueId) {
-                await findingUniqueCodeDoNotRepeat();
-            }
-        };
-
-        await findingUniqueCodeDoNotRepeat();
-
         const newSubAdmin = new Admin({
             ...validatedBody,
             password: hashedPassword,
-            ...(uniqueCode && { uniqueId: uniqueCode }),
         });
 
         await newSubAdmin.save();
@@ -177,27 +202,36 @@ class subAdminController {
 
         const isAlreadyExists = await Admin.findOne(
             {
-                $or: [
-                    { email: restBody?.email },
-                    { phoneNumber: restBody?.phoneNumber },
+                $and: [
+                    { _id: { $ne: adminId } },
+                    {
+                        $or: [
+                            { email: restBody?.email },
+                            { phoneNumber: restBody?.phoneNumber },
+                            { userName: restBody?.userName },
+                        ],
+                    },
                 ],
             },
             {
                 phoneNumber: 1,
                 email: 1,
+                userName: 1,
             },
         );
 
-        if (
-            isAlreadyExists &&
-            ((isAlreadyExists?.email === restBody?.email &&
-                isAlreadyExists._id.toString() !== adminId) ||
-                (isAlreadyExists?.phoneNumber === restBody?.phoneNumber &&
-                    isAlreadyExists._id.toString() !== adminId))
-        ) {
+        if (isAlreadyExists) {
             return res.status(400).json(
                 errorResponse({
-                    message: `${(isAlreadyExists?.email === restBody?.email && 'This Email ') || 'This Phone Number '} is already exists`,
+                    message: `${
+                        isAlreadyExists?.email === restBody?.email
+                            ? 'This Email '
+                            : isAlreadyExists?.phoneNumber ===
+                                restBody?.phoneNumber
+                              ? 'This Phone Number '
+                              : 'This User Name '
+                    }
+                     is already exists`,
                 }),
             );
         }
@@ -229,6 +263,37 @@ class subAdminController {
             successResponse({
                 data: updatedAdmin,
                 message: 'Successfully updated',
+            }),
+        );
+    });
+    manageAdminSubAdminRelation = catchAsync(async (req, res) => {
+        const isSuperAdminId = isSuperAdminAccessingApi(req);
+
+        const { adminId, subAdminId, isActive } =
+            subAdminValidationSchema?.manageAdminSubAdminRelation.parse({
+                ...req?.body,
+                adminId: isSuperAdminId
+                    ? req?.body?.adminId
+                    : getAccessorId(id),
+            });
+
+        const updatedData = await AdminSubAdminLinker.findOneAndUpdate(
+            { adminId, subAdminId },
+            {
+                $set: {
+                    isActive,
+                },
+            },
+            { new: true },
+        );
+        if (updatedData) {
+            return res
+                .status(200)
+                .json(successResponse({ message: 'Unlinked successfully' }));
+        }
+        return res.status(200).json(
+            errorResponse({
+                message: 'Something went wrong while updating!',
             }),
         );
     });

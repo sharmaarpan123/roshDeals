@@ -33,10 +33,13 @@ export default (app) => {
     );
 
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
-   
+
     app.use(
         '/fileUpload',
-        AuthMiddleware(Object.values(ROLE_TYPE_ENUM).map((i) => i)),
+        AuthMiddleware([
+            ...Object.values(ADMIN_ROLE_TYPE_ENUM).map((i) => i),
+            ROLE_TYPE_ENUM.USER,
+        ]),
         // SlowRateMiddleWare(),
         upload.single('file'),
         fileUpload,

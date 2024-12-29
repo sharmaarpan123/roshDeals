@@ -1,5 +1,6 @@
 import Admin from '../database/models/Admin.js';
 import redis from '../lib/redis.js';
+import { ADMIN_ROLE_TYPE_ENUM } from './commonTypes.js';
 
 export function randomOtp() {
     const randomNum = Math.random() * 9000;
@@ -28,7 +29,7 @@ export const waitRequest = (waitTiming) =>
 export const getAllAdminsFromCache = async () => {
     const redisData = await redis.get('admins');
 
-    const redisParseData = JSON.parse(redisData || "[]");
+    const redisParseData = JSON.parse(redisData || '[]');
 
     if (!redisParseData?.length) {
         const allAdmins = await Admin.find({ isActive: true });
@@ -38,3 +39,34 @@ export const getAllAdminsFromCache = async () => {
         return redisParseData;
     }
 };
+
+export const isAdminOrSubAdminAccessingApi = (req) =>
+    req?.user?.roles?.some((role) =>
+        [ADMIN_ROLE_TYPE_ENUM.ADMIN, ADMIN_ROLE_TYPE_ENUM.SUBADMIN].includes(
+            role,
+        ),
+    )
+        ? req?.user?._id
+        : null;
+
+export const isSuperAdminSuperSubAdminAccessingApi = (req) =>
+    req?.user?.roles?.some((role) =>
+        [
+            ADMIN_ROLE_TYPE_ENUM.SUPERADMIN,
+            ADMIN_ROLE_TYPE_ENUM.SUPERSUBADMIN,
+        ].includes(role),
+    )
+        ? req?.user?._id
+        : null;
+
+export const isAdminAccessingApi = (req) =>
+    req?.user?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)
+        ? req?.user?._id
+        : null;
+
+export const isSuperAdminAccessingApi = (req) =>
+    req?.user?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)
+        ? req?.user?._id
+        : null;
+
+export const getAccessorId = (req) => req?.user?._id;

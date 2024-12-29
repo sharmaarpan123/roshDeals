@@ -64,6 +64,17 @@ AdminRouter.post(
     }),
     subAdminController.addSubAdminController,
 );
+
+AdminRouter.post(
+    '/isUserNameExists',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    subAdminController.checkIsUserNameExists,
+);
+
 AdminRouter.get(
     '/subAdmin/getAllWithFilters',
     AdminAccessMiddleware({
@@ -90,6 +101,16 @@ AdminRouter.post(
         canAdminAccess,
     }),
     subAdminController.updateSubAdminController,
+);
+
+AdminRouter.post(
+    '/manageAdminSubAdminRelation',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+    }),
+    subAdminController.manageAdminSubAdminRelation,
 );
 
 // admin modules
@@ -133,6 +154,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'manage-user',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     getAllUsersController,
 );
@@ -212,6 +235,8 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'dealCategory',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     dealCategoryController.getAllDealCategoryWithFilters,
 );
@@ -255,6 +280,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'brand',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     brandController.getAllBrandWithCFilters,
 );

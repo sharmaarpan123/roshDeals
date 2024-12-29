@@ -1,3 +1,4 @@
+import Admin from '../../database/models/Admin.js';
 import User from '../../database/models/User.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import { requiredString } from '../../utilities/ValidationSchema.js';
@@ -21,7 +22,11 @@ const schema = z.object({
         .refine((data) => /^\d+$/.test(data), {
             message: 'phone Number should be Numeric',
         }),
-    referralId: requiredString('referral Id'),
+    currentAdminReference: z
+        .string({
+            required_error: 'Current  Reference Code is required',
+        })
+        .min(1, { message: 'Current Reference Code is required' }),
     email: z
         .string({
             required_error: 'Email is required',
@@ -49,7 +54,14 @@ const schema = z.object({
 });
 const signupController = catchAsync(async (req, res) => {
     const body = schema.parse(req.body);
-    const { name, email, password, phoneNumber, fcmToken, referralId } = body;
+    const {
+        name,
+        email,
+        password,
+        phoneNumber,
+        fcmToken,
+        currentAdminReference,
+    } = body;
     const isAlreadyExists = await User.findOne(
         {
             $or: [{ email }, { phoneNumber }],
@@ -66,15 +78,30 @@ const signupController = catchAsync(async (req, res) => {
             }),
         );
     }
+
+    const adminCheck = await Admin.findOne({ userName: currentAdminReference });
+
+    if (!adminCheck?._id || !adminCheck.isActive) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Your Reference Code is In valid',
+            }),
+        );
+    }
+
     const hashedPassword = await hashPassword(password);
+
     const user = await User.create({
         name,
         email,
         password: hashedPassword,
         phoneNumber,
-        referralId,
+        currentAdminReference: adminCheck?._id,
+        historyAdminReferences: [adminCheck?._id],
     });
+
     await user.save();
+
     const updatedUser = await User.findOneAndUpdate(
         {
             phoneNumber,
@@ -86,7 +113,9 @@ const signupController = catchAsync(async (req, res) => {
             new: true,
         },
     );
+
     const token = jwtGen(updatedUser);
+
     return res.status(200).json(
         successResponse({
             message: 'Sign up successfully',

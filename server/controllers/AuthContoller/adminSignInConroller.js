@@ -74,7 +74,7 @@ const adminSignInController = catchAsync(async (req, res) => {
         return res.status(400).json(
             errorResponse({
                 message:
-                    'Your account has been deactivated by the admin ,  please contact your admin',
+                    'Your account has been deactivated by the super admin ,  please contact your super admin',
             }),
         );
     }

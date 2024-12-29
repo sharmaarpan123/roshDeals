@@ -28,7 +28,7 @@ const adminRoleCreateRefineFunction =
             ) &&
             !data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUPERADMIN)
         ) {
-            // super sub admin can only can't add super admin
+            // super sub admin  only can't add super admin
             return true;
         } else if (
             data?.apiAccessorRoles?.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN) &&
@@ -66,6 +66,16 @@ class subAdminValidation {
             permissions: z.array(this.permissionSchema()).optional(),
             apiAccessorRoles: z.array(z.string()),
             isActive: z.boolean({ required_error: 'Status is required' }),
+            userName: z
+                .string()
+                .min(5, {
+                    message: 'Username must be at least 5 characters long.',
+                })
+                .max(10, { message: 'Username must not exceed 10 characters.' })
+                .regex(/^[a-zA-Z0-9]+$/, {
+                    message:
+                        'Username can only contain alphanumeric characters.',
+                }),
             roles: z
                 .array(z.nativeEnum(ADMIN_ROLE_TYPE_ENUM))
                 .min(1, { message: 'Role is required' }),
@@ -85,12 +95,28 @@ class subAdminValidation {
             permissions: z.array(this.permissionSchema()).optional(),
             apiAccessorRoles: z.array(z.string()),
             isActive: z.boolean().optional(),
+            userName: z
+                .string()
+                .min(5, {
+                    message: 'Username must be at least 5 characters long.',
+                })
+                .max(10, { message: 'Username must not exceed 10 characters.' })
+                .regex(/^[a-zA-Z0-9]+$/, {
+                    message:
+                        'Username can only contain alphanumeric characters.',
+                }),
             roles: z.array(z.nativeEnum(ADMIN_ROLE_TYPE_ENUM)).optional(),
         })
         .refine(adminRoleCreateRefineFunction({ editMode: true }), {
             message: "You don't have permission to create this role!",
             path: ['roles'],
         });
+
+        manageAdminSubAdminRelation = z.object({
+        subAdminId: requiredString('Sub admin'),
+        adminId: requiredString('Admin'),
+        isActive: requiredBoolean('Status'),
+    });
 }
 
 const subAdminValidationSchema = new subAdminValidation();
