@@ -225,6 +225,8 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'platForm',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     platFormController.getPlatFormById,
 );
@@ -270,6 +272,8 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'dealCategory',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     dealCategoryController.getDealCategoryByIdController,
 );
@@ -314,6 +318,8 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'brand',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     brandController.geBrandByIdController,
 );

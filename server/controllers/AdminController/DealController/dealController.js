@@ -18,6 +18,7 @@ import { validatingMongoObjectIds } from '../../../utilities/validations.js';
 import { sendNotification } from '../../../utilities/sendNotification.js';
 import User from '../../../database/models/User.js';
 import Brand from '../../../database/models/Brand.js';
+import moment from 'moment';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -33,7 +34,12 @@ export const dealPaymentStatusChangeController = catchAsync(
         }
         const updatedDeal = await Deal.findOneAndUpdate(
             { _id: dealId },
-            { paymentStatus: status },
+            {
+                paymentStatus: status,
+                ...(status === 'paid' && {
+                    paymentDate: moment().utc().toDate(),
+                }),
+            },
             { new: true },
         );
 

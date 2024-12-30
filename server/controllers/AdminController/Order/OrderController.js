@@ -3,7 +3,10 @@ import Deal from '../../../database/models/Deal.js';
 import Order from '../../../database/models/Order.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import { ORDER_FORM_STATUS } from '../../../utilities/commonTypes.js';
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
+import {
+    errorResponse,
+    successResponse,
+} from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import {
     acceptRejectOrderSchema,
@@ -13,6 +16,7 @@ import {
 } from './Schema.js';
 import User from '../../../database/models/User.js';
 import { sendNotification } from '../../../utilities/sendNotification.js';
+import moment from 'moment';
 
 export const acceptRejectOrder = catchAsync(async (req, res) => {
     const { orderId, status, rejectReason } = acceptRejectOrderSchema.parse(
@@ -104,7 +108,12 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 
     const updatedOrder = await Order.findOneAndUpdate(
         { _id: orderId },
-        { paymentStatus: status },
+        {
+            paymentStatus: status,
+            ...(status === 'paid' && {
+                paymentDate: moment().utc().toDate(),
+            }),
+        },
         { new: true },
     );
 

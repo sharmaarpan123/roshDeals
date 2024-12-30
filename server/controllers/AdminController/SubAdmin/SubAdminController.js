@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Admin from '../../../database/models/Admin.js';
 import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
 import catchAsync from '../../../utilities/catchAsync.js';
@@ -23,45 +24,88 @@ class subAdminController {
             ADMIN_ROLE_TYPE_ENUM.ADMIN,
         );
 
-        let subAdminList;
+        let pipeline = [
+            // Match admins based on search criteria
+            ...(isAdminAccessingApi // if  admin accessing just to include subAdmin relation status
+                ? [
+                      {
+                          $lookup: {
+                              from: 'adminsubadminlinkers', // AdminSubAdminLinker collection name
+                              let: { subAdminId: '$_id' }, // Reference to the current admin's _id
+                              pipeline: [
+                                  {
+                                      $match: {
+                                          $expr: {
+                                              $eq: [
+                                                  '$subAdminId',
+                                                  '$$subAdminId',
+                                              ],
+                                          },
+                                      },
+                                  },
+                              ],
+                              as: 'adminSubAdminLinkerInfo',
+                          },
+                      },
+                      {
+                          $match: {
+                              adminSubAdminLinkerInfo: { $ne: [] },
+                              ...(search && {
+                                  name: { $regex: search, $options: 'i' },
+                              }),
+                          },
+                      },
+                      {
+                          $unwind: {
+                              path: '$adminSubAdminLinkerInfo',
+                              preserveNullAndEmptyArrays: false,
+                          },
+                      },
+                  ]
+                : // if super admin accessing
+                  [
+                      {
+                          $match: {
+                              ...(search && {
+                                  name: { $regex: search, $options: 'i' },
+                              }),
+                          },
+                      },
+                  ]),
+        ];
 
-        if (isAdminAccessingApi) {
-            subAdminList = await AdminSubAdminLinker.find({
-                adminId: req?.user?._id,
-            });
-        }
+        const total = Admin.aggregate([
+            // pipeline for only to count total
+            ...pipeline,
+            {
+                $count: 'totalCount',
+            },
+        ]);
 
-        let AllDAta = Admin.find({
-            ...(search && { name: { $regex: search, $options: 'i' } }),
-            ...(isAdminAccessingApi && {
-                // if admin access this api show only subAdmin linked to him
-                _id: { $in: [subAdminList?.map((i) => i.subAdminId)] },
-            }),
-        })
-            .populate('permissions.moduleId')
-            .sort({ createdAt: -1 });
+        pipeline = [
+            // pipeline with pagination
+            ...pipeline,
+            {
+                $sort: {
+                    createdAt: -1,
+                },
+            },
+            {
+                $skip: offset || 0,
+            },
+            {
+                $limit: limit || 10,
+            },
+        ];
 
-        if (typeof offset !== 'undefined') {
-            AllDAta = AllDAta.skip(offset);
-        }
+        const AllDAta = Admin.aggregate(pipeline);
 
-        if (typeof limit !== 'undefined') {
-            AllDAta = AllDAta.limit(limit);
-        }
-
-        const total = Admin.find({
-            ...(search && { name: { $regex: search, $options: 'i' } }),
-            ...(isAdminAccessingApi && {
-                // if admin access this api show only subAdmin linked to him
-                _id: { $in: [subAdminList?.map((i) => i.subAdminId)] },
-            }),
-        }).countDocuments();
-        const data = await Promise.all([AllDAta, total]);
+        const data = await Promise.all([total, AllDAta]);
         return res.status(200).json(
             successResponse({
                 message: 'All SubAdmins',
-                data: data[0],
-                total: data[1],
+                data: data[1],
+                total: (data[0] && data[0][0] && data[0][0]?.totalCount) || 0,
             }),
         );
     });
@@ -286,10 +330,13 @@ class subAdminController {
             },
             { new: true },
         );
+
         if (updatedData) {
-            return res
-                .status(200)
-                .json(successResponse({ message: 'Unlinked successfully' }));
+            return res.status(200).json(
+                successResponse({
+                    message: 'Updated successfully',
+                }),
+            );
         }
         return res.status(200).json(
             errorResponse({

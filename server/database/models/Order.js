@@ -25,6 +25,9 @@ const orderSchema = new mongoose.Schema(
             enum: ORDER_FORM_STATUS,
             default: ORDER_FORM_STATUS.PENDING,
         },
+        paymentDate: {
+            type: Date,
+        },
     },
     {
         timestamps: true,

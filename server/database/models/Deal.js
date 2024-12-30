@@ -117,6 +117,9 @@ const dealSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        paymentDate: {
+            type: Date,
+        },
     },
     {
         timestamps: true,
