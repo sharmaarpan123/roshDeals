@@ -104,7 +104,8 @@ class subAdminValidation {
                 .regex(/^[a-zA-Z0-9]+$/, {
                     message:
                         'Username can only contain alphanumeric characters.',
-                }),
+                })
+                .optional(),
             roles: z.array(z.nativeEnum(ADMIN_ROLE_TYPE_ENUM)).optional(),
         })
         .refine(adminRoleCreateRefineFunction({ editMode: true }), {
@@ -112,7 +113,7 @@ class subAdminValidation {
             path: ['roles'],
         });
 
-        manageAdminSubAdminRelation = z.object({
+    manageAdminSubAdminRelation = z.object({
         subAdminId: requiredString('Sub admin'),
         adminId: requiredString('Admin'),
         isActive: requiredBoolean('Status'),

@@ -18,7 +18,7 @@ import subAdminValidationSchema from './schema.js';
 
 class subAdminController {
     getSubAdminListWithFilter = catchAsync(async (req, res) => {
-        const { offset, limit, search } = filterSchema.parse(req.query);
+        const { offset, limit, search, status } = filterSchema.parse(req.query);
 
         const isAdminAccessingApi = req?.user?.roles?.includes(
             ADMIN_ROLE_TYPE_ENUM.ADMIN,
@@ -26,7 +26,7 @@ class subAdminController {
 
         let pipeline = [
             // Match admins based on search criteria
-            ...(isAdminAccessingApi // if  admin accessing just to include subAdmin relation status
+            ...(isAdminAccessingApi // if  admin accessing  just to include subAdmin relation status
                 ? [
                       {
                           $lookup: {
@@ -69,6 +69,9 @@ class subAdminController {
                               ...(search && {
                                   name: { $regex: search, $options: 'i' },
                               }),
+                              ...(status && {
+                                  isActive: Boolean(+status),
+                              }),
                           },
                       },
                   ]),
@@ -91,10 +94,10 @@ class subAdminController {
                 },
             },
             {
-                $skip: offset || 0,
+                $skip: +offset || 0,
             },
             {
-                $limit: limit || 10,
+                $limit: +limit || 10,
             },
         ];
 
@@ -263,6 +266,9 @@ class subAdminController {
                 userName: 1,
             },
         );
+
+        console.log(restBody?.userName , "sdf")
+
 
         if (isAlreadyExists) {
             return res.status(400).json(

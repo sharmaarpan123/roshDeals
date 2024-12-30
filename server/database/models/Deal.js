@@ -1,6 +1,14 @@
 import mongoose from 'mongoose';
 const dealSchema = new mongoose.Schema(
     {
+        parentDealId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Deal',
+        },
+        adminId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+        },
         productName: {
             type: String,
             required: true,
@@ -119,6 +127,14 @@ const dealSchema = new mongoose.Schema(
         },
         paymentDate: {
             type: Date,
+        },
+        showToUsers: {
+            type: Boolean,
+            default: true,
+        },
+        showToSubAdmins: {
+            type: Boolean,
+            default: false,
         },
     },
     {
