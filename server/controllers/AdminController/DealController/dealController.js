@@ -19,6 +19,9 @@ import { sendNotification } from '../../../utilities/sendNotification.js';
 import User from '../../../database/models/User.js';
 import Brand from '../../../database/models/Brand.js';
 import moment from 'moment';
+import { filterSchema } from '../../../utilities/ValidationSchema.js';
+import { isAdminOrSubAdminAccessingApi } from '../../../utilities/utilitis.js';
+import mongoose from 'mongoose';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -81,16 +84,31 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
     const { offset, limit, search, status, paymentStatus, isSlotCompleted } =
         allDealsListSchema.parse(req.body);
 
+    const adminOrSubAdminId = isAdminOrSubAdminAccessingApi(req);
+
     const query = {
         ...(search && { productName: { $regex: search, $options: 'i' } }),
         ...(status && { isActive: Boolean(+status) }),
         ...(paymentStatus && { paymentStatus }),
         ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
-        ...(isSlotCompleted === 'uncompleted' && { isSlotCompleted: false }),
+        ...(isSlotCompleted === 'uncompleted' && {
+            isSlotCompleted: false,
+        }),
+        ...(adminOrSubAdminId && {
+            adminId: new mongoose.Types.ObjectId(adminOrSubAdminId),
+        }),
     };
 
     const dealData = Deal.find(query)
         .populate('brand')
+        .populate({
+            path: 'parentDealId',
+            populate: [
+                { path: 'dealCategory' },
+                { path: 'platForm' },
+                { path: 'brand' },
+            ],
+        })
         .populate('dealCategory')
         .populate('platForm')
         .skip(offset || 0)
@@ -111,12 +129,23 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
 });
 
 export const allDeals = catchAsync(async (req, res) => {
+    const { search, offset, limit } = filterSchema.parse(req.body);
+    const adminOrSubAdminId = isAdminOrSubAdminAccessingApi(req);
     const dealData = await Deal.find(
-        { isActive: true },
+        {
+            isActive: true,
+            ...(search && { productName: { $regex: search, $options: 'i' } }),
+            ...(adminOrSubAdminId && {
+                adminId: mongoose.Types.ObjectId(adminOrSubAdminId),
+            }),
+        },
         { _id: 1, productName: 1 },
-    ).sort({
-        createdAt: -1,
-    });
+    )
+        .sort({
+            createdAt: -1,
+        })
+        .skip(offset || 0)
+        .limit(limit || 10);
 
     return res.status(200).json(
         successResponse({
@@ -132,6 +161,7 @@ export const addDealController = catchAsync(async (req, res) => {
         actualPrice,
         brand,
         lessAmount,
+        lessAmountToSubAdmin,
         dealCategory,
         platForm,
         postUrl,
@@ -147,12 +177,16 @@ export const addDealController = catchAsync(async (req, res) => {
         exchangeDealProducts,
         finalCashBackForUser,
         commissionValue,
+        commissionValueToSubAdmin,
         isCommissionDeal,
+        showToUsers,
+        showToSubAdmins,
     } = body;
     const newDeal = await Deal.create({
         actualPrice,
         brand,
         lessAmount,
+        lessAmountToSubAdmin,
         dealCategory,
         platForm,
         postUrl,
@@ -168,6 +202,10 @@ export const addDealController = catchAsync(async (req, res) => {
         finalCashBackForUser,
         commissionValue,
         isCommissionDeal,
+        showToUsers,
+        showToSubAdmins,
+        commissionValueToSubAdmin,
+        adminId: req?.user?._id,
         isActive: isActive === false ? false : true, // we want by default  active true  so if
         //on add time isActive is  false it will false other wise it will be all time true
         // we can edit on edit api
@@ -241,6 +279,10 @@ export const editDealController = catchAsync(async (req, res) => {
         refundDays,
         commissionValue,
         isCommissionDeal,
+        lessAmountToSubAdmin,
+        commissionValueToSubAdmin,
+        showToSubAdmins,
+        showToUsers,
     } = body;
     // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
     const inValidMongoIdMessage = await validatingMongoObjectIds({
@@ -266,6 +308,10 @@ export const editDealController = catchAsync(async (req, res) => {
             dealCategory,
             platForm,
             postUrl,
+            lessAmountToSubAdmin,
+            commissionValueToSubAdmin,
+            showToSubAdmins,
+            showToUsers,
             productCategories,
             productName,
             slotAlloted,

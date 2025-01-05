@@ -4,7 +4,10 @@ import {
     filterRefineFunction,
     filterRefineMessage,
     filterSchemaObject,
+    optionalString,
+    requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
+import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 
 const allDealsListSchema = filterSchemaObject
     .merge(
@@ -129,6 +132,10 @@ const addDealSchema = z
         }),
         exchangeDealProducts: z.array(z.string()).optional(),
         isCommissionDeal: z.boolean().optional(),
+        showToUsers: requiredBoolean('show to user'),
+        showToSubAdmins: requiredBoolean('show to sub admin'),
+        commissionValueToSubAdmin: optionalString(),
+        lessAmountToSubAdmin: optionalString(),
     })
     .refine(
         (data) => {
@@ -172,8 +179,39 @@ const addDealSchema = z
         {
             message:
                 'if your deal is commission based please send both  value commissionValue and isCommissionDeal value ',
-
             path: ['commissionValue'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                data?.showToSubAdmins &&
+                data?.lessAmount &&
+                !data?.lessAmountToSubAdmin
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please  send less Amount for the Mediator',
+            path: ['lessAmountToSubAdmin'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                data?.showToSubAdmins &&
+                data?.commissionValue &&
+                !data?.commissionValueToSubAdmin
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please send commission for the Mediator',
+            path: ['commissionValueToSubAdmin'],
         },
     );
 
@@ -182,9 +220,9 @@ const BulkAddDealSchema = z.array(addDealSchema, {
     required_error: 'Bulk Add is required',
 });
 
-const getDeal = z.object({
-    dealId: z.string({ required_error: 'DealId is  required' }).trim(),
-});
+    const getDeal = z.object({
+        dealId: z.string({ required_error: 'DealId is  required' }).trim(),
+    });
 
 export const paymentStatusChangeSchema = getDeal.merge(
     z.object({
@@ -283,6 +321,10 @@ const editDealSchema = z
             .number({ invalid_type_error: 'Refund Days should be numeric' })
             .optional(),
         isCommissionDeal: z.boolean().optional(),
+        showToUsers: requiredBoolean('show to user'),
+        showToSubAdmins: requiredBoolean('show to sub admin'),
+        commissionValueToSubAdmin: optionalString(),
+        lessAmountToSubAdmin: optionalString(),
     })
     .merge(getDeal)
     .refine(
@@ -328,6 +370,38 @@ const editDealSchema = z
             message:
                 'if your deal is commission based please send both  value commissionValue and isCommissionDeal value ',
             path: ['commissionValue'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                data?.showToSubAdmins &&
+                data?.lessAmount &&
+                !data?.lessAmountToSubAdmin
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please  send less Amount for the Mediator',
+            path: ['lessAmountToSubAdmin'],
+        },
+    )
+    .refine(
+        (data) => {
+            if (
+                data?.showToSubAdmins &&
+                data?.commissionValue &&
+                !data?.commissionValueToSubAdmin
+            ) {
+                return false;
+            }
+            return true;
+        },
+        {
+            message: 'Please send commission for the Mediator',
+            path: ['commissionValueToSubAdmin'],
         },
     );
 const getDealsWithBrandIdSchema = z.object({

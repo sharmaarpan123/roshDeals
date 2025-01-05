@@ -32,7 +32,7 @@ const adminRoleCreateRefineFunction =
             return true;
         } else if (
             data?.apiAccessorRoles?.includes(ADMIN_ROLE_TYPE_ENUM?.ADMIN) &&
-            data?.roles.includes(ADMIN_ROLE_TYPE_ENUM?.SUBADMIN)
+            data?.roles?.includes(ADMIN_ROLE_TYPE_ENUM?.SUBADMIN)
         ) {
             // admin can only add sub admin
             return true;

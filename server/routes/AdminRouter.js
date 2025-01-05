@@ -378,9 +378,12 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canAdd,
+        canAdminAccess,
     }),
     addDealController,
 );
+
+
 AdminRouter.post(
     '/deal/bulk-add',
     AdminAccessMiddleware({
@@ -394,6 +397,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
     }),
     editDealController,
 );
@@ -402,6 +406,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     dealDetailsWithFilters,
 );
@@ -419,6 +425,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
     }),
     dealDetails,
 );
