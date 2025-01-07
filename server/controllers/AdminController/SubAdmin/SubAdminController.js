@@ -48,17 +48,18 @@ class subAdminController {
                           },
                       },
                       {
-                          $match: {
-                              adminSubAdminLinkerInfo: { $ne: [] },
-                              ...(search && {
-                                  name: { $regex: search, $options: 'i' },
-                              }),
-                          },
-                      },
-                      {
                           $unwind: {
                               path: '$adminSubAdminLinkerInfo',
                               preserveNullAndEmptyArrays: false,
+                          },
+                      },
+                      {
+                          $match: {
+                              'adminSubAdminLinkerInfo.adminId':
+                                  new mongoose.Types.ObjectId(req?.user?._id),
+                              ...(search && {
+                                  name: { $regex: search, $options: 'i' },
+                              }),
                           },
                       },
                   ]
@@ -267,8 +268,7 @@ class subAdminController {
             },
         );
 
-        console.log(restBody?.userName , "sdf")
-
+        console.log(restBody?.userName, 'sdf');
 
         if (isAlreadyExists) {
             return res.status(400).json(

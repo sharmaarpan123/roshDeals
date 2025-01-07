@@ -47,7 +47,7 @@ const getPosterById = catchAsync(async (req, res) => {
     const data = await Poster.findOne({ _id: posterId })
         .populate('brand')
         .populate({
-            path: 'deal',
+            path: 'deal',   
             populate: {
                 path: 'brand dealCategory platForm',
             },
