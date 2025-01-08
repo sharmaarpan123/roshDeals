@@ -6,11 +6,8 @@ import {
     errorResponse,
     successResponse,
 } from '../../../utilities/Responses.js';
-import {
-    getAccessorId,
-    isAdminOrSubAdminAccessingApi,
-} from '../../../utilities/utilitis.js';
-import SubAdminDealSchema from './Schema.js';
+import { getAccessorId } from '../../../utilities/utilitis.js';
+import SubAdminDealSchema from './schema.js';
 
 class SubAdminDealControllerClass {
     cloneDealController = catchAsync(async (req, res) => {
