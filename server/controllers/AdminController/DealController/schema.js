@@ -1,5 +1,6 @@
 import { isUrlValid } from '../../../utilities/utilitis.js';
 import { z } from 'zod';
+
 import {
     filterRefineFunction,
     filterRefineMessage,
@@ -7,7 +8,7 @@ import {
     optionalString,
     requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
-import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
+
 
 const allDealsListSchema = filterSchemaObject
     .merge(
@@ -126,10 +127,7 @@ const addDealSchema = z
             .min(1, { message: 'unique Identifier  is required' }),
         imageUrl: z.string().optional(),
         isExchangeDeal: z.boolean().optional(),
-        refundDays: z.number({
-            required_error: 'Please add refundDays field',
-            invalid_type_error: 'refundDays field  should be numeric',
-        }),
+        
         exchangeDealProducts: z.array(z.string()).optional(),
         isCommissionDeal: z.boolean().optional(),
         showToUsers: requiredBoolean('show to user'),

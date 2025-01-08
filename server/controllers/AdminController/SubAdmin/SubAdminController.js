@@ -320,7 +320,7 @@ class subAdminController {
         const isSuperAdminId = isSuperAdminAccessingApi(req);
 
         const { adminId, subAdminId, isActive } =
-            subAdminValidationSchema?.manageAdminSubAdminRelation.parse({
+            subAdminValidationSchema.manageAdminSubAdminRelation.parse({
                 ...req?.body,
                 adminId: isSuperAdminId
                     ? req?.body?.adminId

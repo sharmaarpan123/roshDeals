@@ -61,7 +61,7 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
-        } = SubAdminDealSchema?.allDealsListSchema.parse(req.body);
+        } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         const adminIds = await AdminSubAdminLinker.find({
             subAdminId: req?.user?._id,
@@ -109,7 +109,7 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
-        } = SubAdminDealSchema?.allDealsListSchema.parse(req.body);
+        } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         const adminIds = await AdminSubAdminLinker.find({
             adminId: req?.user?._id,
@@ -246,7 +246,7 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
-        } = SubAdminDealSchema?.allDealsListSchema.parse(req.body);
+        } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         const subAdminId = getAccessorId(req);
 
