@@ -94,9 +94,13 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         ...(isSlotCompleted === 'uncompleted' && {
             isSlotCompleted: false,
         }),
-        ...(adminOrSubAdminId && {
-            adminId: new mongoose.Types.ObjectId(adminOrSubAdminId),
-        }),
+        ...(adminOrSubAdminId
+            ? {
+                  adminId: new mongoose.Types.ObjectId(adminOrSubAdminId), // when admin accessing api
+              }
+            : {
+                  parentDealId: { $exists: false }, // when super admin accessing api
+              }),
     };
 
     const dealData = Deal.find(query)
