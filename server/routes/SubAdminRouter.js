@@ -24,6 +24,7 @@ SubAdminRouter.post(
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canAdd,
         canSubAdminAccess,
+        canAdminAccess,
     }),
     SubAdminDealController.getDealOfAdminsWithFilters,
 );

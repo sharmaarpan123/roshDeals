@@ -6,7 +6,10 @@ import {
     errorResponse,
     successResponse,
 } from '../../../utilities/Responses.js';
-import { getAccessorId } from '../../../utilities/utilitis.js';
+import {
+    getAccessorId,
+    isSuperAdminAccessingApi,
+} from '../../../utilities/utilitis.js';
 import SubAdminDealSchema from './schema.js';
 
 class SubAdminDealControllerClass {
@@ -108,16 +111,34 @@ class SubAdminDealControllerClass {
             isSlotCompleted,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
-        const adminIds = await AdminSubAdminLinker.find({
-            adminId: req?.user?._id,
-        }).select('subAdminId');
+        let adminIds;
+
+        const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
+        if (!isSuperAdminAccessing) {
+            adminIds = await AdminSubAdminLinker.find({
+                adminId: req?.user?._id,
+            }).select('subAdminId');
+        }
 
         let aggregatePipelines = [
-            {
-                $match: {
-                    adminId: { $in: adminIds?.map((i) => i?.subAdminId) },
-                },
-            },
+            ...(isSuperAdminAccessing
+                ? [
+                      {
+                          $match: {
+                              parentDealId: { $exists: true }, // all the deal
+                          },
+                      },
+                  ]
+                : [
+                      {
+                          $match: {
+                              adminId: {
+                                  $in: adminIds?.map((i) => i?.subAdminId),
+                              },
+                          },
+                      },
+                  ]),
+
             {
                 $lookup: {
                     from: 'deals',
