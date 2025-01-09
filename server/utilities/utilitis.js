@@ -65,7 +65,7 @@ export const isAdminAccessingApi = (req) =>
         : null;
 
 export const isSuperAdminAccessingApi = (req) =>
-    req?.user?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)
+    req?.user?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERADMIN)
         ? req?.user?._id
         : null;
 

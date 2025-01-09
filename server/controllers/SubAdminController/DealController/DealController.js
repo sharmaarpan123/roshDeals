@@ -120,6 +120,8 @@ class SubAdminDealControllerClass {
             }).select('subAdminId');
         }
 
+        console.log(isSuperAdminAccessing, 'accesrror');
+
         let aggregatePipelines = [
             ...(isSuperAdminAccessing
                 ? [
@@ -154,9 +156,11 @@ class SubAdminDealControllerClass {
             },
             {
                 $match: {
-                    'parentDealId.adminId': new mongoose.Types.ObjectId(
-                        req?.user?._id,
-                    ),
+                    ...(!isSuperAdminAccessing && {
+                        'parentDealId.adminId': new mongoose.Types.ObjectId(
+                            req?.user?._id,
+                        ),
+                    }),
                     ...(search && {
                         'parentDealId.productName': {
                             $regex: search,
@@ -231,6 +235,8 @@ class SubAdminDealControllerClass {
                 $count: 'totalCount',
             },
         ];
+
+        console.log(aggregatePipelines);
 
         const totalCount = Deal.aggregate(aggregatePipelines);
 
@@ -335,7 +341,7 @@ class SubAdminDealControllerClass {
                 },
             });
 
-        if (!DealRes) { 
+        if (!DealRes) {
             return res.status(400).json(
                 errorResponse({
                     message: 'No Data Found',
