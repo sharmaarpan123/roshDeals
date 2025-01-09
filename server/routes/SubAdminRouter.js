@@ -14,6 +14,7 @@ SubAdminRouter.post(
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canAdd,
         canSubAdminAccess,
+        canAdminAccess,
     }),
     SubAdminDealController.cloneDealController,
 );
@@ -29,12 +30,13 @@ SubAdminRouter.post(
     SubAdminDealController.getDealOfAdminsWithFilters,
 );
 
-SubAdminRouter.get(
+SubAdminRouter.post(
     '/myDealsAsMed/getWithFilters',
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canView,
         canSubAdminAccess,
+        canAdminAccess,
     }),
     SubAdminDealController.getMyDealAsMedWithFilters,
 );
@@ -55,6 +57,7 @@ SubAdminRouter.get(
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canView,
         canSubAdminAccess,
+        canAdminAccess,
     }),
     SubAdminDealController.getAgencyDealDetailsAsMed,
 );

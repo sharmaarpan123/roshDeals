@@ -200,6 +200,19 @@ class SubAdminDealControllerClass {
                 },
             },
             {
+                $lookup: {
+                    from: 'admins',
+                    foreignField: '_id',
+                    localField: 'adminId',
+                    as: 'adminId',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$adminId',
+                },
+            },
+            {
                 $unwind: {
                     path: '$parentDealId.brand',
                 },
@@ -322,7 +335,7 @@ class SubAdminDealControllerClass {
                 },
             });
 
-        if (!DealRes) {
+        if (!DealRes) { 
             return res.status(400).json(
                 errorResponse({
                     message: 'No Data Found',
@@ -332,7 +345,7 @@ class SubAdminDealControllerClass {
 
         const isClonedAlready = await Deal.findOne({
             parentDealId: DealRes?._id,
-            adminId: req?.user?._id,
+            adminId: new mongoose.Types.ObjectId(req?.user?._id),
         });
 
         if (isClonedAlready) {

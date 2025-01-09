@@ -20,7 +20,10 @@ import User from '../../../database/models/User.js';
 import Brand from '../../../database/models/Brand.js';
 import moment from 'moment';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
-import { isAdminOrSubAdminAccessingApi } from '../../../utilities/utilitis.js';
+import {
+    isAdminAccessingApi,
+    isAdminOrSubAdminAccessingApi,
+} from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
 
 export const dealPaymentStatusChangeController = catchAsync(
@@ -84,7 +87,7 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
     const { offset, limit, search, status, paymentStatus, isSlotCompleted } =
         allDealsListSchema.parse(req.body);
 
-    const adminOrSubAdminId = isAdminOrSubAdminAccessingApi(req);
+    const adminId = isAdminAccessingApi(req);
 
     const query = {
         ...(search && { productName: { $regex: search, $options: 'i' } }),
@@ -94,13 +97,10 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         ...(isSlotCompleted === 'uncompleted' && {
             isSlotCompleted: false,
         }),
-        ...(adminOrSubAdminId
-            ? {
-                  adminId: new mongoose.Types.ObjectId(adminOrSubAdminId), // when admin accessing api
-              }
-            : {
-                  parentDealId: { $exists: false }, // when super admin accessing api
-              }),
+        ...(adminId && {
+            adminId: new mongoose.Types.ObjectId(adminId),
+        }),
+        parentDealId: { $exists: false },
     };
 
     const dealData = Deal.find(query)
