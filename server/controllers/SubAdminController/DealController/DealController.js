@@ -4,6 +4,7 @@ import Deal from '../../../database/models/Deal.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import {
     errorResponse,
+    sendErrorResponse,
     successResponse,
 } from '../../../utilities/Responses.js';
 import {
@@ -27,12 +28,19 @@ class SubAdminDealControllerClass {
         const clonedDeal = await Deal.findOne({ _id: dealId });
 
         if (!clonedDeal) {
-            return res.status(200).json(
+            return res.status(400).json(
                 errorResponse({
                     message: 'Deal  Not Found',
                     data: DealRes,
                 }),
             );
+        }
+
+        if (clonedDeal?.isCommissionDeal && !commissionValue) {
+            return sendErrorResponse({
+                res,
+                message: 'Please  send commission value',
+            });
         }
 
         const newDeal = await Deal.create({

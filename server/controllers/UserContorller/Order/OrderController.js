@@ -33,7 +33,10 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     // validating the deals Id // start
     const validDealsIds = await Deal.find({
         _id: { $in: dealIds },
-    });
+    })
+        .populate('adminId')
+        .select('adminId');
+
     if (dealIds.length !== validDealsIds.length) {
         return res.status(400).json(
             errorResponse({
@@ -63,8 +66,9 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         { $inc: { slotCompletedCount: 1 } },
     );
     const newCreatedOrders = await Order.insertMany(
-        dealIds.map((deal) => ({
-            dealId: deal,
+        validDealsIds.map((deal) => ({
+            dealId: deal._id,
+            dealOwner: deal?.adminId?._id,
             orderIdOfPlatForm,
             orderScreenShot,
             reviewerName,
@@ -176,12 +180,18 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const { limit, offset ,selectedDate} = filterSchema.parse(req.query);
+    const { limit, offset, selectedDate } = filterSchema.parse(req.query);
     const dateFilter = selectedDate
         ? {
               createdAt: {
                   $gte: toUTC(new Date(selectedDate)), // Start of the day in UTC
-                  $lt: toUTC(new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() + 1))), // End of the day in UTC
+                  $lt: toUTC(
+                      new Date(
+                          new Date(selectedDate).setDate(
+                              new Date(selectedDate).getDate() + 1,
+                          ),
+                      ),
+                  ), // End of the day in UTC
               },
           }
         : {};

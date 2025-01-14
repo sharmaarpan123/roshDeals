@@ -4,6 +4,11 @@ const orderSchema = new mongoose.Schema(
     {
         userId: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
         dealId: { type: mongoose.Types.ObjectId, required: true, ref: 'Deal' },
+        dealOwner: {
+            type: mongoose.Types.ObjectId,
+            required: true,
+            ref: 'Admin',
+        },
         reviewerName: { type: String, required: true },
         orderIdOfPlatForm: { type: String, required: true }, // order id from the platforms
         orderScreenShot: { type: String, required: true },

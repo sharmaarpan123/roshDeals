@@ -165,6 +165,109 @@ export const getAllOrders = catchAsync(async (req, res) => {
         allOrdersListSchema.parse(req.body);
 
     const aggregateArr = [
+
+
+        
+        
+        {
+            $match: {
+                ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
+                ...(dealId?.length > 0 && {
+                    dealId: {
+                        $in: dealId?.map(
+                            (id) => new mongoose.Types.ObjectId(id),
+                        ),
+                    },
+                }),
+            },
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'dealId',
+                foreignField: '_id',
+                as: 'dealId',
+            },
+        },
+        { $unwind: '$dealId' },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.brand',
+                foreignField: '_id',
+                as: 'dealId.brand',
+            },
+        },
+        { $unwind: '$dealId.brand' },
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'dealId.dealCategory',
+                foreignField: '_id',
+                as: 'dealId.dealCategory',
+            },
+        },
+        { $unwind: '$dealId.dealCategory' },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'dealId.platForm',
+                foreignField: '_id',
+                as: 'dealId.platForm',
+            },
+        },
+        { $unwind: '$dealId.platForm' },
+        {
+            $match: {
+                ...(brandId && {
+                    'dealId.brand._id': new mongoose.Types.ObjectId(brandId),
+                }),
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userId',
+            },
+        },
+        { $unwind: '$userId' },
+        { $sort: { createdAt: -1 } },
+    ];
+
+    if (limit || offset) {
+        aggregateArr.push({ $skip: offset || 0 });
+        aggregateArr.push({ $limit: limit || 20 });
+    }
+
+    const orders = Order.aggregate(aggregateArr);
+
+    if (limit || offset) {
+        aggregateArr.pop();
+        aggregateArr.pop();
+    }
+
+    aggregateArr.push({ $count: 'total' });
+
+    const totalCount = Order.aggregate(aggregateArr);
+
+    const data = await Promise.all([orders, totalCount]);
+
+    return res.status(200).json(
+        successResponse({
+            message: 'orders list!',
+            data: data[0],
+            total: data[1].length > 0 ? data[1][0].total : 0,
+        }),
+    );
+});
+
+export const getAllOrdersAsMed = catchAsync(async (req, res) => {
+    const { offset, limit, dealId, brandId, orderFormStatus } =
+        allOrdersListSchema.parse(req.body);
+
+    const aggregateArr = [
         {
             $match: {
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
