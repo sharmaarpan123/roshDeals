@@ -113,6 +113,16 @@ AdminRouter.post(
     subAdminController.manageAdminSubAdminRelation,
 );
 
+AdminRouter.post(
+    '/linkedSubAdmin',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+    }),
+    subAdminController.linkSubAdminByAdmin,
+);
+
 // admin modules
 AdminRouter.post(
     '/add/subAdminModule',
@@ -382,7 +392,6 @@ AdminRouter.post(
     }),
     addDealController,
 );
-
 
 AdminRouter.post(
     '/deal/bulk-add',

@@ -62,5 +62,16 @@ SubAdminRouter.get(
     SubAdminDealController.getAgencyDealDetailsAsMed,
 );
 
+SubAdminRouter.get(
+    '/myDealAsMed/detail/:dealId',
+    AdminAccessMiddleware({
+        uniqueSlug: 'deal',
+        key: permissionsLevelKey.canView,
+        canSubAdminAccess,
+        canAdminAccess,
+    }),
+    SubAdminDealController.getAgencyDealDetailsAsMed,
+);
+
 export default SubAdminRouter;
 // # sourceMappingURL=SubAdminRouter.js.map

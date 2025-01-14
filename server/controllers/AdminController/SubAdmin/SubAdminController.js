@@ -344,9 +344,84 @@ class subAdminController {
                 }),
             );
         }
-        return res.status(200).json(
+        return res.status(400).json(
             errorResponse({
                 message: 'Something went wrong while updating!',
+            }),
+        );
+    });
+
+    linkSubAdminByAdmin = catchAsync(async (req, res) => {
+        const { subAdminUserName, adminUserName } =
+            subAdminValidationSchema.linkAdminSubAdmin.parse({
+                ...req?.body,
+            });
+
+        const isUserNameExistsPromise = [
+            Admin.findOne({ userName: adminUserName }),
+            Admin.findOne({ userName: subAdminUserName }),
+        ];
+
+        const isUserNamesExists = await Promise.all(isUserNameExistsPromise);
+
+        if (!isUserNamesExists[0]) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'In Valid Agency User Name',
+                }),
+            );
+        }
+
+        if (!isUserNamesExists[1]) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'In Valid Med User Name',
+                }),
+            );
+        }
+
+        if (
+            !isUserNamesExists[1].roles.includes(ADMIN_ROLE_TYPE_ENUM.SUBADMIN)
+        ) {
+            return res.status(400).json(
+                errorResponse({
+                    message:
+                        'This User is not Become Mediator yet!, Please ask Him to become a Mediator',
+                }),
+            );
+        }
+
+        const isAlreadyLinked = await AdminSubAdminLinker.findOne({
+            adminId: isUserNamesExists[0]?._id,
+            subAdminId: isUserNamesExists[1]?._id,
+        });
+
+        if (isAlreadyLinked) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'This Mediator is already Added',
+                }),
+            );
+        }
+
+        const adminSubAdminLink = new AdminSubAdminLinker({
+            adminId: isUserNamesExists[0]?._id,
+            subAdminId: isUserNamesExists[1]?._id,
+        });
+
+        const data = await adminSubAdminLink.save();
+
+        if (data) {
+            return res.status(200).json(
+                successResponse({
+                    message: 'Successfully Added',
+                }),
+            );
+        }
+
+        return res.status(400).json(
+            errorResponse({
+                message: 'Something went wrong while Adding!',
             }),
         );
     });

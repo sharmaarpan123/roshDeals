@@ -339,7 +339,8 @@ class SubAdminDealControllerClass {
                 populate: {
                     path: 'brand dealCategory platForm',
                 },
-            });
+            })
+            .lean();
 
         if (!DealRes) {
             return res.status(400).json(

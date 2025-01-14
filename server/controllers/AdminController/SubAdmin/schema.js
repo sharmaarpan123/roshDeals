@@ -118,6 +118,11 @@ class subAdminValidation {
         adminId: requiredString('Admin'),
         isActive: requiredBoolean('Status'),
     });
+
+    linkAdminSubAdmin = z.object({
+        subAdminUserName: requiredString('Sub admin'),
+        adminUserName: requiredString('Admin'),
+    });
 }
 
 const subAdminValidationSchema = new subAdminValidation();
