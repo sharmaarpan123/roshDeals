@@ -23,6 +23,7 @@ import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import {
     isAdminAccessingApi,
     isAdminOrSubAdminAccessingApi,
+    isSuperAdminAccessingApi,
 } from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
 
@@ -372,7 +373,16 @@ export const dealDetails = catchAsync(async (req, res) => {
 });
 
 export const getDealsWithBrandId = catchAsync(async (req, res) => {
-    const { brandId } = getDealsWithBrandIdSchema.parse(req.params);
+    // const apiAccessingAs = {
+    //     dealsAsAgency: 'dealsAsAgency',
+    //     medDealsAsAgency: 'medDealsAsAgency',
+    //     dealAsMed: 'dealAsMed',
+    // };
+    const { brandId } = getDealsWithBrandIdSchema.parse({
+        ...req.params,
+    });
+
+    // const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
 
     const deals = await Deal.find({ ...(brandId && { brand: brandId }) });
 

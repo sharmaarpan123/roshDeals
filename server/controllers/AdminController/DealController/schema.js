@@ -8,7 +8,7 @@ import {
     optionalString,
     requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
-
+import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 
 const allDealsListSchema = filterSchemaObject
     .merge(
@@ -127,7 +127,7 @@ const addDealSchema = z
             .min(1, { message: 'unique Identifier  is required' }),
         imageUrl: z.string().optional(),
         isExchangeDeal: z.boolean().optional(),
-        
+
         exchangeDealProducts: z.array(z.string()).optional(),
         isCommissionDeal: z.boolean().optional(),
         showToUsers: requiredBoolean('show to user'),
@@ -218,9 +218,9 @@ const BulkAddDealSchema = z.array(addDealSchema, {
     required_error: 'Bulk Add is required',
 });
 
-    const getDeal = z.object({
-        dealId: z.string({ required_error: 'DealId is  required' }).trim(),
-    });
+const getDeal = z.object({
+    dealId: z.string({ required_error: 'DealId is  required' }).trim(),
+});
 
 export const paymentStatusChangeSchema = getDeal.merge(
     z.object({
@@ -406,6 +406,17 @@ const getDealsWithBrandIdSchema = z.object({
     brandId: z
         .string({ required_error: 'brand id is required' })
         .min(1, { message: "'brand id is required'" }),
+    // apiAccessorRole: z.nativeEnum(
+    //     {
+    //         dealsAsAgency: 'dealsAsAgency',
+    //         medDealsAsAgency: 'medDealsAsAgency',
+    //         dealAsMed: 'dealAsMed',
+    //     },
+    //     {
+    //         required_error: 'Poster type is required',
+    //         invalid_type_error: 'inValid Poster Type',
+    //     },
+    // ),
 });
 
 export {

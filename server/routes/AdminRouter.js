@@ -1,8 +1,8 @@
 import express from 'express';
 import AdminModuleController from '../controllers/AdminController/AdminModule/AdminModuleController.js';
-import { dashboardController } from '../controllers/AdminController/dashBoardController.js';
-import subAdminController from '../controllers/AdminController/SubAdmin/SubAdminController.js';
 import brandController from '../controllers/AdminController/BrandConroller/brandController.js';
+import chatController from '../controllers/AdminController/ChatController/ChatController.js';
+import { dashboardController } from '../controllers/AdminController/dashBoardController.js';
 import dealCategoryController from '../controllers/AdminController/DealCategoryController/dealCategoryController.js';
 import {
     addDealController,
@@ -15,15 +15,19 @@ import {
     editDealController,
     getDealsWithBrandId,
 } from '../controllers/AdminController/DealController/dealController.js';
+import { adminMeQueryController } from '../controllers/AdminController/meQuery.js';
 import { sendNotificationController } from '../controllers/AdminController/NotificationController/NotificationCotroller.js';
 import {
     acceptRejectOrder,
     bulkPaymentStatusUpdate,
     getAllOrders,
+    getAllOrdersOfMedAsAgency,
+    getAllOrdersOfMedAsMed,
     paymentStatusUpdate,
 } from '../controllers/AdminController/Order/OrderController.js';
 import platFormController from '../controllers/AdminController/PlatFormController/platFormController.js';
 import PosterController from '../controllers/AdminController/PosterController/PosterController.js';
+import subAdminController from '../controllers/AdminController/SubAdmin/SubAdminController.js';
 import {
     activeInActiveUserController,
     getAllUsersController,
@@ -32,8 +36,6 @@ import {
 } from '../controllers/AdminController/userController/Usercontroller.js';
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
-import chatController from '../controllers/AdminController/ChatController/ChatController.js';
-import { adminMeQueryController } from '../controllers/AdminController/meQuery.js';
 const AdminRouter = express.Router();
 
 // dashboard
@@ -478,8 +480,42 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'order',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
     }),
     getAllOrders,
+);
+
+AdminRouter.post(
+    '/ordersOfMedAsAgency/all',
+    AdminAccessMiddleware({
+        uniqueSlug: 'order',
+        key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
+    }),
+    getAllOrdersOfMedAsAgency,
+);
+
+AdminRouter.post(
+    '/ordersOfMedAsMed/all',
+    AdminAccessMiddleware({
+        uniqueSlug: 'order',
+        key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
+    }),
+    getAllOrdersOfMedAsMed,
+);
+
+AdminRouter.post(
+    '/medOrdersAsAgency/all',
+    AdminAccessMiddleware({
+        uniqueSlug: 'order',
+        key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+        canSubAdminAccess,
+    }),
+    getAllOrdersOfMedAsAgency,
 );
 AdminRouter.post(
     '/order/paymentStatusUpdate',
