@@ -111,22 +111,14 @@ export default catchAsync(async (req, res) => {
                 as: 'parentDeal',
             },
         },
-        // {
-        //     $lookup: {
-        //         from: 'dealcategories', // Collection name in your database
-        //         localField: 'dealCategory',
-        //         foreignField: '_id',
-        //         as: 'dealCategoryData',
-        //     },
-        // },
         {
             $lookup: {
-                from: 'dealcategories', // Join with the 'brands' collection
+                from: 'dealcategories',
                 let: {
                     dealCategoryId: '$dealCategory',
                     parentDealCategoryId: {
                         $arrayElemAt: ['$parentDeal.dealCategory', 0],
-                    }, // Use parentDeal's brand if it exists
+                    },
                 },
                 pipeline: [
                     {

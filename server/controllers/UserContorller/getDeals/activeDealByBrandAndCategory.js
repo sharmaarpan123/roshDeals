@@ -44,6 +44,12 @@ export default catchAsync(async (req, res) => {
         .populate('brand')
         .populate('dealCategory')
         .populate('platForm')
+        .populate({
+            path: 'parentDealId',
+            populate: {
+                path: 'brand dealCategory platForm',
+            },
+        })
         .skip(offset)
         .limit(limit);
 
