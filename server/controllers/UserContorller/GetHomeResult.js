@@ -34,7 +34,7 @@ export default catchAsync(async (req, res) => {
         })
         .skip(dealsFilter?.offset || 0)
         .limit(dealsFilter?.limit || 10);
-        
+
     const brandData = Deal.aggregate([
         {
             $match: {
@@ -54,23 +54,23 @@ export default catchAsync(async (req, res) => {
         {
             $unwind: '$brandData',
         },
-        {
-            $group: {
-                _id: '$brandData._id', // Group by the unique identifier of the brand document
-                brandData: { $first: '$brandData' }, // Keep the first document in each group
-            },
-        },
-        {
-            $replaceRoot: {
-                newRoot: '$brandData',
-            },
-        },
-        {
-            $skip: brandFilter?.offset || 0,
-        },
-        {
-            $limit: brandFilter?.limit || 10,
-        },
+        // {
+        //     $group: {
+        //         _id: '$brandData._id', // Group by the unique identifier of the brand document
+        //         brandData: { $first: '$brandData' }, // Keep the first document in each group
+        //     },
+        // },
+        // {
+        //     $replaceRoot: {
+        //         newRoot: '$brandData',
+        //     },
+        // },
+        // {
+        //     $skip: brandFilter?.offset || 0,
+        // },
+        // {
+        //     $limit: brandFilter?.limit || 10,
+        // },
     ]);
     const DealCategoriesData = Deal.aggregate([
         {
