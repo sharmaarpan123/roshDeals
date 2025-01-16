@@ -14,7 +14,13 @@ export const dealDetails = catchAsync(async (req, res) => {
     const DealRes = await Deal.findOne({ _id: dealId })
         .populate('dealCategory')
         .populate('platForm')
-        .populate('brand');
+        .populate('brand')
+        .populate({
+            path: 'parentDealId',
+            populate: {
+                path: 'brand dealCategory platForm',
+            },
+        });
     if (!DealRes) {
         return res.status(400).json(
             errorResponse({

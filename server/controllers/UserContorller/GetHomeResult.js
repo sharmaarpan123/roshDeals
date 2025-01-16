@@ -34,6 +34,7 @@ export default catchAsync(async (req, res) => {
         })
         .skip(dealsFilter?.offset || 0)
         .limit(dealsFilter?.limit || 10);
+        
     const brandData = Deal.aggregate([
         {
             $match: {
