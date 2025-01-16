@@ -175,7 +175,7 @@ export const getAllOrders = catchAsync(async (req, res) => {
         {
             $match: {
                 ...(adminId && {
-                    dealOwner: adminId,
+                    dealOwner: new mongoose.Types.ObjectId(adminId),
                 }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
