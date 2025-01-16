@@ -28,10 +28,9 @@ export default catchAsync(async (req, res) => {
         adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
         // ...(type === SearchEnumType.brand && { brand: id }),
 
-        $or: [
-            ...(type === SearchEnumType.brand ? [{ brand: id }] : []),
-            ...(type === SearchEnumType.brand ? [{ 'parentDealId.brand': id }] : []),
-        ],
+        ...(type === SearchEnumType.brand && {
+            $or: [{ brand: id }, { 'parentDealId.brand': id }],
+        }),
 
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
         ...(type === SearchEnumType.platForm && { platForm: id }),
