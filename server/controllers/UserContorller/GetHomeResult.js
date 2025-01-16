@@ -26,6 +26,12 @@ export default catchAsync(async (req, res) => {
         .populate('brand')
         .populate('dealCategory')
         .populate('platForm')
+        .populate({
+            path: 'parentDealId',
+            populate: {
+                path: 'brand dealCategory platForm',
+            },
+        })
         .skip(dealsFilter?.offset || 0)
         .limit(dealsFilter?.limit || 10);
     const brandData = Deal.aggregate([
