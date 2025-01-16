@@ -35,66 +35,66 @@ export default catchAsync(async (req, res) => {
         .skip(dealsFilter?.offset || 0)
         .limit(dealsFilter?.limit || 10);
 
-        const brandData = await Deal.aggregate([
-            {
-              $match: {
+    const brandData = await Deal.aggregate([
+        {
+            $match: {
                 isActive: true,
                 isSlotCompleted: false,
                 adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
-              },
             },
-            {
-              $lookup: {
+        },
+        {
+            $lookup: {
                 from: 'deals', // Self-reference the 'deals' collection to handle parentDealId
                 localField: 'parentDealId',
                 foreignField: '_id',
                 as: 'parentDeal',
-              },
             },
-            {
-              $lookup: {
+        },
+        {
+            $lookup: {
                 from: 'brands', // Join with the 'brands' collection
                 let: {
-                  brandId: '$brand',
-                  parentBrandId: { $arrayElemAt: ['$parentDeal.brand', 0] }, // Use parentDeal's brand if it exists
+                    brandId: '$brand',
+                    parentBrandId: { $arrayElemAt: ['$parentDeal.brand', 0] }, // Use parentDeal's brand if it exists
                 },
                 pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $or: [
-                          { $eq: ['$_id', '$$brandId'] }, // Match the direct brand
-                          { $eq: ['$_id', '$$parentBrandId'] }, // Match the parentDeal's brand
-                        ],
-                      },
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $eq: ['$_id', '$$brandId'] }, // Match the direct brand
+                                    { $eq: ['$_id', '$$parentBrandId'] }, // Match the parentDeal's brand
+                                ],
+                            },
+                        },
                     },
-                  },
                 ],
                 as: 'brandData',
-              },
             },
-            {
-              $unwind: '$brandData',
-            },
-            {
-              $group: {
+        },
+        {
+            $unwind: '$brandData',
+        },
+        {
+            $group: {
                 _id: '$brandData._id', // Group by brand ID
                 brandData: { $first: '$brandData' }, // Keep the brand document
-              },
             },
-            {
-              $replaceRoot: {
+        },
+        {
+            $replaceRoot: {
                 newRoot: '$brandData', // Replace the document with brand data
-              },
             },
-            {
-              $skip: brandFilter?.offset || 0,
-            },
-            {
-              $limit: brandFilter?.limit || 10,
-            },
-          ]);
-          
+        },
+        {
+            $skip: brandFilter?.offset || 0,
+        },
+        {
+            $limit: brandFilter?.limit || 10,
+        },
+    ]);
+
     const DealCategoriesData = Deal.aggregate([
         {
             $match: {
@@ -105,9 +105,41 @@ export default catchAsync(async (req, res) => {
         },
         {
             $lookup: {
-                from: 'dealcategories', // Collection name in your database
-                localField: 'dealCategory',
+                from: 'deals', // Self-reference the 'deals' collection to handle parentDealId
+                localField: 'parentDealId',
                 foreignField: '_id',
+                as: 'parentDeal',
+            },
+        },
+        // {
+        //     $lookup: {
+        //         from: 'dealcategories', // Collection name in your database
+        //         localField: 'dealCategory',
+        //         foreignField: '_id',
+        //         as: 'dealCategoryData',
+        //     },
+        // },
+        {
+            $lookup: {
+                from: 'dealcategories', // Join with the 'brands' collection
+                let: {
+                    dealCategoryId: '$dealCategory',
+                    parentDealCategoryId: {
+                        $arrayElemAt: ['$parentDeal.dealCategory', 0],
+                    }, // Use parentDeal's brand if it exists
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $eq: ['$_id', '$$dealCategoryId'] }, // Match the direct brand
+                                    { $eq: ['$_id', '$$parentDealCategoryId'] }, // Match the parentDeal's brand
+                                ],
+                            },
+                        },
+                    },
+                ],
                 as: 'dealCategoryData',
             },
         },
