@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Deal from '../../database/models/Deal.js';
 import Poster from '../../database/models/Poster.js';
 import { successResponse } from '../../utilities/Responses.js';
@@ -10,10 +11,16 @@ const schema = z.object({
     dealCategoryFilter: filterSchema.optional(),
 });
 export default catchAsync(async (req, res) => {
-    const { dealsFilter, brandFilter, dealCategoryFilter } = schema.parse(req.body);
+    const { dealsFilter, brandFilter, dealCategoryFilter } = schema.parse(
+        req.body,
+    );
+
+    const adminCurrentRefferance = req?.user?.currentAdminReference;
+
     const activelyDeals = Deal.find({
         isActive: true,
         isSlotCompleted: false,
+        adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
     })
         .populate('brand')
         .populate('dealCategory')
@@ -23,9 +30,9 @@ export default catchAsync(async (req, res) => {
     const brandData = Deal.aggregate([
         {
             $match: {
-            
                 isActive: true,
                 isSlotCompleted: false,
+                adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
             },
         },
         {
@@ -62,6 +69,7 @@ export default catchAsync(async (req, res) => {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
+                adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
             },
         },
         {
@@ -99,11 +107,11 @@ export default catchAsync(async (req, res) => {
         .populate('brand')
         .populate('dealCategory')
         .populate({
-        path: 'deal',
-        populate: {
-            path: 'brand dealCategory platForm',
-        },
-    });
+            path: 'deal',
+            populate: {
+                path: 'brand dealCategory platForm',
+            },
+        });
     const homeData = await Promise.all([
         activelyDeals,
         brandData,
@@ -111,15 +119,17 @@ export default catchAsync(async (req, res) => {
         PosterData,
     ]);
     if (homeData?.length) {
-        return res.status(200).json(successResponse({
-            message: 'Home Data Fetched',
-            data: {
-                activelyDeals: homeData[0],
-                brandData: homeData[1],
-                dealCategoryData: homeData[2],
-                Poster: homeData[3],
-            },
-        }));
+        return res.status(200).json(
+            successResponse({
+                message: 'Home Data Fetched',
+                data: {
+                    activelyDeals: homeData[0],
+                    brandData: homeData[1],
+                    dealCategoryData: homeData[2],
+                    Poster: homeData[3],
+                },
+            }),
+        );
     }
 });
 //# sourceMappingURL=GetHomeResult.js.map

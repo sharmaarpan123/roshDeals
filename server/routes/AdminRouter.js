@@ -121,6 +121,7 @@ AdminRouter.post(
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canEdit,
         canAdminAccess,
+        
     }),
     subAdminController.linkSubAdminByAdmin,
 );

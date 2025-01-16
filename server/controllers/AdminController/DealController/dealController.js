@@ -23,7 +23,6 @@ import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import {
     isAdminAccessingApi,
     isAdminOrSubAdminAccessingApi,
-    isSuperAdminAccessingApi,
 } from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
 
