@@ -43,17 +43,17 @@ export default catchAsync(async (req, res) => {
                 adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
-        {
-            $lookup: {
-                from: 'brands', // Collection name in your database
-                localField: 'brand',
-                foreignField: '_id',
-                as: 'brandData',
-            },
-        },
-        {
-            $unwind: '$brandData',
-        },
+        // {
+        //     $lookup: {
+        //         from: 'brands', // Collection name in your database
+        //         localField: 'brand',
+        //         foreignField: '_id',
+        //         as: 'brandData',
+        //     },
+        // },
+        // {
+        //     $unwind: '$brandData',
+        // },
         // {
         //     $group: {
         //         _id: '$brandData._id', // Group by the unique identifier of the brand document
