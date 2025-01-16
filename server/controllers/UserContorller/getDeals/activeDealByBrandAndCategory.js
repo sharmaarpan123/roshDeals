@@ -26,7 +26,13 @@ export default catchAsync(async (req, res) => {
         isActive: true,
         isSlotCompleted: false,
         adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
-        ...(type === SearchEnumType.brand && { brand: id }),
+        // ...(type === SearchEnumType.brand && { brand: id }),
+
+        $or: [
+            ...(type === SearchEnumType.brand ? [{ brand: id }] : []),
+            ...(type === SearchEnumType.brand ? [{ 'parentDealId.brand': id }] : []),
+        ],
+
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
         ...(type === SearchEnumType.platForm && { platForm: id }),
         ...(selectedCategoryFilter?.length && {
