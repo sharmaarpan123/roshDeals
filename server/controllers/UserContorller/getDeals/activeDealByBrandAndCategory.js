@@ -6,19 +6,38 @@ import mongoose from 'mongoose';
 import Brand from '../../../database/models/Brand.js';
 import DealCategory from '../../../database/models/DealCategory.js';
 import PlatForm from '../../../database/models/PlatForm.js';
+import { getCurrentAdminReferencesId } from '../../../utilities/utilitis.js';
 export default catchAsync(async (req, res) => {
     const body = activeDealByBrandAndCategory.parse(req.body);
-    console.log(body)
-    const { type, id, offset, limit, selectedCategoryFilter, selectedPlatformFilter, selectedBrandFilter } = body;
+
+    const {
+        type,
+        id,
+        offset,
+        limit,
+        selectedCategoryFilter,
+        selectedPlatformFilter,
+        selectedBrandFilter,
+    } = body;
+
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+
     const filter = {
         isActive: true,
         isSlotCompleted: false,
+        adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
         ...(type === SearchEnumType.brand && { brand: id }),
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
         ...(type === SearchEnumType.platForm && { platForm: id }),
-        ...(selectedCategoryFilter?.length && { dealCategory: { $in: selectedCategoryFilter } }),
-        ...(selectedPlatformFilter?.length && { platForm: { $in: selectedPlatformFilter } }),
-        ...(selectedBrandFilter?.length && { brand: { $in: selectedBrandFilter } }),
+        ...(selectedCategoryFilter?.length && {
+            dealCategory: { $in: selectedCategoryFilter },
+        }),
+        ...(selectedPlatformFilter?.length && {
+            platForm: { $in: selectedPlatformFilter },
+        }),
+        ...(selectedBrandFilter?.length && {
+            brand: { $in: selectedBrandFilter },
+        }),
     };
     // Fetch deals with pagination
     const DealData = Deal.find(filter)
@@ -35,23 +54,25 @@ export default catchAsync(async (req, res) => {
     const relatedFilter = {
         isActive: true,
         isSlotCompleted: false,
+        adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
         ...(type === SearchEnumType.brand && { brand: id }),
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
         ...(type === SearchEnumType.platForm && { platForm: id }),
     };
 
     // Fetch distinct IDs and populate their details
-    const [relatedBrands, relatedCategories, relatedPlatforms] = await Promise.all([
-        Deal.find(relatedFilter).distinct('brand').then(ids =>
-            Brand.find({ _id: { $in: ids } })
-        ),
-        Deal.find(relatedFilter).distinct('dealCategory').then(ids =>
-            DealCategory.find({ _id: { $in: ids } })
-        ),
-        Deal.find(relatedFilter).distinct('platForm').then(ids =>
-            PlatForm.find({ _id: { $in: ids } })
-        ),
-    ]);
+    const [relatedBrands, relatedCategories, relatedPlatforms] =
+        await Promise.all([
+            Deal.find(relatedFilter)
+                .distinct('brand')
+                .then((ids) => Brand.find({ _id: { $in: ids } })),
+            Deal.find(relatedFilter)
+                .distinct('dealCategory')
+                .then((ids) => DealCategory.find({ _id: { $in: ids } })),
+            Deal.find(relatedFilter)
+                .distinct('platForm')
+                .then((ids) => PlatForm.find({ _id: { $in: ids } })),
+        ]);
 
     // Execute all queries concurrently
     const [data, totalCount] = await Promise.all([DealData, total]);
@@ -59,7 +80,8 @@ export default catchAsync(async (req, res) => {
     // Respond with successResponse
     return res.status(200).json(
         successResponse({
-            message: 'Deal data with related brands, categories, and platforms for the requested id',
+            message:
+                'Deal data with related brands, categories, and platforms for the requested id',
             data,
             total: totalCount,
             others: {

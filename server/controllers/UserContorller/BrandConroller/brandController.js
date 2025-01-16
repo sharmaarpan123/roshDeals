@@ -1,13 +1,14 @@
-
 import catchAsync from '../../../utilities/catchAsync.js';
-import {  successResponse } from '../../../utilities/Responses.js';
+import { successResponse } from '../../../utilities/Responses.js';
 import Brand from '../../../database/models/Brand.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import Deal from '../../../database/models/Deal.js';
+import mongoose from 'mongoose';
 
+import { getCurrentAdminReferencesId } from '../../../utilities/utilitis.js';
 const getAllBrandController = catchAsync(async (req, res) => {
     const { offset, limit, search, status } = filterSchema.parse(req.body);
- 
+
     let AllDAta = Brand.find({
         ...(status && { isActive: Boolean(+status) }),
         ...(search && { name: { $regex: search, $options: 'i' } }),
@@ -37,11 +38,15 @@ const getAllBrandController = catchAsync(async (req, res) => {
 
 const getActiveBrandController = catchAsync(async (req, res) => {
     const { offset, limit, search } = filterSchema.parse(req.body);
+
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+
     const brandData = await Deal.aggregate([
         {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
+                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
         {
@@ -86,9 +91,6 @@ const getActiveBrandController = catchAsync(async (req, res) => {
     );
 });
 export default {
-    
     getAllBrandController,
     getActiveBrandController,
-   
 };
-

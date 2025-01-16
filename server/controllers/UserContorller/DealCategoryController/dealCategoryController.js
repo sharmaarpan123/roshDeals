@@ -1,11 +1,10 @@
+import mongoose from 'mongoose';
 import Deal from '../../../database/models/Deal.js';
 import DealCategory from '../../../database/models/DealCategory.js';
 import catchAsync from '../../../utilities/catchAsync.js';
-import {
-    successResponse,
-} from '../../../utilities/Responses.js';
+import { successResponse } from '../../../utilities/Responses.js';
+import { getCurrentAdminReferencesId } from '../../../utilities/utilitis.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
-
 
 const getAllDealCategoryController = catchAsync(async (req, res) => {
     const AllDealCategories = await DealCategory.find({}).sort({
@@ -20,11 +19,15 @@ const getAllDealCategoryController = catchAsync(async (req, res) => {
 });
 const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
+
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+
     const DealCategoriesData = Deal.aggregate([
         {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
+                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
         {
@@ -72,9 +75,6 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
     );
 });
 export default {
-
     getAllDealCategoryController,
     getActiveDealCategoriesController,
-
 };
-

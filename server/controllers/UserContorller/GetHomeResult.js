@@ -5,6 +5,7 @@ import { successResponse } from '../../utilities/Responses.js';
 import { filterSchema } from '../../utilities/ValidationSchema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { z } from 'zod';
+import { getCurrentAdminReferencesId } from '../../utilities/utilitis.js';
 const schema = z.object({
     dealsFilter: filterSchema.optional(),
     brandFilter: filterSchema.optional(),
@@ -15,12 +16,12 @@ export default catchAsync(async (req, res) => {
         req.body,
     );
 
-    const adminCurrentRefferance = req?.user?.currentAdminReference;
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
     const activelyDeals = Deal.find({
         isActive: true,
         isSlotCompleted: false,
-        adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
+        adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
     })
         .populate('brand')
         .populate('dealCategory')
@@ -32,7 +33,7 @@ export default catchAsync(async (req, res) => {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
-                adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
+                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
         {
@@ -69,7 +70,7 @@ export default catchAsync(async (req, res) => {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
-                adminId: new mongoose.Types.ObjectId(adminCurrentRefferance),
+                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
         {

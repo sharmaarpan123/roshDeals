@@ -74,3 +74,6 @@ export const toUTC = (date) => {
     const offsetMinutes = 330; // IST is UTC+5:30
     return new Date(date.getTime() - offsetMinutes * 60 * 1000);
 };
+
+export const getCurrentAdminReferencesId = (req) =>
+    req?.user?.currentAdminReference;
