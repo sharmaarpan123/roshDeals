@@ -13,7 +13,10 @@ import {
     OrderFromUpdateSchema,
     reviewFormSubmitSchema,
 } from './Schema.js';
-import { toUTC } from '../../../utilities/utilitis.js';
+import {
+    getCurrentAdminReferencesId,
+    toUTC,
+} from '../../../utilities/utilitis.js';
 
 const checkSlotCompletedDeals = async (dealIds) =>
     Deal.find({
@@ -180,7 +183,14 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const { limit, offset, selectedDate } = filterSchema.parse(req.query);
+    const {
+        limit,
+        offset,
+        selectedDate,
+        selectedBrandFilter,
+        selectedCategoryFilter,
+        selectedPlatformFilter,
+    } = filterSchema.parse(req.query);
     const dateFilter = selectedDate
         ? {
               createdAt: {
@@ -196,7 +206,13 @@ export const OrderList = catchAsync(async (req, res) => {
           }
         : {};
 
-    const orders = await Order.find({ userId: req.user._id, ...dateFilter })
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+
+    const orders = await Order.find({
+        userId: req.user._id,
+        ...dateFilter,
+        dealOwner: new mongoose.Types.ObjectId(adminCurrentRecreance),
+    })
         .populate({
             path: 'dealId',
             select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
