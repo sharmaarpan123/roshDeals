@@ -29,12 +29,9 @@ export default catchAsync(async (req, res) => {
         isActive: true,
         isSlotCompleted: false,
         adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
-        // ...(type === SearchEnumType.brand && { brand: id }),
-
         ...(type === SearchEnumType.brand && {
             $or: [{ brand: id }, { 'parentDealId.brand': id }],
         }),
-
         ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
         ...(type === SearchEnumType.platForm && { platForm: id }),
         ...(selectedCategoryFilter?.length && {
@@ -47,21 +44,8 @@ export default catchAsync(async (req, res) => {
             brand: { $in: selectedBrandFilter },
         }),
     };
-    // Fetch deals with pagination
-    // const DealData = Deal.find(filter)
-    //     .populate('brand')
-    //     .populate('dealCategory')
-    //     .populate('platForm')
-    //     .populate({
-    //         path: 'parentDealId',
-    //         populate: {
-    //             path: 'brand dealCategory platForm',
-    //         },
-    //     })
-    //     .skip(offset)
-    //     .limit(limit);
 
-    const DealData = Deal.aggregate([
+    let pipeLine = [
         {
             $match: {
                 isActive: true,
@@ -234,10 +218,28 @@ export default catchAsync(async (req, res) => {
                 }),
             },
         },
+    ];
+
+    const total = Deal.countDocuments([
+        ...pipeLine,
+        {
+            $count: 'totalCount',
+        },
     ]);
 
+    pipeLine = [
+        ...pipeLine,
+        {
+            $skip: offset || 0,
+        },
+        {
+            $limit: limit || 10,
+        },
+    ];
+
+    const DealData = Deal.aggregate([...pipeLine]);
+
     // Fetch total count
-    const total = Deal.countDocuments(filter);
 
     // Fetch related brands, categories, and platforms with populate
     const relatedFilter = {
@@ -272,7 +274,11 @@ export default catchAsync(async (req, res) => {
             message:
                 'Deal data with related brands, categories, and platforms for the requested id',
             data,
-            total: totalCount,
+            total:
+                (totalCount[1] &&
+                    totalCount[1][0] &&
+                    totalCount[1][0]?.totalCount) ||
+                0,
             others: {
                 relatedData: {
                     brands: relatedBrands,
