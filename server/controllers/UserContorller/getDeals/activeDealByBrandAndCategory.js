@@ -76,7 +76,7 @@ export default catchAsync(async (req, res) => {
         },
         {
             $unwind: {
-                path: 'parentDealId',
+                path: '$parentDealId',
                 preserveNullAndEmptyArrays: true,
             },
         },
