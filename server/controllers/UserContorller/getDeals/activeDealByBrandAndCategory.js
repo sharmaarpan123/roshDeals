@@ -45,18 +45,142 @@ export default catchAsync(async (req, res) => {
         }),
     };
     // Fetch deals with pagination
-    const DealData = Deal.find(filter)
-        .populate('brand')
-        .populate('dealCategory')
-        .populate('platForm')
-        .populate({
-            path: 'parentDealId',
-            populate: {
-                path: 'brand dealCategory platForm',
+    // const DealData = Deal.find(filter)
+    //     .populate('brand')
+    //     .populate('dealCategory')
+    //     .populate('platForm')
+    //     .populate({
+    //         path: 'parentDealId',
+    //         populate: {
+    //             path: 'brand dealCategory platForm',
+    //         },
+    //     })
+    //     .skip(offset)
+    //     .limit(limit);
+
+    const DealData = Deal.aggregate([
+        {
+            $match: {
+                isActive: true,
+                isSlotCompleted: false,
+                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
-        })
-        .skip(offset)
-        .limit(limit);
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                foreignField: '_id',
+                localField: 'parentDealId',
+                as: 'parentDealId',
+            },
+        },
+        {
+            $unwind: {
+                path: 'parentDealId',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $match: {
+                ...(type === SearchEnumType.brand && {
+                    $or: [{ brand: id }, { 'parentDealId.brand': id }],
+                }),
+                ...(type === SearchEnumType.dealCategory && {
+                    $or: [
+                        { dealCategory: id },
+                        { 'parentDealId.dealCategory': id },
+                    ],
+                }),
+                ...(type === SearchEnumType.platForm && {
+                    $or: [{ platForm: id }, { 'parentDealId.platForm': id }],
+                }),
+                ...(selectedCategoryFilter?.length && {
+                    $or: [
+                        { dealCategory: { $in: selectedCategoryFilter } },
+                        {
+                            'parentDealId.dealCategory': {
+                                $in: selectedCategoryFilter,
+                            },
+                        },
+                    ],
+                }),
+                ...(selectedPlatformFilter?.length && {
+                    $or: [
+                        { platForm: { $in: selectedPlatformFilter } },
+                        {
+                            'parentDealId.platForm': {
+                                $in: selectedPlatformFilter,
+                            },
+                        },
+                    ],
+                }),
+                ...(selectedBrandFilter?.length && {
+                    $or: [
+                        { brand: { $in: selectedBrandFilter } },
+                        { 'parentDealId.brand': { $in: selectedBrandFilter } },
+                    ],
+                }),
+            },
+        },
+
+        // parent deal populate
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'parentDealId.dealCategory',
+                foreignField: '_id',
+                as: 'parentDealId.dealCategory',
+            },
+        },
+        { $unwind: '$parentDealId.dealCategory' },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'parentDealId.platForm',
+                foreignField: '_id',
+                as: 'parentDealId.platForm',
+            },
+        },
+        { $unwind: '$parentDealId.platForm' },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'parentDealId.brand',
+                foreignField: '_id',
+                as: 'parentDealId.brand',
+            },
+        },
+        { $unwind: '$parentDealId.brand' },
+
+        // root level  deal populate
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'dealCategory',
+                foreignField: '_id',
+                as: 'dealCategory',
+            },
+        },
+        { $unwind: '$dealCategory' },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'platForm',
+                foreignField: '_id',
+                as: 'platForm',
+            },
+        },
+        { $unwind: '$platForm' },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        },
+        { $unwind: '$brand' },
+    ]);
 
     // Fetch total count
     const total = Deal.countDocuments(filter);
