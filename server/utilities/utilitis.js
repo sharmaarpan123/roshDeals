@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Admin from '../database/models/Admin.js';
 import redis from '../lib/redis.js';
 import { ADMIN_ROLE_TYPE_ENUM } from './commonTypes.js';
@@ -77,3 +78,6 @@ export const toUTC = (date) => {
 
 export const getCurrentAdminReferencesId = (req) =>
     req?.user?.currentAdminReference;
+
+export const MongooseObjectId = (id) =>
+    mongoose.Types.ObjectId.createFromHexString(id);

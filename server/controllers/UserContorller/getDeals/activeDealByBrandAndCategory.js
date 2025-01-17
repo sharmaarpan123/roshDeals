@@ -6,7 +6,10 @@ import mongoose from 'mongoose';
 import Brand from '../../../database/models/Brand.js';
 import DealCategory from '../../../database/models/DealCategory.js';
 import PlatForm from '../../../database/models/PlatForm.js';
-import { getCurrentAdminReferencesId } from '../../../utilities/utilitis.js';
+import {
+    getCurrentAdminReferencesId,
+    MongooseObjectId,
+} from '../../../utilities/utilitis.js';
 export default catchAsync(async (req, res) => {
     const body = activeDealByBrandAndCategory.parse(req.body);
 
@@ -63,7 +66,7 @@ export default catchAsync(async (req, res) => {
             $match: {
                 isActive: true,
                 isSlotCompleted: false,
-                adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
+                adminId: MongooseObjectId(adminCurrentRecreance),
             },
         },
         {
@@ -81,7 +84,7 @@ export default catchAsync(async (req, res) => {
             },
         },
 
-        // parent deal populate
+        // // // parent deal populate
         {
             $lookup: {
                 from: 'dealcategories',
@@ -90,7 +93,12 @@ export default catchAsync(async (req, res) => {
                 as: 'parentDealId.dealCategory',
             },
         },
-        { $unwind: '$parentDealId.dealCategory' },
+        {
+            $unwind: {
+                path: '$parentDealId.dealCategory',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
         {
             $lookup: {
                 from: 'platforms',
@@ -99,7 +107,12 @@ export default catchAsync(async (req, res) => {
                 as: 'parentDealId.platForm',
             },
         },
-        { $unwind: '$parentDealId.platForm' },
+        {
+            $unwind: {
+                path: '$parentDealId.platForm',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
         {
             $lookup: {
                 from: 'brands',
@@ -108,7 +121,12 @@ export default catchAsync(async (req, res) => {
                 as: 'parentDealId.brand',
             },
         },
-        { $unwind: '$parentDealId.brand' },
+        {
+            $unwind: {
+                path: '$parentDealId.brand',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
 
         // root level  deal populate
         {
@@ -119,7 +137,12 @@ export default catchAsync(async (req, res) => {
                 as: 'dealCategory',
             },
         },
-        { $unwind: '$dealCategory' },
+        {
+            $unwind: {
+                path: '$dealCategory',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
         {
             $lookup: {
                 from: 'platforms',
@@ -128,7 +151,12 @@ export default catchAsync(async (req, res) => {
                 as: 'platForm',
             },
         },
-        { $unwind: '$platForm' },
+        {
+            $unwind: {
+                path: '$platForm',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
         {
             $lookup: {
                 from: 'brands',
@@ -137,46 +165,70 @@ export default catchAsync(async (req, res) => {
                 as: 'brand',
             },
         },
-        { $unwind: '$brand' },
+        { $unwind: { path: '$brand', preserveNullAndEmptyArrays: true } },
 
         {
             $match: {
                 ...(type === SearchEnumType.brand && {
-                    $or: [{ brand: id }, { 'parentDealId.brand': id }],
+                    $or: [
+                        { 'brand._id': MongooseObjectId(id) },
+                        { 'parentDealId.brand': MongooseObjectId(id) },
+                    ],
                 }),
                 ...(type === SearchEnumType.dealCategory && {
                     $or: [
-                        { dealCategory: id },
-                        { 'parentDealId.dealCategory': id },
+                        { 'dealCategory._id': MongooseObjectId(id) },
+                        {
+                            'parentDealId.dealCategory': MongooseObjectId(id),
+                        },
                     ],
                 }),
                 ...(type === SearchEnumType.platForm && {
-                    $or: [{ platForm: id }, { 'parentDealId.platForm': id }],
+                    $or: [
+                        { 'platForm._id': MongooseObjectId(id) },
+                        { 'parentDealId.platForm': MongooseObjectId(id) },
+                    ],
                 }),
                 ...(selectedCategoryFilter?.length && {
                     $or: [
-                        { dealCategory: { $in: selectedCategoryFilter } },
+                        {
+                            'dealCategory._id': {
+                                $in: [MongooseObjectId(selectedCategoryFilter)],
+                            },
+                        },
                         {
                             'parentDealId.dealCategory': {
-                                $in: selectedCategoryFilter,
+                                $in: [MongooseObjectId(selectedCategoryFilter)],
                             },
                         },
                     ],
                 }),
                 ...(selectedPlatformFilter?.length && {
                     $or: [
-                        { platForm: { $in: selectedPlatformFilter } },
+                        {
+                            'platForm._id': {
+                                $in: [MongooseObjectId(selectedPlatformFilter)],
+                            },
+                        },
                         {
                             'parentDealId.platForm': {
-                                $in: selectedPlatformFilter,
+                                $in: [MongooseObjectId(selectedPlatformFilter)],
                             },
                         },
                     ],
                 }),
                 ...(selectedBrandFilter?.length && {
                     $or: [
-                        { brand: { $in: selectedBrandFilter } },
-                        { 'parentDealId.brand': { $in: selectedBrandFilter } },
+                        {
+                            'brand._id': {
+                                $in: [MongooseObjectId(selectedBrandFilter)],
+                            },
+                        },
+                        {
+                            'parentDealId.brand': {
+                                $in: [MongooseObjectId(selectedBrandFilter)],
+                            },
+                        },
                     ],
                 }),
             },
