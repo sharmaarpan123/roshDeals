@@ -84,7 +84,7 @@ export default catchAsync(async (req, res) => {
             },
         },
 
-        // // // parent deal populate
+        // parent deal populate
         {
             $lookup: {
                 from: 'dealcategories',
@@ -172,21 +172,22 @@ export default catchAsync(async (req, res) => {
                 ...(type === SearchEnumType.brand && {
                     $or: [
                         { 'brand._id': MongooseObjectId(id) },
-                        { 'parentDealId.brand': MongooseObjectId(id) },
+                        { 'parentDealId.brand._id': MongooseObjectId(id) },
                     ],
                 }),
                 ...(type === SearchEnumType.dealCategory && {
                     $or: [
                         { 'dealCategory._id': MongooseObjectId(id) },
                         {
-                            'parentDealId.dealCategory': MongooseObjectId(id),
+                            'parentDealId.dealCategory._id':
+                                MongooseObjectId(id),
                         },
                     ],
                 }),
                 ...(type === SearchEnumType.platForm && {
                     $or: [
                         { 'platForm._id': MongooseObjectId(id) },
-                        { 'parentDealId.platForm': MongooseObjectId(id) },
+                        { 'parentDealId.platForm._id': MongooseObjectId(id) },
                     ],
                 }),
                 ...(selectedCategoryFilter?.length && {
@@ -197,7 +198,7 @@ export default catchAsync(async (req, res) => {
                             },
                         },
                         {
-                            'parentDealId.dealCategory': {
+                            'parentDealId.dealCategory._id': {
                                 $in: [MongooseObjectId(selectedCategoryFilter)],
                             },
                         },
@@ -211,7 +212,7 @@ export default catchAsync(async (req, res) => {
                             },
                         },
                         {
-                            'parentDealId.platForm': {
+                            'parentDealId.platForm._id': {
                                 $in: [MongooseObjectId(selectedPlatformFilter)],
                             },
                         },
@@ -225,7 +226,7 @@ export default catchAsync(async (req, res) => {
                             },
                         },
                         {
-                            'parentDealId.brand': {
+                            'parentDealId.brand._id': {
                                 $in: [MongooseObjectId(selectedBrandFilter)],
                             },
                         },
