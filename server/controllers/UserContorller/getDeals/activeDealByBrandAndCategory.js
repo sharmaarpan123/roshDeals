@@ -80,48 +80,6 @@ export default catchAsync(async (req, res) => {
                 preserveNullAndEmptyArrays: true,
             },
         },
-        {
-            $match: {
-                ...(type === SearchEnumType.brand && {
-                    $or: [{ brand: id }, { 'parentDealId.brand': id }],
-                }),
-                ...(type === SearchEnumType.dealCategory && {
-                    $or: [
-                        { dealCategory: id },
-                        { 'parentDealId.dealCategory': id },
-                    ],
-                }),
-                ...(type === SearchEnumType.platForm && {
-                    $or: [{ platForm: id }, { 'parentDealId.platForm': id }],
-                }),
-                ...(selectedCategoryFilter?.length && {
-                    $or: [
-                        { dealCategory: { $in: selectedCategoryFilter } },
-                        {
-                            'parentDealId.dealCategory': {
-                                $in: selectedCategoryFilter,
-                            },
-                        },
-                    ],
-                }),
-                ...(selectedPlatformFilter?.length && {
-                    $or: [
-                        { platForm: { $in: selectedPlatformFilter } },
-                        {
-                            'parentDealId.platForm': {
-                                $in: selectedPlatformFilter,
-                            },
-                        },
-                    ],
-                }),
-                ...(selectedBrandFilter?.length && {
-                    $or: [
-                        { brand: { $in: selectedBrandFilter } },
-                        { 'parentDealId.brand': { $in: selectedBrandFilter } },
-                    ],
-                }),
-            },
-        },
 
         // parent deal populate
         {
@@ -180,6 +138,49 @@ export default catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$brand' },
+
+        {
+            $match: {
+                ...(type === SearchEnumType.brand && {
+                    $or: [{ brand: id }, { 'parentDealId.brand': id }],
+                }),
+                ...(type === SearchEnumType.dealCategory && {
+                    $or: [
+                        { dealCategory: id },
+                        { 'parentDealId.dealCategory': id },
+                    ],
+                }),
+                ...(type === SearchEnumType.platForm && {
+                    $or: [{ platForm: id }, { 'parentDealId.platForm': id }],
+                }),
+                ...(selectedCategoryFilter?.length && {
+                    $or: [
+                        { dealCategory: { $in: selectedCategoryFilter } },
+                        {
+                            'parentDealId.dealCategory': {
+                                $in: selectedCategoryFilter,
+                            },
+                        },
+                    ],
+                }),
+                ...(selectedPlatformFilter?.length && {
+                    $or: [
+                        { platForm: { $in: selectedPlatformFilter } },
+                        {
+                            'parentDealId.platForm': {
+                                $in: selectedPlatformFilter,
+                            },
+                        },
+                    ],
+                }),
+                ...(selectedBrandFilter?.length && {
+                    $or: [
+                        { brand: { $in: selectedBrandFilter } },
+                        { 'parentDealId.brand': { $in: selectedBrandFilter } },
+                    ],
+                }),
+            },
+        },
     ]);
 
     // Fetch total count
