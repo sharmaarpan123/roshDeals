@@ -22,7 +22,7 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
 
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
-    const DealCategoriesData = Deal.aggregate([
+    let pipeLine = [
         {
             $match: {
                 isActive: true,
@@ -32,9 +32,33 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
         },
         {
             $lookup: {
-                from: 'dealcategories', // Collection name in your database
-                localField: 'dealCategory',
+                from: 'deals', // Self-reference the 'deals' collection to handle parentDealId
+                localField: 'parentDealId',
                 foreignField: '_id',
+                as: 'parentDeal',
+            },
+        },
+        {
+            $lookup: {
+                from: 'dealcategories',
+                let: {
+                    dealCategoryId: '$dealCategory',
+                    parentDealCategoryId: {
+                        $arrayElemAt: ['$parentDeal.dealCategory', 0],
+                    },
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $eq: ['$_id', '$$dealCategoryId'] }, // Match the direct brand
+                                    { $eq: ['$_id', '$$parentDealCategoryId'] }, // Match the parentDeal's brand
+                                ],
+                            },
+                        },
+                    },
+                ],
                 as: 'dealCategoryData',
             },
         },
@@ -43,8 +67,8 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
         },
         {
             $group: {
-                _id: '$dealCategory',
-                dealCategoryData: { $first: '$dealCategoryData' },
+                _id: '$dealCategoryData._id', // Group by the unique identifier of the brand document
+                dealCategoryData: { $first: '$dealCategoryData' }, // Keep the first document in each group
             },
         },
         {
@@ -52,25 +76,24 @@ const getActiveDealCategoriesController = catchAsync(async (req, res) => {
                 newRoot: '$dealCategoryData',
             },
         },
+    ];
+
+    pipeLine = [
+        ...pipeLine,
         {
             $skip: offset || 0,
         },
         {
-            $limit: limit || 15,
+            $limit: limit || 10,
         },
-    ]);
+    ];
+    const DealCategoriesData = Deal.aggregate(pipeLine);
 
-    const total = Deal.find({
-        isActive: true,
-        isSlotCompleted: false,
-    }).countDocuments();
-
-    const data = await Promise.all([DealCategoriesData, total]);
+    const data = await Promise.all([DealCategoriesData]);
     return res.status(200).json(
         successResponse({
             message: 'All active Deal Category',
             data: data[0],
-            total: data[1],
         }),
     );
 });
