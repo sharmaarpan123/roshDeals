@@ -15,6 +15,7 @@ import {
 } from './Schema.js';
 import {
     getCurrentAdminReferencesId,
+    MongooseObjectId,
     toUTC,
 } from '../../../utilities/utilitis.js';
 
@@ -234,6 +235,8 @@ export const OrderList = catchAsync(async (req, res) => {
     );
 }); //
 export const UserEarning = catchAsync(async (req, res) => {
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+
     const earnings = await Order.aggregate([
         {
             $match: {
@@ -251,6 +254,11 @@ export const UserEarning = catchAsync(async (req, res) => {
         },
         {
             $unwind: '$deal',
+        },
+        {
+            $match: {
+                'deal.dealOwner': MongooseObjectId(adminCurrentRecreance),
+            },
         },
         {
             $group: {
