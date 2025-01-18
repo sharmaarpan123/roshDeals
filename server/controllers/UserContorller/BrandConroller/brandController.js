@@ -49,7 +49,6 @@ const getActiveBrandController = catchAsync(async (req, res) => {
                 adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
             },
         },
-
         {
             $lookup: {
                 from: 'deals', // Collection name in your database
@@ -60,21 +59,28 @@ const getActiveBrandController = catchAsync(async (req, res) => {
         },
         {
             $lookup: {
-                from: 'brands', // Collection name in your database
-                localField: 'brand',
-                foreignField: '_id',
+                from: 'brands',
+                let: {
+                    brandId: '$brand',
+                    parentBrandId: {
+                        $arrayElemAt: ['$parentDealId.brand', 0],
+                    },
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $eq: ['$_id', '$$brandId'] }, // Match the direct brand
+                                    { $eq: ['$_id', '$$parentBrandId'] }, // Match the parentDeal's brand
+                                ],
+                            },
+                        },
+                    },
+                ],
                 as: 'brandData',
             },
         },
-        {
-            $lookup: {
-                from: 'brands', // Collection name in your database
-                localField: 'parentDealId.brand',
-                foreignField: '_id',
-                as: 'brandData',
-            },
-        },
-
         {
             $match: {
                 'brandData.name': { $regex: search || '', $options: 'i' },

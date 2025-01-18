@@ -37,7 +37,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     const validDealsIds = await Deal.find({
         _id: { $in: dealIds },
     })
-        .populate('adminId')
+        .populate('adminId parentDealId')
         .select('adminId');
 
     if (dealIds.length !== validDealsIds.length) {
