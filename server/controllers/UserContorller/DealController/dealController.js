@@ -61,9 +61,6 @@ export const activeDealsController = catchAsync(async (req, res) => {
                 isActive: true,
                 isSlotCompleted: false,
                 adminId: MongooseObjectId(adminCurrentRecreance),
-                ...(search && {
-                    productName: { $regex: search, $options: 'i' },
-                }),
             },
         },
         {
@@ -74,6 +71,28 @@ export const activeDealsController = catchAsync(async (req, res) => {
                 as: 'parentDealId',
             },
         },
+
+        {
+            $match: {
+                ...(search && {
+                    $or: [
+                        {
+                            'parentDealId.productName': {
+                                $regex: search,
+                                $options: 'i',
+                            },
+                        },
+                        {
+                            productName: {
+                                $regex: search,
+                                $options: 'i',
+                            },
+                        },
+                    ],
+                }),
+            },
+        },
+
         {
             $unwind: {
                 path: '$parentDealId',
