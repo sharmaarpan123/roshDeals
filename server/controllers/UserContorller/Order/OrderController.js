@@ -19,11 +19,6 @@ import {
     toUTC,
 } from '../../../utilities/utilitis.js';
 
-const checkSlotCompletedDeals = async (dealIds) =>
-    Deal.find({
-        _id: { $in: dealIds },
-        $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
-    });
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
@@ -34,61 +29,89 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         exchangeDealProducts,
     } = createOrderSchema.parse(req.body);
     const { _id, currentAdminReference } = req.user;
-    // validating the deals Id // start
-    const validDealsIds = await Deal.find({
+
+    // Validate the deals
+    const validDeals = await Deal.find({
         _id: { $in: dealIds },
         adminId: currentAdminReference,
     })
         .populate('adminId parentDealId')
-        .select('adminId');
+        .select('adminId parentDealId slotCompletedCount slotAlloted');
 
-    if (dealIds.length !== validDealsIds.length) {
+    if (dealIds.length !== validDeals.length) {
         return res.status(400).json(
             errorResponse({
-                message: 'Deals are not Valid',
+                message: 'Some deals are not valid or do not belong to your admin account.',
             }),
         );
     }
 
-    // validating the deals Id// end
+    // Map parent or child deals
+    const parentOrChildDeals = validDeals.map((deal) => {
+        if (deal.parentDealId) {
+            return {
+                dealId: deal.parentDealId._id,
+                isParent: true,
+            };
+        } else {
+            return {
+                dealId: deal._id,
+                isParent: false,
+            };
+        }
+    });
 
-    // check to sure deals slot not completed // start
-    const slotCompletedDeals = await checkSlotCompletedDeals(dealIds);
+    // Check if any slots are completed (for parents or children)
+    const parentOrChildDealIds = parentOrChildDeals.map((d) => d.dealId);
+    const slotCompletedDeals = await Deal.find({
+        _id: { $in: parentOrChildDealIds },
+        $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
+    });
+
     if (slotCompletedDeals.length) {
         return res.status(400).json(
             errorResponse({
-                message:
-                    'These Deals Slot are completed , please cancel these orders',
+                message: 'Some deals have completed their slots. Please cancel these orders.',
                 others: { deals: slotCompletedDeals },
             }),
         );
     }
-    // check to sure deals slot not completed// end
+
+    // Update slot counts
     await Deal.updateMany(
         {
-            _id: { $in: dealIds },
+            _id: { $in: parentOrChildDealIds },
             $expr: { $lt: ['$slotCompletedCount', '$slotAlloted'] },
         },
-        { $inc: { slotCompletedCount: 1 } },
+        { $inc: { slotCompletedCount: 1 } }
     );
-    const newCreatedOrders = await Order.insertMany(
-        validDealsIds.map((deal) => ({
-            dealId: deal._id,
-            dealOwner: deal?.adminId?._id,
+
+    // Create orders
+    const newOrders = validDeals.map((deal) => {
+        const parentOrChildDeal = parentOrChildDeals.find(
+            (d) => d.dealId.toString() === (deal.parentDealId?._id || deal._id).toString()
+        );
+
+        return {
+            dealId: parentOrChildDeal.dealId,
+            dealOwner: deal.adminId._id,
             orderIdOfPlatForm,
             orderScreenShot,
             reviewerName,
             userId: _id,
             exchangeDealProducts,
-        })),
-    );
+        };
+    });
+
+    const insertedOrders = await Order.insertMany(newOrders);
+
     return res.status(200).json(
         successResponse({
-            message: 'orders created successfully!',
-            data: newCreatedOrders,
-        }),
+            message: 'Orders created successfully!',
+            data: insertedOrders,
+        })
     );
-}); //
+});
 //
 export const OrderFromUpdate = catchAsync(async (req, res) => {
     const { orderIdOfPlatForm, reviewerName, orderScreenShot, orderId } =
