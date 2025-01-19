@@ -121,7 +121,6 @@ AdminRouter.post(
         uniqueSlug: 'systemAccess',
         key: permissionsLevelKey.canEdit,
         canAdminAccess,
-        
     }),
     subAdminController.linkSubAdminByAdmin,
 );
@@ -473,6 +472,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'order',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     acceptRejectOrder,
 );
