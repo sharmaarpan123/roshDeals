@@ -80,6 +80,9 @@ const signInController = catchAsync(async (req, res) => {
         );
     }
 
+    const token = jwtGen(updatedUser);
+
+
     const updatedUser = await User.findOneAndUpdate(
         {
             phoneNumber,
@@ -88,6 +91,7 @@ const signInController = catchAsync(async (req, res) => {
             $set: {
                 fcmToken: fcmToken,
                 currentAdminReference: adminCheck?._id,
+                token
             },
             $addToSet: {
                 historyAdminReferences: adminCheck?._id, // Adds the value only if it doesn't already exist
@@ -98,7 +102,6 @@ const signInController = catchAsync(async (req, res) => {
         },
     );
 
-    const token = jwtGen(updatedUser);
 
     return res.status(200).json(
         successResponse({
