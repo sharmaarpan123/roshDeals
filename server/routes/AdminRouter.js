@@ -454,6 +454,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     dealPaymentStatusChangeController,
 );
