@@ -18,6 +18,7 @@ import {
     MongooseObjectId,
     toUTC,
 } from '../../../utilities/utilitis.js';
+import { populate } from 'dotenv';
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
@@ -90,7 +91,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     // Create orders
     const newOrders = validDeals.map((deal) => {
         return {
-            dealId: deal.dealId,
+            dealId: deal._id,
             dealOwner: deal.adminId._id,
             orderIdOfPlatForm,
             orderScreenShot,
@@ -243,6 +244,15 @@ export const OrderList = catchAsync(async (req, res) => {
                 { path: 'brand', select: 'name image' },
                 { path: 'dealCategory', select: 'name' },
                 { path: 'platForm', select: 'name' },
+                {
+                    path: 'parentDealId',
+                    select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
+                    populate: [
+                        { path: 'brand', select: 'name image' },
+                        { path: 'dealCategory', select: 'name' },
+                        { path: 'platForm', select: 'name' },
+                    ],
+                },
             ],
         })
         .sort({ createdAt: -1 })
