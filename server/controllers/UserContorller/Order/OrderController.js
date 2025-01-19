@@ -19,7 +19,6 @@ import {
     toUTC,
 } from '../../../utilities/utilitis.js';
 
-
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
         dealIds,
@@ -41,7 +40,8 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     if (dealIds.length !== validDeals.length) {
         return res.status(400).json(
             errorResponse({
-                message: 'Some deals are not valid or do not belong to your admin account.',
+                message:
+                    'Some deals are not valid or do not belong to your admin account.',
             }),
         );
     }
@@ -71,7 +71,8 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     if (slotCompletedDeals.length) {
         return res.status(400).json(
             errorResponse({
-                message: 'Some deals have completed their slots. Please cancel these orders.',
+                message:
+                    'Some deals have completed their slots. Please cancel these orders.',
                 others: { deals: slotCompletedDeals },
             }),
         );
@@ -83,17 +84,13 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             _id: { $in: parentOrChildDealIds },
             $expr: { $lt: ['$slotCompletedCount', '$slotAlloted'] },
         },
-        { $inc: { slotCompletedCount: 1 } }
+        { $inc: { slotCompletedCount: 1 } },
     );
 
     // Create orders
     const newOrders = validDeals.map((deal) => {
-        const parentOrChildDeal = parentOrChildDeals.find(
-            (d) => d.dealId.toString() === (deal.parentDealId?._id || deal._id).toString()
-        );
-
         return {
-            dealId: parentOrChildDeal.dealId,
+            dealId: deal.dealId,
             dealOwner: deal.adminId._id,
             orderIdOfPlatForm,
             orderScreenShot,
@@ -109,7 +106,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         successResponse({
             message: 'Orders created successfully!',
             data: insertedOrders,
-        })
+        }),
     );
 });
 //
