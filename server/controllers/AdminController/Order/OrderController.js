@@ -326,35 +326,46 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
 
         {
             $lookup: {
-                from: 'brands',
-                localField: 'dealId.brand',
+                from: 'deals',
+                localField: 'dealId.parentDealId',
                 foreignField: '_id',
-                as: 'dealId.brand',
+                as: 'dealId.parentDealId',
             },
         },
-        { $unwind: '$dealId.brand' },
+        { $unwind: '$dealId.parentDealId' },
+
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.parentDealId.brand',
+                foreignField: '_id',
+                as: 'dealId.parentDealId.brand',
+            },
+        },
+        { $unwind: '$dealId.parentDealId.brand' },
         {
             $lookup: {
                 from: 'dealcategories',
-                localField: 'dealId.dealCategory',
+                localField: 'dealId.parentDealId.dealCategory',
                 foreignField: '_id',
-                as: 'dealId.dealCategory',
+                as: 'dealId.parentDealId.dealCategory',
             },
         },
-        { $unwind: '$dealId.dealCategory' },
+        { $unwind: '$dealId.parentDealId.dealCategory' },
         {
             $lookup: {
                 from: 'platforms',
-                localField: 'dealId.platForm',
+                localField: 'dealId.parentDealId.platForm',
                 foreignField: '_id',
-                as: 'dealId.platForm',
+                as: 'dealId.parentDealId.platForm',
             },
         },
-        { $unwind: '$dealId.platForm' },
+        { $unwind: '$dealId.parentDealId.platForm' },
         {
             $match: {
                 ...(brandId && {
-                    'dealId.brand._id': new mongoose.Types.ObjectId(brandId),
+                    'dealId.parentDealId.brand._id':
+                        new mongoose.Types.ObjectId(brandId),
                 }),
             },
         },
@@ -433,35 +444,46 @@ export const getAllOrdersOfMedAsMed = catchAsync(async (req, res) => {
 
         {
             $lookup: {
-                from: 'brands',
-                localField: 'dealId.brand',
+                from: 'deals',
+                localField: 'dealId.parentDealId',
                 foreignField: '_id',
-                as: 'dealId.brand',
+                as: 'dealId.parentDealId',
             },
         },
-        { $unwind: '$dealId.brand' },
+        { $unwind: '$dealId.parentDealId' },
+
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.parentDealId.brand',
+                foreignField: '_id',
+                as: 'dealId.parentDealId.brand',
+            },
+        },
+        { $unwind: '$dealId.parentDealId.brand' },
         {
             $lookup: {
                 from: 'dealcategories',
-                localField: 'dealId.dealCategory',
+                localField: 'dealId.parentDealId.dealCategory',
                 foreignField: '_id',
-                as: 'dealId.dealCategory',
+                as: 'dealId.parentDealId.dealCategory',
             },
         },
-        { $unwind: '$dealId.dealCategory' },
+        { $unwind: '$dealId.parentDealId.dealCategory' },
         {
             $lookup: {
                 from: 'platforms',
-                localField: 'dealId.platForm',
+                localField: 'dealId.parentDealId.platForm',
                 foreignField: '_id',
-                as: 'dealId.platForm',
+                as: 'dealId.parentDealId.platForm',
             },
         },
-        { $unwind: '$dealId.platForm' },
+        { $unwind: '$dealId.parentDealId.platForm' },
         {
             $match: {
                 ...(brandId && {
-                    'dealId.brand._id': new mongoose.Types.ObjectId(brandId),
+                    'dealId.parentDealId.brand._id':
+                        new mongoose.Types.ObjectId(brandId),
                 }),
             },
         },

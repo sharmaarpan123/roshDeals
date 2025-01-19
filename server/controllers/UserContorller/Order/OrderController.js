@@ -274,6 +274,7 @@ export const UserEarning = catchAsync(async (req, res) => {
             $match: {
                 userId: new mongoose.Types.ObjectId(req.user._id),
                 paymentStatus: 'paid',
+                dealOwner: MongooseObjectId(adminCurrentRecreance),
             },
         },
         {
@@ -286,11 +287,6 @@ export const UserEarning = catchAsync(async (req, res) => {
         },
         {
             $unwind: '$deal',
-        },
-        {
-            $match: {
-                'deal.dealOwner': MongooseObjectId(adminCurrentRecreance),
-            },
         },
         {
             $group: {

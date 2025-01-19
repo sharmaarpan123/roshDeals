@@ -526,6 +526,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'order',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess , 
+        canSubAdminAccess
     }),
     paymentStatusUpdate,
 );
