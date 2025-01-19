@@ -13,6 +13,7 @@ import {
     isAdminAccessingApi,
     isAdminOrSubAdminAccessingApi,
     isSuperAdminAccessingApi,
+    MongooseObjectId,
 } from '../../../utilities/utilitis.js';
 import {
     acceptRejectOrderSchema,
@@ -100,7 +101,54 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
 export const paymentStatusUpdate = catchAsync(async (req, res) => {
     const { orderId, status } = paymentStatusUpdateSchema.parse(req.body);
 
-    const order = await Order.findOne({ _id: orderId });
+    // const order = await Order.findOne({ _id: orderId });
+
+    const adminId = req?.user?._id;
+
+    const isSuperAccessing = isSuperAdminAccessingApi(req);
+
+    const order = await Order.aggregate([
+        {
+            $match: {
+                _id: MongooseObjectId(orderId),
+            },
+        },
+        ...(!isSuperAccessing
+            ? [
+                  {
+                      $lookup: {
+                          from: 'deals',
+                          localField: 'dealId',
+                          foreignField: '_id',
+                          as: 'dealId',
+                      },
+                  },
+                  { $unwind: '$dealId' },
+                  {
+                      $lookup: {
+                          from: 'deals',
+                          localField: 'dealId.parentDealId',
+                          foreignField: '_id',
+                          as: 'dealId.parentDealId',
+                      },
+                  },
+                  { $unwind: '$dealId.parentDealId' },
+                  {
+                      $match: {
+                          $or: [
+                              {
+                                  'dealId.parentDealId.adminId':
+                                      MongooseObjectId(adminId),
+                              },
+                              {
+                                  'dealId.adminId': MongooseObjectId(adminId),
+                              },
+                          ],
+                      },
+                  },
+              ]
+            : []),
+    ]);
 
     if (!order) {
         return res.status(400).json(
@@ -111,7 +159,14 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
     }
 
     const updatedOrder = await Order.findOneAndUpdate(
-        { _id: orderId },
+        {
+            _id: orderId,
+            ...(status === 'paid' && {
+                // if user want to change the status to paid
+                // and make sure order review form is accepted
+                orderFormStatus: ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED,
+            }),
+        },
         {
             paymentStatus: status,
             ...(status === 'paid' && {
@@ -120,6 +175,15 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
         },
         { new: true },
     );
+
+    if (!updatedOrder) {
+        return res.status(400).json(
+            successResponse({
+                message: `Order Review Form should be Accepted`,
+                data: updatedOrder,
+            }),
+        );
+    }
 
     return res.status(200).json(
         successResponse({
