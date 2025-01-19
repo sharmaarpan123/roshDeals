@@ -33,10 +33,11 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         reviewerName,
         exchangeDealProducts,
     } = createOrderSchema.parse(req.body);
-    const { _id } = req.user;
+    const { _id, currentAdminReference } = req.user;
     // validating the deals Id // start
     const validDealsIds = await Deal.find({
         _id: { $in: dealIds },
+        adminId: currentAdminReference,
     })
         .populate('adminId parentDealId')
         .select('adminId');
@@ -48,6 +49,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             }),
         );
     }
+
     // validating the deals Id// end
 
     // check to sure deals slot not completed // start
