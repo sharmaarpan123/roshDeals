@@ -77,7 +77,7 @@ export const toUTC = (date) => {
 };
 
 export const getCurrentAdminReferencesId = (req) =>
-    req?.user?.currentAdminReference;
+    req?.user?.currentAdminReference?._id;
 
 export const MongooseObjectId = (id) =>
     mongoose.Types.ObjectId.createFromHexString(id);

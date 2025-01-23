@@ -102,20 +102,6 @@ const signInController = catchAsync(async (req, res) => {
 
     const token = jwtGen(updatedUser);
 
-    // User.findOneAndUpdate(
-    //     {
-    //         phoneNumber,
-    //     },
-    //     {
-    //         $set: {
-    //             token,
-    //         },
-    //     },
-    //     {
-    //         new: true,
-    //     },
-    // );
-
     return res.status(200).json(
         successResponse({
             message: 'Sign in successfully',

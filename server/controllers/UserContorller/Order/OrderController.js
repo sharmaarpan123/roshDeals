@@ -27,7 +27,9 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         reviewerName,
         exchangeDealProducts,
     } = createOrderSchema.parse(req.body);
-    const { _id, currentAdminReference } = req.user;
+    const { _id } = req.user;
+
+    const currentAdminReference = getCurrentAdminReferencesId(req);
 
     // Validate the deals
     const validDeals = await Deal.find({
