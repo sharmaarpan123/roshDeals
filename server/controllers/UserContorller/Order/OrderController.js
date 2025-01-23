@@ -36,7 +36,8 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         _id: { $in: dealIds },
         adminId: currentAdminReference,
     })
-        .populate('adminId parentDealId')
+        .populate('adminId')
+        .populate('parentDealId')
         .select('adminId parentDealId slotCompletedCount slotAlloted');
 
     if (dealIds.length !== validDeals.length) {
@@ -93,8 +94,8 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     // Create orders
     const newOrders = validDeals.map((deal) => {
         return {
-            dealId: deal._id,
-            dealOwner: deal.adminId._id,
+            dealId: deal?._id,
+            dealOwner: deal?.adminId?._id,
             orderIdOfPlatForm,
             orderScreenShot,
             reviewerName,

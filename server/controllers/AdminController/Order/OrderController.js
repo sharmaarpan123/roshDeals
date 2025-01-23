@@ -11,7 +11,6 @@ import {
 import { sendNotification } from '../../../utilities/sendNotification.js';
 import {
     isAdminAccessingApi,
-    isAdminOrSubAdminAccessingApi,
     isSuperAdminAccessingApi,
     MongooseObjectId,
 } from '../../../utilities/utilitis.js';
@@ -28,7 +27,7 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         req.body,
     );
 
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findOne({ _id: orderId }).lean();
     if (!order) {
         return res.status(400).json(
             errorResponse({
@@ -66,11 +65,17 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
     let message = '';
 
     switch (status) {
-        case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
-            message = 'Your review form is acFcepted';
+        case ORDER_FORM_STATUS.ACCEPTED:
+            message = `Your order for ${order.orderIdOfPlatForm} is accepted`;
             break;
         case ORDER_FORM_STATUS.REJECTED:
-            message = 'Your order form is rejected';
+            message = `Your order for ${order.orderIdOfPlatForm} is rejected`;
+            break;
+        case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
+            message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
+            break;
+        case ORDER_FORM_STATUS.REVIEW_FORM_REJECTED:
+            message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
             break;
         default:
             message = 'your order is ' + status;
@@ -86,6 +91,9 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             notification: {
                 imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
             },
+        },
+        data: {
+            orderId: order._id.toString(),
         },
         tokens: [user.fcmToken],
     });
@@ -125,10 +133,10 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
                   },
                   { $unwind: '$dealId' },
                   {
-                      $lookup: {   
-                          from: 'deals',    
+                      $lookup: {
+                          from: 'deals',
                           localField: 'dealId.parentDealId',
-                          foreignField: '_id', 
+                          foreignField: '_id',
                           as: 'dealId.parentDealId',
                       },
                   },

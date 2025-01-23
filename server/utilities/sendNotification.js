@@ -25,7 +25,7 @@ export const sendNotification = (message) => {
         .then((response) => {
             console.log(
                 'Successfully sent firebase message:',
-                response,
+                JSON.stringify(response),
             );
         })
         .catch((error) => {
