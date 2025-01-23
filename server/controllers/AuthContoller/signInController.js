@@ -98,7 +98,7 @@ const signInController = catchAsync(async (req, res) => {
         },
     )
         .populate('currentAdminReference')
-        .populate('historyAdminReferences');
+        .select('currentAdminReference , _id , name');
 
     const token = jwtGen(updatedUser);
 
