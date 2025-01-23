@@ -125,10 +125,10 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
                   },
                   { $unwind: '$dealId' },
                   {
-                      $lookup: {
-                          from: 'deals',
+                      $lookup: {   
+                          from: 'deals',    
                           localField: 'dealId.parentDealId',
-                          foreignField: '_id',
+                          foreignField: '_id', 
                           as: 'dealId.parentDealId',
                       },
                   },
