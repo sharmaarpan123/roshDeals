@@ -84,7 +84,9 @@ const adminSignInController = catchAsync(async (req, res) => {
             phoneNumber,
         },
         {
-            fcmToken: fcmToken,
+            $addToSet: {
+                fcmTokens: fcmToken,
+            },
         },
         {
             new: true,

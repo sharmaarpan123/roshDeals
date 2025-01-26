@@ -42,8 +42,8 @@ const adminSchema = new mongoose.Schema(
             enum: ADMIN_ROLE_TYPE_ENUM,
             required: true,
         },
-        fcmToken: {
-            type: String,
+        fcmTokens: {
+            type: [String],
         },
         permissions: {
             type: [PermissionObj],

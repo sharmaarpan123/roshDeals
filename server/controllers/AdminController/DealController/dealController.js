@@ -25,6 +25,7 @@ import {
     isAdminOrSubAdminAccessingApi,
 } from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
+import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -215,6 +216,40 @@ export const addDealController = catchAsync(async (req, res) => {
         // we can edit on edit api
     });
     const DealRes = await newDeal.save();
+
+    let adminsFireBaseTokens = [];
+
+    if (showToSubAdmins) {
+        const subAdmins = await AdminSubAdminLinker.find({
+            adminId: req?.user?._id,
+        })
+            .populate('subAdminId')
+            .select('subAdminId');
+
+        const tokens =
+            subAdmins.map((i) => i?.subAdminId?.fcmTokens).flat() || [];
+
+        adminsFireBaseTokens = [...tokens];
+    }
+
+    if (showToUsers) {
+        const users = await User.find({
+            historyAdminReferences: req?.user?._id,
+        }).select('fcmToken');
+
+        const tokens = users.map((i) => i.fcmToken).flat() || [];
+
+        adminsFireBaseTokens = [...adminsFireBaseTokens, ...tokens];
+    }
+
+    sendNotification({
+        notification: {
+            body: 'New Deal',
+            title: req?.user?.userName + ' has Create a New Deal',
+        },
+        tokens: adminsFireBaseTokens,
+    });
+
     return res.status(200).json(
         successResponse({
             message: 'Deal  Added successfully',

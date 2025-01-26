@@ -18,6 +18,7 @@ import {
     MongooseObjectId,
     toUTC,
 } from '../../../utilities/utilitis.js';
+import { sendNotification } from '../../../utilities/sendNotification.js';
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
@@ -27,7 +28,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         reviewerName,
         exchangeDealProducts,
     } = createOrderSchema.parse(req.body);
-    const { _id } = req.user;
+    const { _id, name } = req.user;
 
     const currentAdminReference = getCurrentAdminReferencesId(req);
 
@@ -106,6 +107,18 @@ export const OrderCreateController = catchAsync(async (req, res) => {
 
     const insertedOrders = await Order.insertMany(newOrders);
 
+    const adminsFireBaseTokens = validDeals
+        .map((i) => i.adminId?.fcmTokens)
+        ?.flat();
+
+    sendNotification({
+        notification: {
+            body: 'New Order',
+            title: name + ' has Create a New order',
+        },
+        tokens: adminsFireBaseTokens,
+    });
+
     return res.status(200).json(
         successResponse({
             message: 'Orders created successfully!',
@@ -143,6 +156,7 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
         },
         { new: true },
     );
+
     return res.status(200).json(
         successResponse({
             message: 'order Form Updated',

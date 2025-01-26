@@ -12,6 +12,7 @@ import {
     isSuperAdminAccessingApi,
 } from '../../../utilities/utilitis.js';
 import SubAdminDealSchema from './schema.js';
+import User from '../../../database/models/User.js';
 
 class SubAdminDealControllerClass {
     cloneDealController = catchAsync(async (req, res) => {
@@ -53,6 +54,20 @@ class SubAdminDealControllerClass {
         });
 
         const DealRes = await newDeal.save();
+
+        const users = await User.find({
+            historyAdminReferences: req?.user?._id,
+        }).select('fcmToken');
+
+        const adminsFireBaseTokens = users.map((i) => i?.fcmToken) || [];
+
+        sendNotification({
+            notification: {
+                body: 'New Deal',
+                title: req?.user?.userName + ' has posted a New Deal',
+            },
+            tokens: adminsFireBaseTokens,
+        });
 
         return res.status(200).json(
             successResponse({
