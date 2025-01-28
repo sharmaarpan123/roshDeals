@@ -21,6 +21,9 @@ import {
     paymentStatusUpdateSchema,
 } from './Schema.js';
 import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
+import Notifications, {
+    notificationType,
+} from '../../../database/models/Notifications.js';
 
 export const acceptRejectOrder = catchAsync(async (req, res) => {
     const { orderId, status, rejectReason } = acceptRejectOrderSchema.parse(
@@ -81,11 +84,14 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             message = 'your order is ' + status;
     }
 
+    const body = 'Order status';
+    const title = message;
+
     sendNotification({
         notification: {
-            body: 'Order status',
-            title: message,
             imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            body,
+            title,
         },
         android: {
             notification: {
@@ -97,6 +103,14 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         },
         tokens: [user.fcmToken],
     });
+
+    Notifications.create({
+        type: notificationType.order,
+        orderId: orderId,
+        userId: order?.userId,
+        body,
+        title,
+    }).then((res) => res.save());
 
     return res.status(200).json(
         successResponse({

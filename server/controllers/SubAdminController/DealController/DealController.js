@@ -13,10 +13,15 @@ import {
 } from '../../../utilities/utilitis.js';
 import SubAdminDealSchema from './schema.js';
 import User from '../../../database/models/User.js';
+import Notifications, {
+    notificationType,
+} from '../../../database/models/Notifications.js';
 
 class SubAdminDealControllerClass {
     cloneDealController = catchAsync(async (req, res) => {
-        const body = SubAdminDealSchema?.cloneDealSchema.parse(req.body);
+        const validatedBody = SubAdminDealSchema?.cloneDealSchema.parse(
+            req.body,
+        );
 
         const {
             dealId,
@@ -24,7 +29,7 @@ class SubAdminDealControllerClass {
             adminCommission,
             finalCashBackForUser,
             commissionValue,
-        } = body;
+        } = validatedBody;
 
         const clonedDeal = await Deal.findOne({ _id: dealId });
 
@@ -61,13 +66,26 @@ class SubAdminDealControllerClass {
 
         const adminsFireBaseTokens = users.map((i) => i?.fcmToken) || [];
 
+        const body = 'New Deal';
+        const title = req?.user?.userName + ' has posted a New Deal';
+
         sendNotification({
             notification: {
-                body: 'New Deal',
-                title: req?.user?.userName + ' has posted a New Deal',
+                body,
+                title,
             },
             tokens: adminsFireBaseTokens,
         });
+
+        Notifications.insertMany([
+            ...users.map((i) => ({
+                userId: i?._id,
+                body,
+                title,
+                DealId: DealRes?._id,
+                type: notificationType.deal,
+            })),
+        ]);
 
         return res.status(200).json(
             successResponse({

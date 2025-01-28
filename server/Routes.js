@@ -1,8 +1,8 @@
-import { adminMeQueryController } from './controllers/AdminController/meQuery.js';
 import fileUpload from './controllers/fileUpload.js';
 import './init-aliases.js';
 import AdminRouter from './routes/AdminRouter.js';
 import AuthRouter from './routes/AuthRouter.js';
+import CommonRouter from './routes/CommonRoutes.js';
 import SubAdminRouter from './routes/SubAdminRouter.js';
 import UserRouter from './routes/UserRouter.js';
 import catchErrorHandler from './utilities/catchErrorHandler.js';
@@ -41,6 +41,17 @@ export default (app) => {
     );
 
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);
+
+    // commonApi means for  all roles like  admin ,  super-admin , and users
+
+    app.use(
+        '/commonApi',
+        AuthMiddleware([
+            ROLE_TYPE_ENUM.USER,
+            ...Object.values(ADMIN_ROLE_TYPE_ENUM).map((i) => i),
+        ]),
+        CommonRouter,
+    );
 
     app.use(
         '/fileUpload',

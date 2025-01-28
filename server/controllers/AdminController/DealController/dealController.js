@@ -26,6 +26,9 @@ import {
 } from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
 import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
+import Notifications, {
+    notificationType,
+} from '../../../database/models/Notifications.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -161,7 +164,7 @@ export const allDeals = catchAsync(async (req, res) => {
 });
 
 export const addDealController = catchAsync(async (req, res) => {
-    const body = addDealSchema.parse(req.body);
+    const validatedBody = addDealSchema.parse(req.body);
     const {
         actualPrice,
         brand,
@@ -186,7 +189,7 @@ export const addDealController = catchAsync(async (req, res) => {
         isCommissionDeal,
         showToUsers,
         showToSubAdmins,
-    } = body;
+    } = validatedBody;
     const newDeal = await Deal.create({
         actualPrice,
         brand,
@@ -217,10 +220,14 @@ export const addDealController = catchAsync(async (req, res) => {
     });
     const DealRes = await newDeal.save();
 
-    let adminsFireBaseTokens = [];
+    let firebaseTokens = [];
+
+    let subAdmins = [];
+
+    let users = [];
 
     if (showToSubAdmins) {
-        const subAdmins = await AdminSubAdminLinker.find({
+        subAdmins = await AdminSubAdminLinker.find({
             adminId: req?.user?._id,
         })
             .populate('subAdminId')
@@ -229,26 +236,48 @@ export const addDealController = catchAsync(async (req, res) => {
         const tokens =
             subAdmins.map((i) => i?.subAdminId?.fcmTokens).flat() || [];
 
-        adminsFireBaseTokens = [...tokens];
+        firebaseTokens = [...tokens];
     }
 
     if (showToUsers) {
-        const users = await User.find({
+        users = await User.find({
             historyAdminReferences: req?.user?._id,
         }).select('fcmToken');
 
         const tokens = users.map((i) => i.fcmToken).flat() || [];
 
-        adminsFireBaseTokens = [...adminsFireBaseTokens, ...tokens];
+        firebaseTokens = [...firebaseTokens, ...tokens];
     }
+
+    const body = 'New Deal';
+    const title = req?.user?.userName + ' has Create a New Deal';
 
     sendNotification({
         notification: {
-            body: 'New Deal',
-            title: req?.user?.userName + ' has Create a New Deal',
+            title,
+            body,
         },
-        tokens: adminsFireBaseTokens,
+        tokens: firebaseTokens,
     });
+
+    Notifications.insertMany([
+        // for the subAdmins
+        ...subAdmins.map((i) => ({
+            adminId: i?.subAdminId?._id,
+            body,
+            title,
+            DealId: DealRes?._id,
+            type: notificationType.deal,
+        })),
+        // for the users
+        ...users.map((i) => ({
+            userId: i?._id,
+            body,
+            title,
+            DealId: DealRes?._id,
+            type: notificationType.deal,
+        })),
+    ]);
 
     return res.status(200).json(
         successResponse({

@@ -37,7 +37,7 @@ export const sendSuccessResponse = ({
     message,
     data,
     others,
-    statusCode,
+    statusCode = 200,
     total,
     res,
 }) => {
