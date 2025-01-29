@@ -19,6 +19,9 @@ import {
     toUTC,
 } from '../../../utilities/utilitis.js';
 import { sendNotification } from '../../../utilities/sendNotification.js';
+import Notifications, {
+    notificationType,
+} from '../../../database/models/Notifications.js';
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
@@ -111,12 +114,25 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         .map((i) => i.adminId?.fcmTokens)
         ?.flat();
 
-    sendNotification({
-        notification: {
-            body: 'New Order',
-            title: name + ' has Create a New order',
-        },
-        tokens: adminsFireBaseTokens,
+    const body = 'New Order';
+    const title = name + ' has Create a New order';
+
+    insertedOrders?.forEach((item) => {
+        sendNotification({
+            notification: {
+                body,
+                title,
+            },
+            tokens: adminsFireBaseTokens,
+        });
+
+        Notifications.create({
+            type: notificationType.order,
+            orderId: item._id,
+            userId: item?.userId,
+            body,
+            title,
+        }).then((res) => res.save());
     });
 
     return res.status(200).json(
@@ -130,7 +146,9 @@ export const OrderCreateController = catchAsync(async (req, res) => {
 export const OrderFromUpdate = catchAsync(async (req, res) => {
     const { orderIdOfPlatForm, reviewerName, orderScreenShot, orderId } =
         OrderFromUpdateSchema.parse(req.body);
-    const order = await Order.findOne({ _id: orderId });
+
+    const { name } = req.user;
+    const order = await Order.findOne({ _id: orderId }).populate('dealOwner');
     if (!order) {
         return res.status(400).json(
             errorResponse({
@@ -156,6 +174,25 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
         },
         { new: true },
     );
+
+    const body = 'Order Form Updated';
+    const title = name + ' buyer has updated Order from';
+
+    sendNotification({
+        notification: {
+            body,
+            title,
+        },
+        tokens: order?.dealOwner?.fcmTokens,
+    });
+
+    Notifications.create({
+        type: notificationType.order,
+        orderId: order._id,
+        userId: order?.userId,
+        body,
+        title,
+    }).then((res) => res.save());
 
     return res.status(200).json(
         successResponse({
