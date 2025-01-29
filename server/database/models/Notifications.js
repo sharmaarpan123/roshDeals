@@ -11,7 +11,7 @@ const NotificationSchema = new mongoose.Schema(
         userId: { type: mongoose.Types.ObjectId, ref: 'User' },
         adminId: { type: mongoose.Types.ObjectId, ref: 'Admin' },
         dealId: { type: mongoose.Types.ObjectId, ref: 'Deal' },
-        orderId: { type: mongoose.Types.ObjectId, ref: 'Deal' },
+        orderId: { type: mongoose.Types.ObjectId, ref: 'Order' },
         title: { type: String, required: true },
         body: { type: String, required: true },
         type: { type: String, enum: Object.values(notificationType) },

@@ -33,15 +33,7 @@ export const sendErrorResponse = ({
         .json(errorResponse({ message, others, statusCode, error }));
 };
 
-export const sendSuccessResponse = ({
-    message,
-    data,
-    others,
-    statusCode = 200,
-    total,
-    res,
-}) => {
-    return res
-        .send(200)
-        .json(successResponse({ message, data, others, statusCode, total }));
+export const sendSuccessResponse = ({ message, data, others, statusCode = 200, total, res }) => {
+    return res.status(statusCode).json(successResponse({ message, data, others, statusCode, total }));
 };
+
