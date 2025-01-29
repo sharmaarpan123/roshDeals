@@ -1,4 +1,3 @@
-import { promise } from 'zod';
 import Notifications from '../../../database/models/Notifications.js';
 import catchAsync from '../../../utilities/catchAsync.js';
 import { sendSuccessResponse } from '../../../utilities/Responses.js';
