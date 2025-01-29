@@ -24,16 +24,24 @@ export const errorResponse = ({ message, others, statusCode, errorInfo }) => ({
 export const sendErrorResponse = ({
     message,
     others,
-    statusCode,
+    statusCode = 400,
     error,
     res,
 }) => {
     return res
-        .send(400)
+        .status(statusCode)
         .json(errorResponse({ message, others, statusCode, error }));
 };
 
-export const sendSuccessResponse = ({ message, data, others, statusCode = 200, total, res }) => {
-    return res.status(statusCode).json(successResponse({ message, data, others, statusCode, total }));
+export const sendSuccessResponse = ({
+    message,
+    data,
+    others,
+    statusCode = 200,
+    total,
+    res,
+}) => {
+    return res
+        .status(statusCode)
+        .json(successResponse({ message, data, others, statusCode, total }));
 };
-

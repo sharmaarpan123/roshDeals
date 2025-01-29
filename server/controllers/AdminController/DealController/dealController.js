@@ -266,7 +266,7 @@ export const addDealController = catchAsync(async (req, res) => {
             adminId: i?.subAdminId?._id,
             body,
             title,
-            DealId: DealRes?._id,
+            dealId: DealRes?._id,
             type: notificationType.deal,
         })),
         // for the users
@@ -274,7 +274,7 @@ export const addDealController = catchAsync(async (req, res) => {
             userId: i?._id,
             body,
             title,
-            DealId: DealRes?._id,
+            dealId: DealRes?._id,
             type: notificationType.deal,
         })),
     ]);
