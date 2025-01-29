@@ -216,7 +216,7 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     } = reviewFormSubmitSchema.parse(req.body);
     const { name } = req.user;
 
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findOne({ _id: orderId }).populate('dealOwner');
     if (!order) {
         return res.status(400).json(
             errorResponse({
