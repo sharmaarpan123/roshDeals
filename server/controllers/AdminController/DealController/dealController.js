@@ -29,6 +29,7 @@ import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js
 import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
+import { extractProductImage } from '../../../utilities/extractProductImage.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -180,7 +181,6 @@ export const addDealController = catchAsync(async (req, res) => {
         termsAndCondition,
         adminCommission,
         uniqueIdentifier,
-        imageUrl,
         refundDays,
         exchangeDealProducts,
         finalCashBackForUser,
@@ -190,6 +190,9 @@ export const addDealController = catchAsync(async (req, res) => {
         showToUsers,
         showToSubAdmins,
     } = validatedBody;
+
+    const imageUrl = await extractProductImage(postUrl);
+
     const newDeal = await Deal.create({
         actualPrice,
         brand,
@@ -204,7 +207,7 @@ export const addDealController = catchAsync(async (req, res) => {
         termsAndCondition,
         adminCommission,
         uniqueIdentifier,
-        imageUrl,
+        imageUrl: imageUrl || '',
         refundDays,
         exchangeDealProducts,
         finalCashBackForUser,
