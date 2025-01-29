@@ -129,10 +129,14 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         Notifications.create({
             type: notificationType.order,
             orderId: item._id,
-            userId: item?.userId,
+            adminId: currentAdminReference,
             body,
             title,
-        }).then((res) => res.save());
+        }).then((res) => {
+            res.save().then((res) => {
+                console.log(res);
+            });
+        });
     });
 
     return res.status(200).json(
@@ -189,7 +193,7 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
     Notifications.create({
         type: notificationType.order,
         orderId: order._id,
-        userId: order?.userId,
+        adminId: order?.dealOwner?._id,
         body,
         title,
     }).then((res) => res.save());
@@ -210,6 +214,8 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
         sellerFeedback,
         paymentId,
     } = reviewFormSubmitSchema.parse(req.body);
+    const { name } = req.user;
+
     const order = await Order.findOne({ _id: orderId });
     if (!order) {
         return res.status(400).json(
@@ -253,6 +259,26 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
             new: true,
         },
     );
+
+    const body = 'Review Form Updated';
+    const title = name + ' buyer has updated Order from';
+
+    sendNotification({
+        notification: {
+            body,
+            title,
+        },
+        tokens: order?.dealOwner?.fcmTokens,
+    });
+
+    Notifications.create({
+        type: notificationType.order,
+        orderId: order._id,
+        adminId: order?.dealOwner?._id,
+        body,
+        title,
+    }).then((res) => res.save());
+
     return res.status(200).json(
         successResponse({
             message: 'Your review Form is submitted!',
