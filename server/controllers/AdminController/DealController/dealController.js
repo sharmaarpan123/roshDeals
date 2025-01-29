@@ -241,7 +241,7 @@ export const addDealController = catchAsync(async (req, res) => {
 
     if (showToUsers) {
         users = await User.find({
-            historyAdminReferences: req?.user?._id,
+            currentAdminReference: req?.user?._id,
         }).select('fcmToken');
 
         const tokens = users.map((i) => i.fcmToken).flat() || [];
