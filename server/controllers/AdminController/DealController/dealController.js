@@ -30,6 +30,7 @@ import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
 import { extractProductImage } from '../../../utilities/extractProductImage.js';
+import { resolve } from 'path';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -369,7 +370,11 @@ export const editDealController = catchAsync(async (req, res) => {
         );
     }
 
-    console.time('starttime');
+    await new Promise((resolve, rejects) => {
+        setTimeout(() => {
+            resolve();
+        }, 30000);
+    });
 
     let finalImageUrl = '';
     let scrapImageUrl = await extractProductImage(postUrl);
@@ -379,8 +384,6 @@ export const editDealController = catchAsync(async (req, res) => {
     } else {
         finalImageUrl = imageUrl;
     }
-
-    console.timeEnd('starttime');
 
     const dealUpdated = await Deal.findOneAndUpdate(
         {
