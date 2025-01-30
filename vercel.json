@@ -16,6 +16,6 @@
     "functions": {
         "/server/server.js": {
             "maxDuration": 40
-        }
+        } 
     }
 }
