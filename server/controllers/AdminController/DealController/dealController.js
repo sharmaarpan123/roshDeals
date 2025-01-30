@@ -370,12 +370,6 @@ export const editDealController = catchAsync(async (req, res) => {
         );
     }
 
-    await new Promise((resolve, rejects) => {
-        setTimeout(() => {
-            resolve();
-        }, 30000);
-    });
-
     let finalImageUrl = '';
     let scrapImageUrl = await extractProductImage(postUrl);
 
