@@ -368,6 +368,20 @@ export const editDealController = catchAsync(async (req, res) => {
             }),
         );
     }
+
+    console.time('starttime');
+
+    let finalImageUrl = '';
+    let scrapImageUrl = await extractProductImage(postUrl);
+
+    if (scrapImageUrl) {
+        finalImageUrl = scrapImageUrl;
+    } else {
+        finalImageUrl = imageUrl;
+    }
+
+    console.timeEnd('starttime');
+
     const dealUpdated = await Deal.findOneAndUpdate(
         {
             _id: dealId,
@@ -389,7 +403,7 @@ export const editDealController = catchAsync(async (req, res) => {
             termsAndCondition,
             adminCommission,
             uniqueIdentifier,
-            imageUrl,
+            imageUrl: finalImageUrl,
             exchangeDealProducts,
             finalCashBackForUser,
             refundDays,

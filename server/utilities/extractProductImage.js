@@ -48,19 +48,3 @@ export const extractProductImage = async (url) => {
         return null;
     }
 };
-
-// Example usage
-// (async () => {
-//     const productUrls = [
-//         'https://www.amazon.in/Sony-HT-S40R-Subwoofer-Connectivity-Connectitvity/dp/B0961X3R2H',
-//         'https://www.flipkart.com/hrx-hrithik-roshan-running-shoes-men/p/itm7773038b71399?pid=SHOG2CHPJ3M8PUMH&lid=LSTSHOG2CHPJ3M8PUMHMARFND&marketplace=FLIPKART&sattr[]=size&st=size',
-//         'https://www.myntra.com/dress/kassually/kassually-sparkle-foil-knitted-sweetheart-neck-puff-sleeves-cut-out-bling-bodycon-dress/25278940/buy?utm_campaign=social_share_pdp_deeplink&utm_medium=deeplink&utm_source=social_share_pdp',
-//         'https://www.nykaa.com/lakme-9-to-5-primer-matte-perfect-cover-foundation/p/574201?productId=574201&pps=1&skuId=574186',
-//         'https://www.meesho.com/classic-dream-catchers/p/eo44t',
-//     ];
-
-//     for (const url of productUrls) {
-//         const image = await extractProductImage(url);
-//         console.log(`Product Image for ${image}`);
-//     }
-// })();
