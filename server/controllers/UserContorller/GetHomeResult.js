@@ -32,6 +32,7 @@ export default catchAsync(async (req, res) => {
                 path: 'brand dealCategory platForm',
             },
         })
+        .sort({ createdAt: -1 })
         .skip(dealsFilter?.offset || 0)
         .limit(dealsFilter?.limit || 10);
 
