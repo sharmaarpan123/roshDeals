@@ -51,7 +51,7 @@ class controller {
     });
     logout = catchAsync(async (req, res) => {
         const user = await User.findOneAndUpdate(
-            { _id: verifiedData?.data?._id },
+            { _id: req?.user?._id },
             { fcmToken: '' },
             { new: true },
         );
