@@ -25,6 +25,7 @@ import activeDealByBrandAndCategory from '../controllers/UserContorller/getDeals
 const UserRouter = express.Router();
 // payment details
 UserRouter.get('/me', UserController.meQueryController);
+UserRouter.get('/logout', UserController.logout);
 // payment
 UserRouter.post('/paymentDetails/add', addPaymentDetails);
 UserRouter.post('/paymentDetails/edit', editPaymentDetails);

@@ -3,7 +3,11 @@ import SupportChatMessage from '../../database/models/SupportChatMessage.js';
 import User from '../../database/models/User.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { verifyJwt } from '../../utilities/jwt.js';
-import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import {
+    errorResponse,
+    sendSuccessResponse,
+    successResponse,
+} from '../../utilities/Responses.js';
 import { getAllAdminsFromCache } from '../../utilities/utilitis.js';
 import userControllerSchema from './Schema.js';
 
@@ -44,6 +48,20 @@ class controller {
                 },
             }),
         );
+    });
+    logout = catchAsync(async (req, res) => {
+        const user = await User.findOneAndUpdate(
+            { _id: verifiedData?.data?._id },
+            { fcmToken: '' },
+            { new: true },
+        );
+
+        if (user) {
+            return sendSuccessResponse({
+                res,
+                message: 'Logout successfully',
+            });
+        }
     });
     supportChatHistoryController = catchAsync(async (req, res) => {
         const { limit, offset, reciever, sender } =
