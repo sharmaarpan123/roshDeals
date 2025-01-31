@@ -13,7 +13,7 @@ export const getAllNotifications = catchAsync(async (req, res) => {
 
     if (roles.includes(ROLE_TYPE_ENUM.USER)) {
         query.userId = _id;
-        // query.userCurrentAdminReference = currentAdminReference?._id;
+        query.userCurrentAdminReference = currentAdminReference?._id;
     } else {
         query.adminId = _id;
     }
