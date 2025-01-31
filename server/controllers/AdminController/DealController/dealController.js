@@ -30,7 +30,6 @@ import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
 import { extractProductImage } from '../../../utilities/extractProductImage.js';
-import { resolve } from 'path';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -280,6 +279,7 @@ export const addDealController = catchAsync(async (req, res) => {
             title,
             dealId: DealRes?._id,
             type: notificationType.deal,
+            userCurrentAdminReference: req?.user?._id,
         })),
     ]);
 

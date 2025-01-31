@@ -41,7 +41,6 @@ const schema = z.object({
 const signInController = catchAsync(async (req, res) => {
     schema.parse(req.body);
     const { password, phoneNumber, fcmToken, currentAdminReference } = req.body;
-    console.log(req.body, 'currentAdminReference');
     const user = await User.findOne({
         phoneNumber,
     });

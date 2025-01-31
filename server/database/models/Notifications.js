@@ -9,6 +9,10 @@ export const notificationType = {
 const NotificationSchema = new mongoose.Schema(
     {
         userId: { type: mongoose.Types.ObjectId, ref: 'User' },
+        userCurrentAdminReference: {
+            type: mongoose.Types.ObjectId,
+            ref: 'Admin',
+        },
         adminId: { type: mongoose.Types.ObjectId, ref: 'Admin' },
         dealId: { type: mongoose.Types.ObjectId, ref: 'Deal' },
         orderId: { type: mongoose.Types.ObjectId, ref: 'Order' },

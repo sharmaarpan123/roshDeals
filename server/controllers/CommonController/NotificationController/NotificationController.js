@@ -7,12 +7,13 @@ import { filterSchema } from '../../../utilities/ValidationSchema.js';
 export const getAllNotifications = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
 
-    const { roles, _id } = req.user;
+    const { roles, _id, currentAdminReference } = req.user;
 
     const query = {};
 
     if (roles.includes(ROLE_TYPE_ENUM.USER)) {
         query.userId = _id;
+        query.userCurrentAdminReference = currentAdminReference?._id;
     } else {
         query.adminId = _id;
     }
