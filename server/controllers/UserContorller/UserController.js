@@ -52,7 +52,7 @@ class controller {
     logout = catchAsync(async (req, res) => {
         const user = await User.findOneAndUpdate(
             { _id: req?.user?._id },
-            { fcmToken: '' },
+            { $set: { fcmToken: '' } },
             { new: true },
         );
 
