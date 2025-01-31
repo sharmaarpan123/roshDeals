@@ -5,6 +5,7 @@ import {
     filterRefineFunction,
     filterRefineMessage,
     filterSchemaObject,
+    optionalBoolean,
     optionalString,
     requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
@@ -323,6 +324,7 @@ const editDealSchema = z
         showToSubAdmins: requiredBoolean('show to sub admin'),
         commissionValueToSubAdmin: optionalString(),
         lessAmountToSubAdmin: optionalString(),
+        shouldScrapProductImage: optionalBoolean(),
     })
     .merge(getDeal)
     .refine(

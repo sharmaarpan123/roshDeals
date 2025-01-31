@@ -166,7 +166,7 @@ export const allDeals = catchAsync(async (req, res) => {
 
 export const addDealController = catchAsync(async (req, res) => {
     const validatedBody = addDealSchema.parse(req.body);
-    const {
+    let {
         actualPrice,
         brand,
         lessAmount,
@@ -182,6 +182,7 @@ export const addDealController = catchAsync(async (req, res) => {
         adminCommission,
         uniqueIdentifier,
         refundDays,
+        imageUrl,
         exchangeDealProducts,
         finalCashBackForUser,
         commissionValue,
@@ -191,7 +192,10 @@ export const addDealController = catchAsync(async (req, res) => {
         showToSubAdmins,
     } = validatedBody;
 
-    const imageUrl = await extractProductImage(postUrl);
+    if (!imageUrl) {
+        // if we did not get the image url from the frontend we should scrap it
+        imageUrl = await extractProductImage(postUrl);
+    }
 
     const newDeal = await Deal.create({
         actualPrice,
@@ -355,6 +359,7 @@ export const editDealController = catchAsync(async (req, res) => {
         commissionValueToSubAdmin,
         showToSubAdmins,
         showToUsers,
+        shouldScrapProductImage,
     } = body;
     // validating the brandId ,  dealCategoryId ,  platFormId ,  that they are existing on our db
     const inValidMongoIdMessage = await validatingMongoObjectIds({
@@ -371,7 +376,11 @@ export const editDealController = catchAsync(async (req, res) => {
     }
 
     let finalImageUrl = '';
-    let scrapImageUrl = await extractProductImage(postUrl);
+    let scrapImageUrl = '';
+
+    if (shouldScrapProductImage) {
+        scrapImageUrl = await extractProductImage(postUrl);
+    }
 
     if (scrapImageUrl) {
         finalImageUrl = scrapImageUrl;
@@ -400,7 +409,7 @@ export const editDealController = catchAsync(async (req, res) => {
             termsAndCondition,
             adminCommission,
             uniqueIdentifier,
-            imageUrl: finalImageUrl,
+            imageUrl: finalImageUrl || '',
             exchangeDealProducts,
             finalCashBackForUser,
             refundDays,
