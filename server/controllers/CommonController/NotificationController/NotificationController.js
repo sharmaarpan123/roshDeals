@@ -1,23 +1,30 @@
 import Notifications from '../../../database/models/Notifications.js';
 import catchAsync from '../../../utilities/catchAsync.js';
+import { ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 import { sendSuccessResponse } from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 
 export const getAllNotifications = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
 
-    const notificationsPromise = Notifications.find({
-        $or: [{ userId: req.user._id }, { adminId: req.user._id }],
-    })
+    const { roles, _id } = req.user;
+
+    const query = {};
+
+    if (roles.includes(ROLE_TYPE_ENUM.USER)) {
+        query.userId = _id;
+    } else {
+        query.adminId = _id;
+    }
+
+    const notificationsPromise = Notifications.find(query)
         .populate('dealId')
         .populate('orderId')
         .sort({ createdAt: -1 })
         .skip(offset || 0)
         .limit(limit || 30);
 
-    const totalCountPromise = Notifications.find({
-        $or: [{ userId: req.user._id }, { adminId: req.user._id }],
-    }).countDocuments();
+    const totalCountPromise = Notifications.find(query).countDocuments();
 
     const [notifications, totalCount] = await Promise.all([
         notificationsPromise,

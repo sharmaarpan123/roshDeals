@@ -31,6 +31,5 @@ export const sendNotification = async (message) => {
         return response;
     } catch (error) {
         console.error('Error sending firebase message:', error);
-        throw error; // Rethrow the error if needed
     }
 };
