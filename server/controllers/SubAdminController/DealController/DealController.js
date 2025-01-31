@@ -16,6 +16,7 @@ import User from '../../../database/models/User.js';
 import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
+import { sendNotification } from '../../../utilities/sendNotification.js';
 
 class SubAdminDealControllerClass {
     cloneDealController = catchAsync(async (req, res) => {
@@ -80,6 +81,7 @@ class SubAdminDealControllerClass {
         Notifications.insertMany([
             ...users.map((i) => ({
                 userId: i?._id,
+                userCurrentAdminReference: req?.user?._id,
                 body,
                 title,
                 DealId: DealRes?._id,

@@ -107,6 +107,7 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
     Notifications.create({
         type: notificationType.order,
         orderId: orderId,
+        userCurrentAdminReference: order?.dealOwner,
         userId: order?.userId,
         body,
         title,
