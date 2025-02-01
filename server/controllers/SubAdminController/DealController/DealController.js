@@ -128,6 +128,7 @@ class SubAdminDealControllerClass {
             .populate('parentDealId')
             .populate('dealCategory')
             .populate('platForm')
+            .populate('adminId')
             .skip(offset || 0)
             .limit(limit || 20)
             .sort({ createdAt: -1 });
