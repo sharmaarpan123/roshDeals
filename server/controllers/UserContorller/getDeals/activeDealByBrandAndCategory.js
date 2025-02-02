@@ -23,8 +23,6 @@ export default catchAsync(async (req, res) => {
         selectedBrandFilter,
     } = body;
 
-    console.log(selectedPlatformFilter, 'filter');
-
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
     let pipeLine = [
@@ -257,11 +255,7 @@ export default catchAsync(async (req, res) => {
         },
     ];
 
-    console.log(JSON.stringify(pipeLine), 'pipleLIne');
-
     const data = await Deal.aggregate([...pipeLine]);
-
-    // Fetch total count
 
     // Fetch related brands, categories, and platforms with populate
     const relatedFilter = {
