@@ -1,5 +1,5 @@
-import { isUrlValid } from '../../../utilities/utilitis.js';
 import { z } from 'zod';
+import { isUrlValid } from '../../../utilities/utilitis.js';
 
 import {
     filterRefineFunction,
@@ -9,7 +9,6 @@ import {
     optionalString,
     requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
-import { ADMIN_ROLE_TYPE_ENUM } from '../../../utilities/commonTypes.js';
 
 const allDealsListSchema = filterSchemaObject
     .merge(
@@ -422,11 +421,6 @@ const getDealsWithBrandIdSchema = z.object({
 });
 
 export {
-    addDealSchema,
-    getDeal,
-    editDealSchema,
-    allDealsListSchema,
-    getDealsWithBrandIdSchema,
-    BulkAddDealSchema,
+    addDealSchema, allDealsListSchema, BulkAddDealSchema, editDealSchema, getDeal, getDealsWithBrandIdSchema
 };
 //# sourceMappingURL=schema.js.map

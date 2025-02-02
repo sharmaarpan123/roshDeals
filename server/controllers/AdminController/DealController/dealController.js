@@ -89,8 +89,17 @@ export const dealStatusChangeController = catchAsync(async (req, res) => {
 });
 
 export const dealDetailsWithFilters = catchAsync(async (req, res) => {
-    const { offset, limit, search, status, paymentStatus, isSlotCompleted } =
-        allDealsListSchema.parse(req.body);
+    const {
+        offset,
+        limit,
+        search,
+        status,
+        paymentStatus,
+        isSlotCompleted,
+        selectedBrandFilter,
+        selectedCategoryFilter,
+        selectedPlatformFilter,
+    } = allDealsListSchema.parse(req.body);
 
     const adminId = isAdminAccessingApi(req);
 
@@ -105,6 +114,22 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         ...(adminId && {
             adminId: new mongoose.Types.ObjectId(adminId),
         }),
+        ...(selectedBrandFilter && {
+            brand: {
+                $in: selectedBrandFilter?.map((i) => i),
+            },
+        }),
+        ...(selectedCategoryFilter && {
+            dealCategory: {
+                $in: selectedCategoryFilter?.map((i) => i),
+            },
+        }),
+        ...(selectedPlatformFilter && {
+            platForm: {
+                $in: selectedPlatformFilter?.map((i) => i),
+            },
+        }),
+
         parentDealId: { $exists: false },
     };
 
