@@ -291,9 +291,6 @@ export const OrderList = catchAsync(async (req, res) => {
         limit,
         offset,
         selectedDate,
-        selectedBrandFilter,
-        selectedCategoryFilter,
-        selectedPlatformFilter,
     } = filterSchema.parse(req.query);
     const dateFilter = selectedDate
         ? {

@@ -178,12 +178,20 @@ export default catchAsync(async (req, res) => {
                     $or: [
                         {
                             'dealCategory._id': {
-                                $in: [MongooseObjectId(selectedCategoryFilter)],
+                                $in: [
+                                    selectedCategoryFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                         {
                             'parentDealId.dealCategory._id': {
-                                $in: [MongooseObjectId(selectedCategoryFilter)],
+                                $in: [
+                                    selectedCategoryFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                     ],
@@ -192,12 +200,20 @@ export default catchAsync(async (req, res) => {
                     $or: [
                         {
                             'platForm._id': {
-                                $in: [MongooseObjectId(selectedPlatformFilter)],
+                                $in: [
+                                    selectedPlatformFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                         {
                             'parentDealId.platForm._id': {
-                                $in: [MongooseObjectId(selectedPlatformFilter)],
+                                $in: [
+                                    selectedPlatformFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                     ],
@@ -206,12 +222,20 @@ export default catchAsync(async (req, res) => {
                     $or: [
                         {
                             'brand._id': {
-                                $in: [MongooseObjectId(selectedBrandFilter)],
+                                $in: [
+                                    selectedBrandFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                         {
                             'parentDealId.brand._id': {
-                                $in: [MongooseObjectId(selectedBrandFilter)],
+                                $in: [
+                                    selectedBrandFilter?.map((i) =>
+                                        MongooseObjectId(i),
+                                    ),
+                                ],
                             },
                         },
                     ],
