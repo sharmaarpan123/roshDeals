@@ -159,19 +159,19 @@ export const filterSchemaObject = z.object({
         })
         .optional(),
     selectedCategoryFilter: z
-        .string()
+        .array(z.string())
         .nullable() // explicitly allow null values
         .optional(),
     selectedPlatformFilter: z
-        .array()
+        .array(z.string())
         .nullable() // explicitly allow null values
         .optional(),
     selectedBrandFilter: z
-        .array()
+        .array(z.string())
         .nullable() // explicitly allow null values
         .optional(),
     selectedDate: z
-        .array()
+        .string()
         .nullable() // explicitly allow null values
         .optional(),
 });
