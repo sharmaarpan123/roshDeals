@@ -104,6 +104,9 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
+            selectedBrandFilter,
+            selectedCategoryFilter,
+            selectedPlatformFilter,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         const adminIds = await AdminSubAdminLinker.find({
@@ -121,6 +124,21 @@ class SubAdminDealControllerClass {
                 isSlotCompleted: false,
             }),
             showToSubAdmins: true,
+            ...(selectedBrandFilter && {
+                brand: {
+                    $in: selectedBrandFilter?.map((i) => i),
+                },
+            }),
+            ...(selectedCategoryFilter && {
+                dealCategory: {
+                    $in: selectedCategoryFilter?.map((i) => i),
+                },
+            }),
+            ...(selectedPlatformFilter && {
+                platForm: {
+                    $in: selectedPlatformFilter?.map((i) => i),
+                },
+            }),
         };
 
         const dealData = Deal.find(query)
@@ -327,6 +345,9 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
+            selectedBrandFilter,
+            selectedCategoryFilter,
+            selectedPlatformFilter,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         const subAdminId = getAccessorId(req);
@@ -341,6 +362,21 @@ class SubAdminDealControllerClass {
             }),
             parentDealId: { $exists: true },
             adminId: new mongoose.Types.ObjectId(subAdminId),
+            ...(selectedBrandFilter && {
+                brand: {
+                    $in: selectedBrandFilter?.map((i) => i),
+                },
+            }),
+            ...(selectedCategoryFilter && {
+                dealCategory: {
+                    $in: selectedCategoryFilter?.map((i) => i),
+                },
+            }),
+            ...(selectedPlatformFilter && {
+                platForm: {
+                    $in: selectedPlatformFilter?.map((i) => i),
+                },
+            }),
         };
 
         const dealData = Deal.find(query)
