@@ -23,27 +23,9 @@ export default catchAsync(async (req, res) => {
         selectedBrandFilter,
     } = body;
 
-    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
+    console.log(selectedPlatformFilter, 'filter');
 
-    const filter = {
-        isActive: true,
-        isSlotCompleted: false,
-        adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
-        ...(type === SearchEnumType.brand && {
-            $or: [{ brand: id }, { 'parentDealId.brand': id }],
-        }),
-        ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
-        ...(type === SearchEnumType.platForm && { platForm: id }),
-        ...(selectedCategoryFilter?.length && {
-            dealCategory: { $in: selectedCategoryFilter },
-        }),
-        ...(selectedPlatformFilter?.length && {
-            platForm: { $in: selectedPlatformFilter },
-        }),
-        ...(selectedBrandFilter?.length && {
-            brand: { $in: selectedBrandFilter },
-        }),
-    };
+    const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
     let pipeLine = [
         {
@@ -153,94 +135,120 @@ export default catchAsync(async (req, res) => {
 
         {
             $match: {
-                ...(type === SearchEnumType.brand && {
-                    $or: [
-                        { 'brand._id': MongooseObjectId(id) },
-                        { 'parentDealId.brand._id': MongooseObjectId(id) },
-                    ],
-                }),
-                ...(type === SearchEnumType.dealCategory && {
-                    $or: [
-                        { 'dealCategory._id': MongooseObjectId(id) },
-                        {
-                            'parentDealId.dealCategory._id':
-                                MongooseObjectId(id),
-                        },
-                    ],
-                }),
-                ...(type === SearchEnumType.platForm && {
-                    $or: [
-                        { 'platForm._id': MongooseObjectId(id) },
-                        { 'parentDealId.platForm._id': MongooseObjectId(id) },
-                    ],
-                }),
-                ...(selectedCategoryFilter?.length && {
-                    $or: [
-                        {
-                            'dealCategory._id': {
-                                $in: selectedCategoryFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                        {
-                            'parentDealId.dealCategory._id': {
-                                $in: selectedCategoryFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                    ],
-                }),
-                ...(selectedPlatformFilter?.length && {
-                    $or: [
-                        {
-                            'platForm._id': {
-                                $in: selectedPlatformFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                        {
-                            'parentDealId.platForm._id': {
-                                $in: selectedPlatformFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                    ],
-                }),
-                ...(selectedBrandFilter?.length && {
-                    $or: [
-                        {
-                            'brand._id': {
-                                $in: selectedBrandFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                        {
-                            'parentDealId.brand._id': {
-                                $in: selectedBrandFilter?.map((i) =>
-                                    MongooseObjectId(i),
-                                ),
-                            },
-                        },
-                    ],
-                }),
+                $and: [
+                    ...(type === SearchEnumType.brand
+                        ? [
+                              {
+                                  $or: [
+                                      { 'brand._id': MongooseObjectId(id) },
+                                      {
+                                          'parentDealId.brand._id':
+                                              MongooseObjectId(id),
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+                    ...(type === SearchEnumType.dealCategory
+                        ? [
+                              {
+                                  $or: [
+                                      {
+                                          'dealCategory._id':
+                                              MongooseObjectId(id),
+                                      },
+                                      {
+                                          'parentDealId.dealCategory._id':
+                                              MongooseObjectId(id),
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+                    ...(type === SearchEnumType.platForm
+                        ? [
+                              {
+                                  $or: [
+                                      { 'platForm._id': MongooseObjectId(id) },
+                                      {
+                                          'parentDealId.platForm._id':
+                                              MongooseObjectId(id),
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+                    ...(selectedCategoryFilter
+                        ? [
+                              {
+                                  $or: [
+                                      {
+                                          'dealCategory._id': {
+                                              $in: selectedCategoryFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                      {
+                                          'parentDealId.dealCategory._id': {
+                                              $in: selectedCategoryFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+
+                    ...(selectedBrandFilter
+                        ? [
+                              {
+                                  $or: [
+                                      {
+                                          'brand._id': {
+                                              $in: selectedBrandFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                      {
+                                          'parentDealId.brand._id': {
+                                              $in: selectedBrandFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+
+                    ...(selectedPlatformFilter
+                        ? [
+                              {
+                                  $or: [
+                                      {
+                                          'platForm._id': {
+                                              $in: selectedPlatformFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                      {
+                                          'parentDealId.platForm._id': {
+                                              $in: selectedPlatformFilter?.map(
+                                                  (i) => MongooseObjectId(i),
+                                              ),
+                                          },
+                                      },
+                                  ],
+                              },
+                          ]
+                        : []),
+                ],
             },
         },
-    ];
-
-    const total = Deal.countDocuments([
-        ...pipeLine,
-        {
-            $count: 'totalCount',
-        },
-    ]);
-
-    pipeLine = [
-        ...pipeLine,
         {
             $skip: offset || 0,
         },
@@ -249,7 +257,9 @@ export default catchAsync(async (req, res) => {
         },
     ];
 
-    const DealData = Deal.aggregate([...pipeLine]);
+    console.log(JSON.stringify(pipeLine), 'pipleLIne');
+
+    const data = await Deal.aggregate([...pipeLine]);
 
     // Fetch total count
 
@@ -277,20 +287,12 @@ export default catchAsync(async (req, res) => {
                 .then((ids) => PlatForm.find({ _id: { $in: ids } })),
         ]);
 
-    // Execute all queries concurrently
-    const [data, totalCount] = await Promise.all([DealData, total]);
-
     // Respond with successResponse
     return res.status(200).json(
         successResponse({
             message:
                 'Deal data with related brands, categories, and platforms for the requested id',
             data,
-            total:
-                (totalCount[1] &&
-                    totalCount[1][0] &&
-                    totalCount[1][0]?.totalCount) ||
-                0,
             others: {
                 relatedData: {
                     brands: relatedBrands,
