@@ -158,21 +158,21 @@ export const filterSchemaObject = z.object({
             invalid_type_error: 'in Valid status',
         })
         .optional(),
-        selectedCategoryFilter: z
+    selectedCategoryFilter: z
         .string()
-        .nullable()  // explicitly allow null values
+        .nullable() // explicitly allow null values
         .optional(),
     selectedPlatformFilter: z
-        .string()
-        .nullable()  // explicitly allow null values
+        .array()
+        .nullable() // explicitly allow null values
         .optional(),
     selectedBrandFilter: z
-        .string()
-        .nullable()  // explicitly allow null values
+        .array()
+        .nullable() // explicitly allow null values
         .optional(),
     selectedDate: z
-        .string()
-        .nullable()  // explicitly allow null values
+        .array()
+        .nullable() // explicitly allow null values
         .optional(),
 });
 export const filterSchema = filterSchemaObject.refine(
