@@ -124,17 +124,17 @@ class SubAdminDealControllerClass {
                 isSlotCompleted: false,
             }),
             showToSubAdmins: true,
-            ...(selectedBrandFilter && {
+            ...(selectedBrandFilter?.length && {
                 brand: {
                     $in: selectedBrandFilter?.map((i) => i),
                 },
             }),
-            ...(selectedCategoryFilter && {
+            ...(selectedCategoryFilter?.length && {
                 dealCategory: {
                     $in: selectedCategoryFilter?.map((i) => i),
                 },
             }),
-            ...(selectedPlatformFilter && {
+            ...(selectedPlatformFilter?.length && {
                 platForm: {
                     $in: selectedPlatformFilter?.map((i) => i),
                 },
@@ -362,17 +362,17 @@ class SubAdminDealControllerClass {
             }),
             parentDealId: { $exists: true },
             adminId: new mongoose.Types.ObjectId(subAdminId),
-            ...(selectedBrandFilter && {
+            ...(selectedBrandFilter?.length && {
                 brand: {
                     $in: selectedBrandFilter?.map((i) => i),
                 },
             }),
-            ...(selectedCategoryFilter && {
+            ...(selectedCategoryFilter?.length && {
                 dealCategory: {
                     $in: selectedCategoryFilter?.map((i) => i),
                 },
             }),
-            ...(selectedPlatformFilter && {
+            ...(selectedPlatformFilter?.length && {
                 platForm: {
                     $in: selectedPlatformFilter?.map((i) => i),
                 },
