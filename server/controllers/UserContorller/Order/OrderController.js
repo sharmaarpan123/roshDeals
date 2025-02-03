@@ -307,6 +307,8 @@ export const OrderList = catchAsync(async (req, res) => {
           }
         : {};
 
+        console.log(offset , "sd")
+
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
     const orders = await Order.find({

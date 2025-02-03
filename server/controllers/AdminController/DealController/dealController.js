@@ -114,17 +114,17 @@ export const dealDetailsWithFilters = catchAsync(async (req, res) => {
         ...(adminId && {
             adminId: new mongoose.Types.ObjectId(adminId),
         }),
-        ...(selectedBrandFilter && {
+        ...(selectedBrandFilter?.length && {
             brand: {
                 $in: selectedBrandFilter?.map((i) => i),
             },
         }),
-        ...(selectedCategoryFilter && {
+        ...(selectedCategoryFilter?.length && {
             dealCategory: {
                 $in: selectedCategoryFilter?.map((i) => i),
             },
         }),
-        ...(selectedPlatformFilter && {
+        ...(selectedPlatformFilter?.length && {
             platForm: {
                 $in: selectedPlatformFilter?.map((i) => i),
             },

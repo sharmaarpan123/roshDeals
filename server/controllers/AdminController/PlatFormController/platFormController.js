@@ -18,10 +18,11 @@ const getAllPlatFormWithFiltersController = catchAsync(async (req, res) => {
     const AllPlatForms = PlatForm.find({
         ...(search && { name: { $regex: search, $options: 'i' } }),
         ...(status && { isActive: Boolean(+status) }),
-    })
-        .skip(offset || 0)
-        .limit(limit || 10)
-        .sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 });
+
+    if (limit) {
+        AllPlatForms.skip(offset).limit(limit);
+    }
 
     const totalCount = PlatForm.find({
         ...(search && { name: { $regex: search, $options: 'i' } }),
