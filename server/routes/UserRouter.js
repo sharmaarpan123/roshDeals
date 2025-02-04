@@ -66,7 +66,7 @@ UserRouter.post(
 
 UserRouter.post('/order/create', OrderCreateController);
 UserRouter.post('/order/update', OrderFromUpdate);
-UserRouter.get('/order/getOrderList', OrderList);
+UserRouter.post('/order/getOrderList', OrderList);
 UserRouter.post('/order/reviewFormSubmit', reviewFromSubmitController);
 UserRouter.get('/order/userEarning', UserEarning);
 
