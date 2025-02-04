@@ -10,6 +10,7 @@ import {
 import {
     getAccessorId,
     isSuperAdminAccessingApi,
+    MongooseObjectId,
 } from '../../../utilities/utilitis.js';
 import SubAdminDealSchema from './schema.js';
 import User from '../../../database/models/User.js';
@@ -171,6 +172,9 @@ class SubAdminDealControllerClass {
             status,
             paymentStatus,
             isSlotCompleted,
+            selectedBrandFilter,
+            selectedCategoryFilter,
+            selectedPlatformFilter,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         let adminIds;
@@ -182,23 +186,24 @@ class SubAdminDealControllerClass {
             }).select('subAdminId');
         }
 
-        console.log(isSuperAdminAccessing, 'accesrror');
-
         let aggregatePipelines = [
             ...(isSuperAdminAccessing
                 ? [
                       {
                           $match: {
-                              parentDealId: { $exists: true }, // all the deal
+                              parentDealId: { $exists: true }, // all  deal
+                              ...(status && { isActive: Boolean(+status) }),
                           },
                       },
                   ]
                 : [
                       {
                           $match: {
+                              parentDealId: { $exists: true }, // all  deal
                               adminId: {
                                   $in: adminIds?.map((i) => i?.subAdminId),
                               },
+                              ...(status && { isActive: Boolean(+status) }),
                           },
                       },
                   ]),
@@ -229,7 +234,6 @@ class SubAdminDealControllerClass {
                             $options: 'i',
                         },
                     }),
-                    ...(status && { isActive: Boolean(+status) }),
                     ...(paymentStatus && {
                         'parentDealId.paymentStatus': paymentStatus,
                     }),
@@ -238,6 +242,27 @@ class SubAdminDealControllerClass {
                     }),
                     ...(isSlotCompleted === 'uncompleted' && {
                         'parentDealId.isSlotCompleted': false,
+                    }),
+                    ...(selectedBrandFilter?.length && {
+                        'parentDealId.brand': {
+                            $in: selectedBrandFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
+                    }),
+                    ...(selectedCategoryFilter?.length && {
+                        'parentDealId.dealCategory': {
+                            $in: selectedCategoryFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
+                    }),
+                    ...(selectedPlatformFilter?.length && {
+                        'parentDealId.platForm': {
+                            $in: selectedPlatformFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
                     }),
                 },
             },
@@ -350,52 +375,195 @@ class SubAdminDealControllerClass {
             selectedPlatformFilter,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
-        const subAdminId = getAccessorId(req);
+        // const query = {
+        //     ...(search && { productName: { $regex: search, $options: 'i' } }),
+        //     ...(status && { isActive: Boolean(+status) }),
+        //     ...(paymentStatus && { paymentStatus }),
+        //     ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
+        //     ...(isSlotCompleted === 'uncompleted' && {
+        //         isSlotCompleted: false,
+        //     }),
+        //     parentDealId: { $exists: true },
+        //     adminId: new mongoose.Types.ObjectId(subAdminId),
+        //     ...(selectedBrandFilter?.length && {
+        //         brand: {
+        //             $in: selectedBrandFilter?.map((i) => i),
+        //         },
+        //     }),
+        //     ...(selectedCategoryFilter?.length && {
+        //         dealCategory: {
+        //             $in: selectedCategoryFilter?.map((i) => i),
+        //         },
+        //     }),
+        //     ...(selectedPlatformFilter?.length && {
+        //         platForm: {
+        //             $in: selectedPlatformFilter?.map((i) => i),
+        //         },
+        //     }),
+        // };
 
-        const query = {
-            ...(search && { productName: { $regex: search, $options: 'i' } }),
-            ...(status && { isActive: Boolean(+status) }),
-            ...(paymentStatus && { paymentStatus }),
-            ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
-            ...(isSlotCompleted === 'uncompleted' && {
-                isSlotCompleted: false,
-            }),
-            parentDealId: { $exists: true },
-            adminId: new mongoose.Types.ObjectId(subAdminId),
-            ...(selectedBrandFilter?.length && {
-                brand: {
-                    $in: selectedBrandFilter?.map((i) => i),
-                },
-            }),
-            ...(selectedCategoryFilter?.length && {
-                dealCategory: {
-                    $in: selectedCategoryFilter?.map((i) => i),
-                },
-            }),
-            ...(selectedPlatformFilter?.length && {
-                platForm: {
-                    $in: selectedPlatformFilter?.map((i) => i),
-                },
-            }),
-        };
+        // const dealData = Deal.find(query)
+        //     .populate('brand')
+        //     .populate({
+        //         path: 'parentDealId',
+        //         populate: [
+        //             { path: 'dealCategory' },
+        //             { path: 'platForm' },
+        //             { path: 'brand' },
+        //         ],
+        //     })
+        //     .populate('dealCategory')
+        //     .populate('platForm')
+        //     .skip(offset || 0)
+        //     .limit(limit || 20)
+        //     .sort({ createdAt: -1 });
 
-        const dealData = Deal.find(query)
-            .populate('brand')
-            .populate({
-                path: 'parentDealId',
-                populate: [
-                    { path: 'dealCategory' },
-                    { path: 'platForm' },
-                    { path: 'brand' },
-                ],
-            })
-            .populate('dealCategory')
-            .populate('platForm')
-            .skip(offset || 0)
-            .limit(limit || 20)
-            .sort({ createdAt: -1 });
+        // const totalCount = Deal.find(query).countDocuments();
 
-        const totalCount = Deal.find(query).countDocuments();
+        // const data = await Promise.all([dealData, totalCount]);
+
+        let aggregatePipelines = [
+            {
+                $match: {
+                    adminId: MongooseObjectId(req?.user?._id),
+                    parentDealId: { $exists: true },
+                    ...(status && { isActive: Boolean(+status) }),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'deals',
+                    foreignField: '_id',
+                    localField: 'parentDealId',
+                    as: 'parentDealId',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$parentDealId',
+                },
+            },
+            {
+                $match: {
+                    ...(search && {
+                        'parentDealId.productName': {
+                            $regex: search,
+                            $options: 'i',
+                        },
+                    }),
+                    ...(paymentStatus && {
+                        'parentDealId.paymentStatus': paymentStatus,
+                    }),
+                    ...(isSlotCompleted === 'completed' && {
+                        'parentDealId.isSlotCompleted': true,
+                    }),
+                    ...(isSlotCompleted === 'uncompleted' && {
+                        'parentDealId.isSlotCompleted': false,
+                    }),
+                    ...(selectedBrandFilter?.length && {
+                        'parentDealId.brand': {
+                            $in: selectedBrandFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
+                    }),
+                    ...(selectedCategoryFilter?.length && {
+                        'parentDealId.dealCategory': {
+                            $in: selectedCategoryFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
+                    }),
+                    ...(selectedPlatformFilter?.length && {
+                        'parentDealId.platForm': {
+                            $in: selectedPlatformFilter?.map((i) =>
+                                MongooseObjectId(i),
+                            ),
+                        },
+                    }),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'brands',
+                    foreignField: '_id',
+                    localField: 'parentDealId.brand',
+                    as: 'parentDealId.brand',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'dealcategories',
+                    foreignField: '_id',
+                    localField: 'parentDealId.dealCategory',
+                    as: 'parentDealId.dealCategory',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'platforms',
+                    foreignField: '_id',
+                    localField: 'parentDealId.platForm',
+                    as: 'parentDealId.platForm',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'admins',
+                    foreignField: '_id',
+                    localField: 'adminId',
+                    as: 'adminId',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$adminId',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$parentDealId.brand',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$parentDealId.dealCategory',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$parentDealId.platForm',
+                },
+            },
+            {
+                $count: 'totalCount',
+            },
+        ];
+
+        console.log(aggregatePipelines);
+
+        const totalCount = Deal.aggregate(aggregatePipelines);
+
+        aggregatePipelines.pop();
+
+        const paginationAndSortingPipeLine = [
+            {
+                $sort: { createdAt: -1 },
+            },
+            {
+                $skip: offset || 0,
+            },
+            {
+                $limit: limit || 20,
+            },
+        ];
+
+        aggregatePipelines = [
+            ...aggregatePipelines,
+            ...paginationAndSortingPipeLine,
+        ];
+
+        const dealData = Deal.aggregate(aggregatePipelines);
 
         const data = await Promise.all([dealData, totalCount]);
 
@@ -403,7 +571,11 @@ class SubAdminDealControllerClass {
             successResponse({
                 data: data[0],
                 message: 'Deal Data',
-                total: data[1],
+                total:
+                    (totalCount[1] &&
+                        totalCount[1][0] &&
+                        totalCount[1][0]?.totalCount) ||
+                    0,
             }),
         );
     });

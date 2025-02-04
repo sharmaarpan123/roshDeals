@@ -464,6 +464,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     dealStatusChangeController,
 );
@@ -526,8 +528,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'order',
         key: permissionsLevelKey.canEdit,
-        canAdminAccess , 
-        canSubAdminAccess
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     paymentStatusUpdate,
 );
