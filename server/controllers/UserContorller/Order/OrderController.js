@@ -287,11 +287,7 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const {
-        limit,
-        offset,
-        selectedDate,
-    } = filterSchema.parse(req.query);
+    const { limit, offset, selectedDate } = filterSchema.parse(req.body);
     const dateFilter = selectedDate
         ? {
               createdAt: {
@@ -306,8 +302,6 @@ export const OrderList = catchAsync(async (req, res) => {
               },
           }
         : {};
-
-        console.log(offset , "sd")
 
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
