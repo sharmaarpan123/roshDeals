@@ -17,7 +17,7 @@ try {
     try {
         const credential = admin.credential.cert(fireBasePushNotification);
         const accessToken = await credential.getAccessToken();
-        // console.log('Access Token:', accessToken.access_token);
+       
     } catch (error) {
         console.error('Error generating access token:', error);
     }

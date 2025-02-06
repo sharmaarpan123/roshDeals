@@ -71,7 +71,7 @@ class controller {
 
         const adminData = await getAllAdminsFromCache();
 
-        console.log(adminData);
+      
 
         adminIds = adminData?.map(
             (item) => new Mongoose.Types.ObjectId(item?._id),

@@ -133,9 +133,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             body,
             title,
         }).then((res) => {
-            res.save().then((res) => {
-                console.log(res);
-            });
+            res.save().then((res) => {});
         });
     });
 

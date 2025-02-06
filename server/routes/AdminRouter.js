@@ -441,11 +441,13 @@ AdminRouter.get(
     dealDetails,
 );
 
-AdminRouter.get(
-    '/deal/getDealWithBrandId/:brandId',
+AdminRouter.post(
+    '/deal/getDealWithBrandId',
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     getDealsWithBrandId,
 );

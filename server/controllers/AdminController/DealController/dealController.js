@@ -8,6 +8,7 @@ import {
     addDealSchema,
     allDealsListSchema,
     BulkAddDealSchema,
+    DealApiAccessingAsEnum,
     editDealSchema,
     getDeal,
     getDealsWithBrandIdSchema,
@@ -23,6 +24,8 @@ import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import {
     isAdminAccessingApi,
     isAdminOrSubAdminAccessingApi,
+    isSuperAdminAccessingApi,
+    MongooseObjectId,
 } from '../../../utilities/utilitis.js';
 import mongoose from 'mongoose';
 import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
@@ -484,18 +487,123 @@ export const dealDetails = catchAsync(async (req, res) => {
 });
 
 export const getDealsWithBrandId = catchAsync(async (req, res) => {
-    // const apiAccessingAs = {
-    //     dealsAsAgency: 'dealsAsAgency',
-    //     medDealsAsAgency: 'medDealsAsAgency',
-    //     dealAsMed: 'dealAsMed',
-    // };
-    const { brandId } = getDealsWithBrandIdSchema.parse({
-        ...req.params,
-    });
+    const { brandId, apiAccessingAs, search } = getDealsWithBrandIdSchema.parse(
+        req.body,
+    );
 
-    // const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
+    let med = [];
 
-    const deals = await Deal.find({ ...(brandId && { brand: brandId }) });
+    const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
+
+    if (!isSuperAdminAccessing) {
+        med = await AdminSubAdminLinker.find({
+            adminId: req.user._id,
+        }).select('subAdminId');
+    }
+
+    const dealsAsAgencyAggregation = [
+        {
+            $match: {
+                ...(search && {
+                    productName: { $regex: search, $options: 'i' },
+                }),
+                ...(!isSuperAdminAccessing && {
+                    adminId: MongooseObjectId(req.user._id),
+                }),
+                brand: MongooseObjectId(brandId),
+                parentDealId: { $exists: false },
+            },
+        },
+    ];
+
+    const medDealsAsAgencyAggregation = [
+        {
+            $match: {
+                ...(!isSuperAdminAccessing && {
+                    adminId: {
+                        $in: med?.map((i) => i.subAdminId) || [],
+                    },
+                }),
+                parentDealId: { $exists: true },
+            },
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'parentDealId',
+                foreignField: '_id',
+                as: 'parentDealId',
+            },
+        },
+        {
+            $match: {
+                ...(!isSuperAdminAccessing && {
+                    'parentDealId.adminId': MongooseObjectId(req.user._id),
+                }),
+                'parentDealId.brand': MongooseObjectId(brandId),
+                ...(search && {
+                    'parentDealId.productName': {
+                        $regex: search,
+                        $options: 'i',
+                    },
+                }),
+            },
+        },
+        {
+            $unwind: {
+                path: '$parentDealId',
+            },
+        },
+    ];
+
+    const dealAsMedAggregation = [
+        {
+            $match: {
+                ...(!isSuperAdminAccessing && {
+                    adminId: MongooseObjectId(req.user._id),
+                }),
+                parentDealId: { $exists: true },
+            },
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'parentDealId',
+                foreignField: '_id',
+                as: 'parentDealId',
+            },
+        },
+        {
+            $match: {
+                'parentDealId.brand': MongooseObjectId(brandId),
+                ...(search && {
+                    'parentDealId.productName': {
+                        $regex: search,
+                        $options: 'i',
+                    },
+                }),
+            },
+        },
+        {
+            $unwind: {
+                path: '$parentDealId',
+            },
+        },
+    ];
+
+    let aggregation;
+    if (apiAccessingAs === DealApiAccessingAsEnum.medDealsAsAgency) {
+        aggregation = medDealsAsAgencyAggregation;
+    } else if (apiAccessingAs === DealApiAccessingAsEnum.dealAsMed) {
+        aggregation = dealAsMedAggregation;
+    } else {
+        // as dealsAsAgency
+        aggregation = dealsAsAgencyAggregation;
+    }
+
+    console.log(JSON.stringify(aggregation), 'aggregation');
+
+    const deals = await Deal.aggregate(aggregation);
 
     return res.status(200).json(
         successResponse({

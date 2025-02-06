@@ -253,8 +253,14 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
 
 // for the super admin and admin only
 export const getAllOrders = catchAsync(async (req, res) => {
-    const { offset, limit, dealId, brandId, orderFormStatus } =
-        allOrdersListSchema.parse(req.body);
+    const {
+        offset,
+        limit,
+        dealId,
+        brandId,
+        orderFormStatus,
+        selectedPlatformFilter,
+    } = allOrdersListSchema.parse(req.body);
 
     const adminId = isAdminAccessingApi(req);
 
@@ -322,6 +328,14 @@ export const getAllOrders = catchAsync(async (req, res) => {
                 ...(brandId && {
                     'dealId.brand._id': new mongoose.Types.ObjectId(brandId),
                 }),
+                ...(selectedPlatformFilter?.length && {
+                    'dealId.platForm._id': {
+                        $in:
+                            selectedPlatformFilter?.map(
+                                (i) => new mongoose.Types.ObjectId(i),
+                            ) || [],
+                    },
+                }),
             },
         },
         {
@@ -364,8 +378,14 @@ export const getAllOrders = catchAsync(async (req, res) => {
 });
 // for the Agency to see his med orders
 export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
-    const { offset, limit, dealId, brandId, orderFormStatus } =
-        allOrdersListSchema.parse(req.body);
+    const {
+        offset,
+        limit,
+        dealId,
+        brandId,
+        orderFormStatus,
+        selectedPlatformFilter,
+    } = allOrdersListSchema.parse(req.body);
 
     const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
 
@@ -454,6 +474,14 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
                     'dealId.parentDealId.brand._id':
                         new mongoose.Types.ObjectId(brandId),
                 }),
+                ...(selectedPlatformFilter?.length && {
+                    'dealId.parentDealId.platForm._id': {
+                        $in:
+                            selectedPlatformFilter?.map(
+                                (i) => new mongoose.Types.ObjectId(i),
+                            ) || [],
+                    },
+                }),
             },
         },
         {
@@ -496,8 +524,14 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
 });
 // for the  med to see his  orders as Orders
 export const getAllOrdersOfMedAsMed = catchAsync(async (req, res) => {
-    const { offset, limit, dealId, brandId, orderFormStatus } =
-        allOrdersListSchema.parse(req.body);
+    const {
+        offset,
+        limit,
+        dealId,
+        brandId,
+        orderFormStatus,
+        selectedPlatformFilter,
+    } = allOrdersListSchema.parse(req.body);
 
     const aggregateArr = [
         {
@@ -571,6 +605,14 @@ export const getAllOrdersOfMedAsMed = catchAsync(async (req, res) => {
                 ...(brandId && {
                     'dealId.parentDealId.brand._id':
                         new mongoose.Types.ObjectId(brandId),
+                }),
+                ...(selectedPlatformFilter?.length && {
+                    'dealId.parentDealId.platForm._id': {
+                        $in:
+                            selectedPlatformFilter?.map(
+                                (i) => new mongoose.Types.ObjectId(i),
+                            ) || [],
+                    },
                 }),
             },
         },

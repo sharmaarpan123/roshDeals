@@ -268,7 +268,6 @@ class subAdminController {
             },
         );
 
-        console.log(restBody?.userName, 'sdf');
 
         if (isAlreadyExists) {
             return res.status(400).json(

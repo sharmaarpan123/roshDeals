@@ -5,8 +5,6 @@ import {
 } from '../server/utilities/Responses.js';
 export default (io) => {
     io.on('connection', (socket) => {
-        console.log('Client connected:', socket.id);
-
         // User connect listener
         socket.on('userConnect', (data, acknowledge) => {
             try {
@@ -128,7 +126,6 @@ export default (io) => {
                     }),
                 );
             } catch (error) {
-                console.log(error);
                 const errorObj = errorResponse({
                     message: 'Server error',
                     errorInfo: error,
@@ -139,12 +136,12 @@ export default (io) => {
 
         // Disconnect admin
         socket.on('disconnectAdmin', (data) => {
-            console.log('Admin disconnected:', data?.adminId);
+            // console.log('Admin disconnected:', data?.adminId);
         });
 
         // Handle disconnect
         socket.on('disconnect', () => {
-            console.log('Client disconnected:', socket.id);
+            // console.log('Client disconnected:', socket.id);
         });
     });
 };

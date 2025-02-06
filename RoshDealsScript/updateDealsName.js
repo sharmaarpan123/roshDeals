@@ -43,4 +43,4 @@ async function updateUserPhone() {
   }
 }
 
-updateUserPhone();
+// updateUserPhone();

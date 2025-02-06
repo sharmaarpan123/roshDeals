@@ -323,7 +323,7 @@ class SubAdminDealControllerClass {
             },
         ];
 
-        console.log(aggregatePipelines);
+       
 
         const totalCount = Deal.aggregate(aggregatePipelines);
 
@@ -540,7 +540,6 @@ class SubAdminDealControllerClass {
             },
         ];
 
-        console.log(aggregatePipelines);
 
         const totalCount = Deal.aggregate(aggregatePipelines);
 

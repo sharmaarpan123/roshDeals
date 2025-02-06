@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { nativeEnum, z } from 'zod';
 import { isUrlValid } from '../../../utilities/utilitis.js';
 
 import {
@@ -9,6 +9,12 @@ import {
     optionalString,
     requiredBoolean,
 } from '../../../utilities/ValidationSchema.js';
+
+export const DealApiAccessingAsEnum = {
+    dealsAsAgency: 'dealsAsAgency',
+    medDealsAsAgency: 'medDealsAsAgency',
+    dealAsMed: 'dealAsMed',
+};
 
 const allDealsListSchema = filterSchemaObject
     .merge(
@@ -403,24 +409,26 @@ const editDealSchema = z
             path: ['commissionValueToSubAdmin'],
         },
     );
-const getDealsWithBrandIdSchema = z.object({
-    brandId: z
-        .string({ required_error: 'brand id is required' })
-        .min(1, { message: "'brand id is required'" }),
-    // apiAccessorRole: z.nativeEnum(
-    //     {
-    //         dealsAsAgency: 'dealsAsAgency',
-    //         medDealsAsAgency: 'medDealsAsAgency',
-    //         dealAsMed: 'dealAsMed',
-    //     },
-    //     {
-    //         required_error: 'Poster type is required',
-    //         invalid_type_error: 'inValid Poster Type',
-    //     },
-    // ),
-});
+const getDealsWithBrandIdSchema = z
+    .object({
+        brandId: z
+            .string({ required_error: 'brand id is required' })
+            .min(1, { message: "'brand id is required'" }),
+        apiAccessingAs: z.nativeEnum(Object.keys(DealApiAccessingAsEnum), {
+            message: 'apiAccessingAs field is required',
+            required_error: 'apiAccessingAs field is required',
+            invalid_type_error: 'apiAccessingAs field is inValid',
+        }),
+    })
+    .merge(filterSchemaObject)
+    .refine(filterRefineFunction, filterSchemaObject);
 
 export {
-    addDealSchema, allDealsListSchema, BulkAddDealSchema, editDealSchema, getDeal, getDealsWithBrandIdSchema
+    addDealSchema,
+    allDealsListSchema,
+    BulkAddDealSchema,
+    editDealSchema,
+    getDeal,
+    getDealsWithBrandIdSchema,
 };
 //# sourceMappingURL=schema.js.map
