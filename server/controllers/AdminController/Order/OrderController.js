@@ -75,7 +75,7 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             message = `Your order for ${order.orderIdOfPlatForm} is rejected`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
-            message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
+            message = `Your Review for ${order.orderIdOfPlatForm} is accepted`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_REJECTED:
             message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
@@ -124,18 +124,25 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
 export const paymentStatusUpdate = catchAsync(async (req, res) => {
     const { orderId, status } = paymentStatusUpdateSchema.parse(req.body);
 
-    // const order = await Order.findOne({ _id: orderId });
-
     const adminId = req?.user?._id;
 
     const isSuperAccessing = isSuperAdminAccessingApi(req);
 
-    const order = await Order.aggregate([
+    let order = await Order.aggregate([
         {
             $match: {
                 _id: MongooseObjectId(orderId),
             },
         },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userId',
+            },
+        },
+        { $unwind: '$userId' },
         ...(!isSuperAccessing
             ? [
                   {
@@ -155,7 +162,12 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
                           as: 'dealId.parentDealId',
                       },
                   },
-                  { $unwind: '$dealId.parentDealId' },
+                  {
+                      $unwind: {
+                          path: '$dealId.parentDealId',
+                          preserveNullAndEmptyArrays: true,
+                      },
+                  },
                   {
                       $match: {
                           $or: [
@@ -172,6 +184,8 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
               ]
             : []),
     ]);
+
+    order = order && order[0];
 
     if (!order) {
         return res.status(400).json(
@@ -207,6 +221,36 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
             }),
         );
     }
+
+    const body = 'Order payment';
+    const title =
+        'Your payment for  order ' + order.orderIdOfPlatForm + ' is ' + status;
+
+    sendNotification({
+        notification: {
+            imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            body,
+            title,
+        },
+        android: {
+            notification: {
+                imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            },
+        },
+        data: {
+            orderId: order?._id?.toString(),
+        },
+        tokens: [order?.userId?.fcmToken],
+    });
+
+    Notifications.create({
+        type: notificationType.order,
+        orderId: orderId,
+        userCurrentAdminReference: order?.dealOwner,
+        userId: order?.userId,
+        body,
+        title,
+    }).then((res) => res.save());
 
     return res.status(200).json(
         successResponse({
@@ -440,7 +484,6 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$dealId.parentDealId' },
-
         {
             $lookup: {
                 from: 'brands',
