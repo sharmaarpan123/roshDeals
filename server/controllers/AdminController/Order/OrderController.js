@@ -183,9 +183,21 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
                   },
               ]
             : []),
+        {
+            $project: {
+                userId: { fcmToken: 1, _id: 1 },
+                _id: 1,
+                paymentStatus: 1,
+                orderIdOfPlatForm: 1,
+                dealOwner: 1,
+                orderFormStatus: 1,
+            },
+        },
     ]);
 
     order = order && order[0];
+
+    console.log(order, 'rodr');
 
     if (!order) {
         return res.status(400).json(
@@ -247,7 +259,7 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
         type: notificationType.order,
         orderId: orderId,
         userCurrentAdminReference: order?.dealOwner,
-        userId: order?.userId,
+        userId: order?.userId?._id,
         body,
         title,
     }).then((res) => res.save());
@@ -263,12 +275,85 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
     const { orderIds, status } = bulkPaymentStatusUpdateSchema.parse(req.body);
 
-    const order = await Order.find({ _id: { $in: orderIds } }, { _id: 1 });
+    // const order = await Order.find({ _id: { $in: orderIds } }, { _id: 1 });
+
+    const adminId = req?.user?._id;
+
+    const isSuperAccessing = isSuperAdminAccessingApi(req);
+
+    let order = await Order.aggregate([
+        {
+            $match: {
+                _id: { $in: orderIds?.map((i) => MongooseObjectId(i)) },
+            },
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userId',
+            },
+        },
+        { $unwind: '$userId' },
+        ...(!isSuperAccessing
+            ? [
+                  {
+                      $lookup: {
+                          from: 'deals',
+                          localField: 'dealId',
+                          foreignField: '_id',
+                          as: 'dealId',
+                      },
+                  },
+                  { $unwind: '$dealId' },
+                  {
+                      $lookup: {
+                          from: 'deals',
+                          localField: 'dealId.parentDealId',
+                          foreignField: '_id',
+                          as: 'dealId.parentDealId',
+                      },
+                  },
+                  {
+                      $unwind: {
+                          path: '$dealId.parentDealId',
+                          preserveNullAndEmptyArrays: true,
+                      },
+                  },
+                  {
+                      $match: {
+                          $or: [
+                              {
+                                  'dealId.parentDealId.adminId':
+                                      MongooseObjectId(adminId),
+                              },
+                              {
+                                  'dealId.adminId': MongooseObjectId(adminId),
+                              },
+                          ],
+                      },
+                  },
+              ]
+            : []),
+        {
+            $project: {
+                userId: { fcmToken: 1, _id: 1 },
+                _id: 1,
+                paymentStatus: 1,
+                orderIdOfPlatForm: 1,
+                dealOwner: 1,
+                orderFormStatus: 1,
+            },
+        },
+    ]);
+
+    console.log(order);
 
     if (!order) {
         return res.status(400).json(
             errorResponse({
-                message: 'Not found any Order with This id',
+                message: 'Not found any Order with This ids',
             }),
         );
     }
@@ -281,16 +366,75 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
         );
     }
 
-    const updatedOrder = await Order.updateMany(
-        { _id: { $in: orderIds } },
-        { paymentStatus: status },
+    if (
+        order?.some(
+            (i) => i.orderFormStatus !== ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED,
+        )
+    ) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'some of your orders review Form is not accepted yet!',
+            }),
+        );
+    }
+
+    await Order.updateMany(
+        {
+            _id: { $in: orderIds },
+            ...(status === 'paid' && {
+                // if user want to change the status to paid
+                // and make sure order review form is accepted
+                orderFormStatus: ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED,
+            }),
+        },
+        {
+            paymentStatus: status,
+            ...(status === 'paid' && {
+                paymentDate: moment().utc().toDate(),
+            }),
+        },
         { new: true },
     );
+
+    const body = 'Order payment';
+
+    order.forEach((order) => {
+        const title =
+            'Your payment for  order ' +
+            order.orderIdOfPlatForm +
+            ' is ' +
+            status;
+
+        sendNotification({
+            notification: {
+                imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+                body,
+                title,
+            },
+            android: {
+                notification: {
+                    imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+                },
+            },
+            data: {
+                orderId: order?._id?.toString(),
+            },
+            tokens: [order?.userId?.fcmToken],
+        });
+
+        Notifications.create({
+            type: notificationType.order,
+            orderId: order?._id,
+            userCurrentAdminReference: order?.dealOwner,
+            userId: order?.userId?._id,
+            body,
+            title,
+        }).then((res) => res.save());
+    });
 
     return res.status(200).json(
         successResponse({
             message: `orders payment status updated successfully`,
-            data: updatedOrder,
         }),
     );
 });
