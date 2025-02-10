@@ -103,15 +103,9 @@ const signupController = catchAsync(async (req, res) => {
     await user.save();
 
     const updatedUser = await User.findOneAndUpdate(
-        {
-            phoneNumber,
-        },
-        {
-            fcmToken: fcmToken,
-        },
-        {
-            new: true,
-        },
+        { phoneNumber }, 
+        { $set: { fcmToken } }, 
+        { new: true }
     )
         .populate('currentAdminReference')
         .populate('historyAdminReferences');
