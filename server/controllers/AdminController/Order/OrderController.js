@@ -197,8 +197,6 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 
     order = order && order[0];
 
-    console.log(order, 'rodr');
-
     if (!order) {
         return res.status(400).json(
             errorResponse({
