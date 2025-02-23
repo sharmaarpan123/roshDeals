@@ -399,6 +399,7 @@ AdminRouter.post(
     '/deal/bulk-add',
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
+        canAdminAccess,
         key: permissionsLevelKey.canAdd,
     }),
     bulkAddDealController,

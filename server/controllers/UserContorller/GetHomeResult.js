@@ -150,7 +150,7 @@ export default catchAsync(async (req, res) => {
                 newRoot: '$dealCategoryData',
             },
         },
-        { $sort: { _id: 1 } },
+        
         {
             $skip: dealCategoryFilter?.offset || 0,
         },

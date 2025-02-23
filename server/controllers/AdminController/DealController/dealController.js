@@ -324,7 +324,12 @@ export const addDealController = catchAsync(async (req, res) => {
 });
 
 export const bulkAddDealController = catchAsync(async (req, res) => {
-    const bulkAddArr = BulkAddDealSchema.parse(req.body);
+    let bulkAddArr = BulkAddDealSchema.parse(req.body);
+
+    bulkAddArr = bulkAddArr.map((item) => ({
+        ...item,
+        adminId: req?.user?._id,
+    }));
 
     const newDeal = await Deal.insertMany(bulkAddArr);
 
