@@ -37,3 +37,9 @@ export const dashboardReportSchema = z
                 'please send start date and end date both other wise none of this.',
         },
     );
+
+export const AdminMeQuerySchema = z.object({
+    token: z
+        .string({ required_error: 'token is required' })
+        .min(1, 'token is required'),
+});

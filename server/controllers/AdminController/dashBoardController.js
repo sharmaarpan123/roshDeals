@@ -94,24 +94,24 @@ export const dashboardController = catchAsync(async (req, res) => {
                     // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
                     ...(!startDate &&
                         revenueReportType === 'yearly' && {
-                            createdAt: {
+                            paymentDate: {
                                 $gte: getPrevious12thMonthFromToday(),
                             },
                         }),
                     ...(!startDate &&
                         revenueReportType === 'monthly' && {
-                            createdAt: {
+                            paymentDate: {
                                 $gte: getPrevious30ThDateFromToday(),
                             },
                         }),
                     ...(!startDate &&
                         revenueReportType === 'weekly' && {
-                            createdAt: {
+                            paymentDate: {
                                 $gte: getLastWeekStartDateFromToday(),
                             },
                         }),
                     ...(startDate && {
-                        createdAt: {
+                        paymentDate: {
                             $gte: new Date(startDate),
                             $lte: new Date(endDate),
                         },

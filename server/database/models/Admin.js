@@ -21,6 +21,10 @@ const adminSchema = new mongoose.Schema(
             unique: true,
             required: true,
         },
+        userName: {
+            type: String,
+            unique: true,
+        },
         password: {
             type: String,
             required: true,
@@ -38,8 +42,8 @@ const adminSchema = new mongoose.Schema(
             enum: ADMIN_ROLE_TYPE_ENUM,
             required: true,
         },
-        fcmToken: {
-            type: String,
+        fcmTokens: {
+            type: [String],
         },
         permissions: {
             type: [PermissionObj],

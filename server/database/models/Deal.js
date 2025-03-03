@@ -1,18 +1,33 @@
 import mongoose from 'mongoose';
 const dealSchema = new mongoose.Schema(
     {
+        parentDealId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Deal',
+        },
+        adminId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+            required: true,
+        },
         productName: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
         uniqueIdentifier: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
         brand: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'Brand',
+            required: function () {
+                return !this.parentDealId;
+            },
             validate: {
                 validator: async function (brandId) {
                     const brand = await mongoose.models.Brand.findById(brandId);
@@ -23,8 +38,10 @@ const dealSchema = new mongoose.Schema(
         },
         platForm: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'PlatForm',
+            required: function () {
+                return !this.parentDealId;
+            },
             validate: {
                 validator: async function (platFormId) {
                     const platForm =
@@ -39,15 +56,17 @@ const dealSchema = new mongoose.Schema(
         },
         dealCategory: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'DealCategory',
+            required: function () {
+                return !this.parentDealId;
+            },
             validate: {
-                validator: async function (DealCategoryId) {
-                    const DealCategory =
+                validator: async function (dealCategoryId) {
+                    const dealCategory =
                         await mongoose.models.DealCategory.findById(
-                            DealCategoryId,
+                            dealCategoryId,
                         ).lean();
-                    return !!DealCategory;
+                    return !!dealCategory;
                 },
                 message: (props) =>
                     `${props.value} is not a valid DealCategory ID!`,
@@ -56,22 +75,45 @@ const dealSchema = new mongoose.Schema(
         productCategories: {
             type: [String],
         },
+        exchangeDealProducts: { type: [String] },
         postUrl: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
         imageUrl: {
             type: String,
         },
         termsAndCondition: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
         actualPrice: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
-        cashBack: {
+        lessAmount: {
+            type: String,
+        },
+        lessAmountToSubAdmin: {
+            type: String,
+        },
+        isCommissionDeal: {
+            type: Boolean,
+            default: false,
+        },
+        commissionValue: {
+            type: String,
+        },
+        commissionValueToSubAdmin: {
+            type: String,
+        },
+        finalCashBackForUser: {
             type: String,
             required: true,
         },
@@ -81,11 +123,15 @@ const dealSchema = new mongoose.Schema(
         },
         slotAlloted: {
             type: Number,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
         },
         slotCompletedCount: {
             type: Number,
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
             default: 0,
         },
         isSlotCompleted: {
@@ -95,12 +141,31 @@ const dealSchema = new mongoose.Schema(
         paymentStatus: {
             type: String,
             enum: ['pending', 'paid'],
-            required: true,
+            required: function () {
+                return !this.parentDealId;
+            },
             default: 'pending',
         },
         isActive: {
             type: Boolean,
             default: true,
+        },
+        refundDays: {
+            type: String,
+            required: function () {
+                return !this.parentDealId;
+            },
+        },
+        paymentDate: {
+            type: Date,
+        },
+        showToUsers: {
+            type: Boolean,
+            default: true,
+        },
+        showToSubAdmins: {
+            type: Boolean,
+            default: false,
         },
     },
     {

@@ -6,7 +6,7 @@ export const requiredString = (key) => {
             required_error: key + ' is required',
         })
         .trim()
-        .min(1, { message: key + 'name should have at least one character' });
+        .min(1, { message: key + ' should have at least one character' });
 };
 
 export const requiredBoolean = (key) => {
@@ -36,7 +36,7 @@ export const optionalPhoneNUmber = (key = '') =>
         })
         .optional();
 
-export const requiredPhoneNumber = (key) =>
+export const requiredPhoneNumber = (key = '') =>
     z
         .string({
             required_error: key + ' Phone Number is required',
@@ -54,7 +54,7 @@ export const optionalString = () => {
 export const requiredEmailString = (key = '') => {
     return z
         .string({
-            required_error: key + 'Email is required',
+            required_error: key + ' Email is required',
         })
         .trim()
         .email('Please send a valid' + key + 'email')
@@ -82,6 +82,33 @@ export const requiredPassword = () =>
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
                     data,
                 ),
+            {
+                message:
+                    'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
+            },
+        );
+
+export const optionalPassword = () =>
+    z
+        .string()
+        .optional()
+        .refine(
+            (data) => {
+                if (!data) {
+                    return true;
+                }
+                if (
+                    data &&
+                    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
+                        data,
+                    )
+                ) {
+                    return false;
+                }
+
+                return true;
+            },
+
             {
                 message:
                     'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
@@ -130,6 +157,22 @@ export const filterSchemaObject = z.object({
         .enum(['0', '1', ''], {
             invalid_type_error: 'in Valid status',
         })
+        .optional(),
+    selectedCategoryFilter: z
+        .array(z.string())
+        .nullable() // explicitly allow null values
+        .optional(),
+    selectedPlatformFilter: z
+        .array(z.string())
+        .nullable() // explicitly allow null values
+        .optional(),
+    selectedBrandFilter: z
+        .array(z.string())
+        .nullable() // explicitly allow null values
+        .optional(),
+    selectedDate: z
+        .string()
+        .nullable() // explicitly allow null values
         .optional(),
 });
 export const filterSchema = filterSchemaObject.refine(

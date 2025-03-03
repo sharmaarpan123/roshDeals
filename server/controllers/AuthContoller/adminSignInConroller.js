@@ -4,6 +4,7 @@ import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import {
     optionalEmailString,
     optionalPhoneNUmber,
+    requiredString,
 } from '../../utilities/ValidationSchema.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { comparePassword } from '../../utilities/hashPassword.js';
@@ -73,7 +74,7 @@ const adminSignInController = catchAsync(async (req, res) => {
         return res.status(400).json(
             errorResponse({
                 message:
-                    'Your account has been deactivated by the admin ,  please contact your admin',
+                    'Your account has been deactivated by the super admin ,  please contact your super admin',
             }),
         );
     }
@@ -83,7 +84,9 @@ const adminSignInController = catchAsync(async (req, res) => {
             phoneNumber,
         },
         {
-            fcmToken: fcmToken,
+            $addToSet: {
+                fcmTokens: fcmToken,
+            },
         },
         {
             new: true,

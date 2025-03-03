@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: '',
         },
+        currentAdminReference: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin',
+        },
+        historyAdminReferences: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: 'Admin',
+        },
         roles: {
             type: [String],
             enum: ROLE_TYPE_ENUM,
@@ -30,6 +38,9 @@ const userSchema = new mongoose.Schema(
             default: [ROLE_TYPE_ENUM.USER],
         },
         fcmToken: {
+            type: String,
+        },
+        token: {
             type: String,
         },
         isActive: {
