@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
     const checkDateFunc = () => {
         return (data) => {
             if (!data) {
@@ -37,9 +36,3 @@ import { z } from 'zod';
                     'please send start date and end date both other wise none of this.',
             },
         );
-
-export const AdminMeQuerySchema = z.object({
-    token: z
-        .string({ required_error: 'token is required' })
-        .min(1, 'token is required'),
-});

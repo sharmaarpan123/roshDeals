@@ -24,6 +24,7 @@ import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js
 import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
+import { isValidObjectId } from '../../../utilities/utilitis.js';
 
 export const acceptRejectOrder = catchAsync(async (req, res) => {
     const { orderId, status, rejectReason } = acceptRejectOrderSchema.parse(
@@ -273,9 +274,21 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
     const { orderIds, status } = bulkPaymentStatusUpdateSchema.parse(req.body);
 
-    // const order = await Order.find({ _id: { $in: orderIds } }, { _id: 1 });
-
     const adminId = req?.user?._id;
+
+    console.log(orderIds, 'asdf');
+
+    const isInvalidMongoDb = orderIds.some((item) => {
+        return !isValidObjectId(item);
+    });
+
+    if (isInvalidMongoDb) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'In Valid Order ids',
+            }),
+        );
+    }
 
     const isSuperAccessing = isSuperAdminAccessingApi(req);
 
@@ -345,8 +358,6 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
             },
         },
     ]);
-
-    console.log(order);
 
     if (!order) {
         return res.status(400).json(

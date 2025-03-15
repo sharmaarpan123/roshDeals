@@ -81,3 +81,7 @@ export const getCurrentAdminReferencesId = (req) =>
 
 export const MongooseObjectId = (id) =>
     mongoose.Types.ObjectId.createFromHexString(id);
+
+export const isValidObjectId = (id) => {
+    return mongoose.Types.ObjectId.isValid(id);
+};

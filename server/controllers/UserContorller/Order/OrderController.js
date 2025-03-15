@@ -115,7 +115,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         ?.flat();
 
     const body = 'New Order';
-    const title = name + ' has Create a New order';
+    const title = name + ' has Created a New order';
 
     insertedOrders?.forEach((item) => {
         sendNotification({

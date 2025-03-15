@@ -51,6 +51,7 @@ AdminRouter.post(
         uniqueSlug: 'dashboard',
         key: permissionsLevelKey.canView,
         canAdminAccess,
+        canSubAdminAccess
     }),
     dashboardController,
 );

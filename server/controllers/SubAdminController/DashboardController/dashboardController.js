@@ -1,12 +1,12 @@
-import Order from '../../database/models/Order.js';
-import User from '../../database/models/User.js';
-import catchAsync from '../../utilities/catchAsync.js';
-import { successResponse } from '../../utilities/Responses.js';
+import Order from '../../../database/models/Order.js';
+import User from '../../../database/models/User.js';
+import catchAsync from '../../../utilities/catchAsync.js';
+import { successResponse } from '../../../utilities/Responses.js';
 import {
     getAccessorId,
     isSuperAdminAccessingApi,
     MongooseObjectId,
-} from '../../utilities/utilitis.js';
+} from '../../../utilities/utilitis.js';
 import { dashboardReportSchema } from './Schema.js';
 
 const getLastWeekStartDateFromToday = () => {
@@ -43,15 +43,29 @@ export const dashboardController = catchAsync(async (req, res) => {
 
     const queryS = [];
 
-    queryS.push(User.find({}).countDocuments()); // total users
-    queryS.push(Order.find({}).countDocuments()); // total order
+    queryS.push(
+        User.find({
+            historyAdminReferences: adminId,
+        }).countDocuments(),
+    ); // total users
     queryS.push(
         Order.find({
+            dealOwner: adminId,
+        }).countDocuments(),
+    ); // total order
+    queryS.push(
+        Order.find({
+            dealOwner: adminId,
             paymentStatus: 'pending',
         }).countDocuments(),
     ); // upPaid orders
     queryS.push(
         Order.aggregate([
+            {
+                $match: {
+                    dealOwner: MongooseObjectId(adminId),
+                },
+            },
             {
                 $group: {
                     _id: '$orderFormStatus',
@@ -66,6 +80,7 @@ export const dashboardController = catchAsync(async (req, res) => {
             {
                 $match: {
                     paymentStatus: 'paid',
+                    dealOwner: MongooseObjectId(adminId),
                 },
             },
             {
@@ -80,26 +95,32 @@ export const dashboardController = catchAsync(async (req, res) => {
                 $unwind: '$dealsData',
             },
             {
-                $lookup: {
-                    from: 'deals',
-                    localField: 'dealsData.parentDealId',
-                    foreignField: '_id',
-                    as: 'dealsData.parentDealId',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$dealsData.parentDealId',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-            {
                 $addFields: {
                     revenue: {
                         $toDouble: {
                             $ifNull: [
-                                '$dealsData.parentDealId.adminCommission',
-                                '$dealsData.adminCommission',
+                                {
+                                    $cond: {
+                                        if: '$dealsData.isCommissionDeal',
+                                        then: {
+                                            $toDouble: {
+                                                $ifNull: [
+                                                    '$dealsData.commissionValue',
+                                                    '0',
+                                                ],
+                                            },
+                                        },
+                                        else: {
+                                            $toDouble: {
+                                                $ifNull: [
+                                                    '$dealsData.lessAmount',
+                                                    '0',
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                                0,
                             ],
                         },
                     },
@@ -123,6 +144,7 @@ export const dashboardController = catchAsync(async (req, res) => {
         Order.aggregate([
             {
                 $match: {
+                    ...(!isSuperAdminAccessing && { dealOwner: adminId }),
                     paymentStatus: 'paid',
                     // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
                     ...(!startDate &&
@@ -162,27 +184,34 @@ export const dashboardController = catchAsync(async (req, res) => {
             {
                 $unwind: '$dealsData',
             },
-            {
-                $lookup: {
-                    from: 'deals',
-                    localField: 'dealsData.parentDealId',
-                    foreignField: '_id',
-                    as: 'dealsData.parentDealId',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$dealsData.parentDealId',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
+
             {
                 $addFields: {
                     revenue: {
                         $toDouble: {
                             $ifNull: [
-                                '$dealsData.parentDealId.adminCommission',
-                                '$dealsData.adminCommission',
+                                {
+                                    $cond: {
+                                        if: '$dealsData.isCommissionDeal',
+                                        then: {
+                                            $toDouble: {
+                                                $ifNull: [
+                                                    '$dealsData.commissionValue',
+                                                    '0',
+                                                ],
+                                            },
+                                        },
+                                        else: {
+                                            $toDouble: {
+                                                $ifNull: [
+                                                    '$dealsData.lessAmount',
+                                                    '0',
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                                0,
                             ],
                         },
                     },
@@ -216,7 +245,7 @@ export const dashboardController = catchAsync(async (req, res) => {
 
     const data = await Promise.all(queryS);
 
-    console.log(JSON.stringify(data[4]), 'Data');
+    console.log(data, 'Data');
 
     return res.status(200).json(
         successResponse({
