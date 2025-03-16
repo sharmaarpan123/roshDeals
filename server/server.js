@@ -28,6 +28,8 @@ const init = async () => {
     app.use('/.well-known', express.static(path.join(process.cwd(), 'server/public', '.well-known')));
     app.use('/images', express.static(path.join(process.cwd(), 'server/public', 'images')));
     app.get('/', (req, res) => {res.sendFile(path.join(process.cwd(), 'server/public', 'deep-link.html'))});
+    app.get('/buyr.apk', (req, res) => {res.sendFile(path.join(process.cwd(), 'server/public', 'buyr.apk'))});
+
 
     await mongoInit();
     getInitialCacheValues();
