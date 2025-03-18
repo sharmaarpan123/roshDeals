@@ -38,7 +38,6 @@ export const dashboardController = catchAsync(async (req, res) => {
         revenueReportType = 'yearly',
     } = dashboardReportSchema.parse(req.body);
 
-    const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
     const adminId = getAccessorId(req);
 
     const queryS = [];
@@ -144,7 +143,7 @@ export const dashboardController = catchAsync(async (req, res) => {
         Order.aggregate([
             {
                 $match: {
-                    ...(!isSuperAdminAccessing && { dealOwner: adminId }),
+                    dealOwner: MongooseObjectId(adminId),
                     paymentStatus: 'paid',
                     // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
                     ...(!startDate &&
