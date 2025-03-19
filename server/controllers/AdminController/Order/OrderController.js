@@ -76,10 +76,10 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             message = `Your order for ${order.orderIdOfPlatForm} is rejected`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
-            message = `Your Review for ${order.orderIdOfPlatForm} is accepted`;
+            message = `Your Review form for ${order.orderIdOfPlatForm} is accepted`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_REJECTED:
-            message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
+            message = `Your Review form for ${order.orderIdOfPlatForm} is rejected`;
             break;
         default:
             message = 'your order is ' + status;

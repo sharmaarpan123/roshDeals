@@ -1,6 +1,9 @@
+import Admin from '../../database/models/Admin.js';
+import AdminSubAdminLinker from '../../database/models/AdminSubAdminLinker.js';
 import Order from '../../database/models/Order.js';
 import User from '../../database/models/User.js';
 import catchAsync from '../../utilities/catchAsync.js';
+import { ADMIN_ROLE_TYPE_ENUM } from '../../utilities/commonTypes.js';
 import { successResponse } from '../../utilities/Responses.js';
 import {
     getAccessorId,
@@ -214,6 +217,17 @@ export const dashboardController = catchAsync(async (req, res) => {
         ]),
     ); // revenue report
 
+    queryS.push(
+        Admin.find({
+            roles: ADMIN_ROLE_TYPE_ENUM.ADMIN,
+        }).countDocuments(),
+    ); // total agency
+    queryS.push(
+        Admin.find({
+            roles: ADMIN_ROLE_TYPE_ENUM.SUBADMIN,
+        }).countDocuments(),
+    ); // total mediators
+
     const data = await Promise.all(queryS);
 
     console.log(JSON.stringify(data[4]), 'Data');
@@ -228,6 +242,8 @@ export const dashboardController = catchAsync(async (req, res) => {
                 totalRevenue: data[4] && data[4][0]?.totalEarnings,
                 orderStatus: data[3],
                 revenueGraphData: data[5],
+                totalAgency: data[6],
+                totalMediator: data[7],
             },
         }),
     );
