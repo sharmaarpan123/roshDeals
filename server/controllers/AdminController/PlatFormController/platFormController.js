@@ -100,7 +100,7 @@ const editPlatFormController = catchAsync(async (req, res) => {
     if (UpdatedPlatForm) {
         return res.status(200).json(
             successResponse({
-                message: 'platForm updated successfully',
+                message: 'Platform updated successfully',
                 data: UpdatedPlatForm,
             }),
         );
@@ -125,7 +125,7 @@ const platFormStatusChangeController = catchAsync(async (req, res) => {
     if (UpdatedPlatForm) {
         return res.status(200).json(
             successResponse({
-                message: 'platForm deleted successfully',
+                message: `Platform ${status ? 'Active' : 'Inactive'} successfully`,
                 data: UpdatedPlatForm,
             }),
         );

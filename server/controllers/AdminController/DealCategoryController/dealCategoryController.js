@@ -12,7 +12,6 @@ import {
     updateStatusChangeSchema,
 } from './schema.js';
 
-
 const getDealCategoryByIdController = catchAsync(async (req, res) => {
     const { dealCategoryId } = DealCategoryIdSchema.parse(req.params);
     const dealCategory = await DealCategory.findOne({
@@ -27,7 +26,7 @@ const getDealCategoryByIdController = catchAsync(async (req, res) => {
 });
 const addDealCategoryController = catchAsync(async (req, res) => {
     const body = addDealCategorySchema.parse(req.body);
-    const { name, isExchangeDeal } = body;
+    const { name, isExchangeDeal, image } = body;
     const alreadyExists = await DealCategory.findOne({
         name,
     }).lean();
@@ -41,6 +40,7 @@ const addDealCategoryController = catchAsync(async (req, res) => {
     const newDealCategory = await DealCategory.create({
         name,
         isExchangeDeal,
+        image,
     });
     const DealCategoryRes = await newDealCategory.save();
     return res.status(200).json(
@@ -53,6 +53,8 @@ const addDealCategoryController = catchAsync(async (req, res) => {
 const editDealCategoryController = catchAsync(async (req, res) => {
     const body = editDealCategorySchema.parse(req.body);
     const { dealCategoryId, ...restBody } = body;
+
+    console.log(restBody , "restBody")
     const UpdatedDealCategoryForm = await DealCategory.findByIdAndUpdate(
         { _id: dealCategoryId },
         { ...restBody },
@@ -133,6 +135,6 @@ export default {
     editDealCategoryController,
     getDealCategoryByIdController,
     DealCategoryUpdateStatusController,
-    getAllDealCategoryWithFilters
+    getAllDealCategoryWithFilters,
 };
 //# sourceMappingURL=dealCategoryController.js.map
