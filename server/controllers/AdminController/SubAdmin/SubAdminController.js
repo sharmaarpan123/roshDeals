@@ -323,7 +323,7 @@ class subAdminController {
                 ...req?.body,
                 adminId: isSuperAdminId
                     ? req?.body?.adminId
-                    : getAccessorId(id),
+                    : getAccessorId(adminId),
             });
 
         const updatedData = await AdminSubAdminLinker.findOneAndUpdate(
