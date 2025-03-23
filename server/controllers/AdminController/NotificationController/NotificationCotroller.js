@@ -33,7 +33,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
         await sendNotification(messageBody);
         return res.status(200).json(
             successResponse({
-                message: 'notification sended successfully',
+                message: 'Notification sent successfully',
             }),
         );
     }
