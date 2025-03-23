@@ -128,30 +128,30 @@ export const dashboardController = catchAsync(async (req, res) => {
                 $match: {
                     paymentStatus: 'paid',
                     // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
-                    ...(!startDate &&
-                        revenueReportType === 'yearly' && {
-                            paymentDate: {
-                                $gte: getPrevious12thMonthFromToday(),
-                            },
-                        }),
-                    ...(!startDate &&
-                        revenueReportType === 'monthly' && {
-                            paymentDate: {
-                                $gte: getPrevious30ThDateFromToday(),
-                            },
-                        }),
-                    ...(!startDate &&
-                        revenueReportType === 'weekly' && {
-                            paymentDate: {
-                                $gte: getLastWeekStartDateFromToday(),
-                            },
-                        }),
-                    ...(startDate && {
-                        paymentDate: {
-                            $gte: new Date(startDate),
-                            $lte: new Date(endDate),
-                        },
-                    }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'yearly' && {
+                    //         paymentDate: {
+                    //             $gte: getPrevious12thMonthFromToday(),
+                    //         },
+                    //     }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'monthly' && {
+                    //         paymentDate: {
+                    //             $gte: getPrevious30ThDateFromToday(),
+                    //         },
+                    //     }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'weekly' && {
+                    //         paymentDate: {
+                    //             $gte: getLastWeekStartDateFromToday(),
+                    //         },
+                    //     }),
+                    // ...(startDate && {
+                    //     paymentDate: {
+                    //         $gte: new Date(startDate),
+                    //         $lte: new Date(endDate),
+                    //     },
+                    // }),
                 },
             },
             {
@@ -196,10 +196,7 @@ export const dashboardController = catchAsync(async (req, res) => {
                     revenue: 1,
                     yearMonth: {
                         $dateToString: {
-                            format:
-                                !startDate && revenueReportType === 'yearly'
-                                    ? '%Y-%m'
-                                    : '%Y-%m-%d',
+                            format: '%Y-%m-%d',
                             date: '$createdAt',
                         },
                     },
