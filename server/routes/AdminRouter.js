@@ -555,6 +555,8 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'notification',
         key: permissionsLevelKey.canAdd,
+        canAdminAccess,
+        canSubAdminAccess,
     }),
     sendNotificationController,
 );
