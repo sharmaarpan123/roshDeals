@@ -1,5 +1,5 @@
 import { z } from 'zod';
- const notificationArr = ['all', 'dealOrderStatus'];
+const notificationArr = ['users', 'dealOrderStatus', 'toMed', 'toAgency'];
 export const orderStatus = [
     'pending',
     'rejected',
