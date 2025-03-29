@@ -18,7 +18,7 @@ config();
 
 const init = async () => {
     const HTTPS_PORT = process.env.PORT || 3000;
-    const HTTP_PORT = 80; 
+    const HTTP_PORT = 8080; 
 
   const app = express();
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
