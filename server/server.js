@@ -18,8 +18,8 @@ config();
 
 const init = async () => {
     // 1. Use more descriptive environment variables
-    const HTTPS_PORT = process.env.HTTPS_PORT || 3000;
-    const HTTP_PORT = process.env.HTTP_PORT || 8080; 
+    const HTTPS_PORT = process.env.PORT || 3000;
+    const HTTP_PORT =  8080; 
 
     const app = express();
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,10 +37,47 @@ const init = async () => {
     }
 
     // 3. Add error handling for server creation
-    const httpsServer = https.createServer(sslOptions, app);
-    httpsServer.on('error', (error) => {
-        console.error('HTTPS Server error:', error);
-    });
+    const startHttpsServer = () => {
+        return new Promise((resolve, reject) => {
+            const httpsServer = https.createServer(sslOptions, app);
+            
+            httpsServer.on('error', (error) => {
+                if (error.code === 'EADDRINUSE') {
+                    console.error(`Port ${HTTPS_PORT} is already in use. Please stop other instances first.`);
+                    process.exit(1);
+                }
+                reject(error);
+            });
+
+            httpsServer.listen(HTTPS_PORT, () => {
+                console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
+                resolve(httpsServer);
+            });
+        });
+    };
+
+    // Add error handling for HTTP server
+    const startHttpServer = () => {
+        return new Promise((resolve, reject) => {
+            const httpServer = http.createServer((req, res) => {
+                res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+                res.end();
+            });
+
+            httpServer.on('error', (error) => {
+                if (error.code === 'EADDRINUSE') {
+                    console.error(`Port ${HTTP_PORT} is already in use. Please stop other instances first.`);
+                    process.exit(1);
+                }
+                reject(error);
+            });
+
+            httpServer.listen(HTTP_PORT, () => {
+                console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
+                resolve(httpServer);
+            });
+        });
+    };
 
     app.use(cors());
     app.use(logger("dev"));
@@ -59,29 +96,16 @@ const init = async () => {
     try {
         await mongoInit();
         getInitialCacheValues();
+        const httpsServer = await startHttpsServer();
+        await startHttpServer();
+        
+        // Initialize Socket.IO after servers are started
+        const io = new SocketServer(httpsServer);
+        InitSocket(io);
     } catch (error) {
-        console.error('Failed to initialize MongoDB or cache:', error);
+        console.error('Server initialization failed:', error);
         process.exit(1);
     }
-
-    Routes(app); // Initialize routes
-
-    // Start HTTPS Server
-    httpsServer.listen(HTTPS_PORT, () => {
-        console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
-    });
-
-    // Start HTTP Server and Redirect to HTTPS
-    http.createServer((req, res) => {
-        res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-        res.end();
-    }).listen(HTTP_PORT, () => {
-        console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
-    });
-
-    // Initialize Socket.IO on HTTPS server
-    const io = new SocketServer(httpsServer);
-    InitSocket(io);
 };
 
 // 5. Add global error handling
