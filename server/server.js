@@ -43,8 +43,8 @@ const init = async () => {
 
   // Load Cloudflare SSL Certificate & Key
   const sslOptions = {
-    key: fs.readFileSync("/etc/ssl/private/cloudflare.key"), // Private key path
-    cert: fs.readFileSync("/etc/ssl/certs/cloudflare.pem"),  // Certificate path
+    key: fs.readFileSync("/home/ubuntu/ssl/cloudflare.key"), // Updated key path
+    cert: fs.readFileSync("/home/ubuntu/ssl/cloudflare.pem"), // Updated cert path
   };
 
   // Start HTTPS Server
