@@ -17,52 +17,79 @@ import { fileURLToPath } from "url";
 config();
 
 const init = async () => {
-    const HTTPS_PORT = process.env.PORT || 3000;
-    const HTTP_PORT = 8080; 
+    // 1. Use more descriptive environment variables
+    const HTTPS_PORT = process.env.HTTPS_PORT || 3000;
+    const HTTP_PORT = process.env.HTTP_PORT || 8080; 
 
-  const app = express();
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const app = express();
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-  app.use(cors());
-  app.use(logger("dev"));
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: false, limit: "4mb" }));
-  app.use("/.well-known", express.static(path.join(process.cwd(), "server/public", ".well-known")));
-  app.use("/images", express.static(path.join(process.cwd(), "server/public", "images")));
-  app.get("/", (req, res) => {
-    res.sendFile(path.join(process.cwd(), "server/public", "deep-link.html"));
-  });
-  app.get("/buyr.apk", (req, res) => {
-    res.sendFile(path.join(process.cwd(), "server/public", "buyr.apk"));
-  });
+    // 2. Add error handling for SSL file reading
+    let sslOptions;
+    try {
+        sslOptions = {
+            key: fs.readFileSync("/home/ubuntu/ssl/cloudflare.key"),
+            cert: fs.readFileSync("/home/ubuntu/ssl/cloudflare.pem"),
+        };
+    } catch (error) {
+        console.error("Failed to load SSL certificates:", error);
+        process.exit(1);
+    }
 
-  await mongoInit();
-  getInitialCacheValues();
-  Routes(app); // Initialize routes
+    // 3. Add error handling for server creation
+    const httpsServer = https.createServer(sslOptions, app);
+    httpsServer.on('error', (error) => {
+        console.error('HTTPS Server error:', error);
+    });
 
-  // Load Cloudflare SSL Certificate & Key
-  const sslOptions = {
-    key: fs.readFileSync("/home/ubuntu/ssl/cloudflare.key"), // Updated key path
-    cert: fs.readFileSync("/home/ubuntu/ssl/cloudflare.pem"), // Updated cert path
-  };
+    app.use(cors());
+    app.use(logger("dev"));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false, limit: "4mb" }));
+    app.use("/.well-known", express.static(path.join(process.cwd(), "server/public", ".well-known")));
+    app.use("/images", express.static(path.join(process.cwd(), "server/public", "images")));
+    app.get("/", (req, res) => {
+        res.sendFile(path.join(process.cwd(), "server/public", "deep-link.html"));
+    });
+    app.get("/buyr.apk", (req, res) => {
+        res.sendFile(path.join(process.cwd(), "server/public", "buyr.apk"));
+    });
 
-  // Start HTTPS Server
-  const httpsServer = https.createServer(sslOptions, app);
-  httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
-  });
+    // 4. Add proper error handling for MongoDB connection
+    try {
+        await mongoInit();
+        getInitialCacheValues();
+    } catch (error) {
+        console.error('Failed to initialize MongoDB or cache:', error);
+        process.exit(1);
+    }
 
-  // Start HTTP Server and Redirect to HTTPS
-  http.createServer((req, res) => {
-    res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-    res.end();
-  }).listen(HTTP_PORT, () => {
-    console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
-  });
+    Routes(app); // Initialize routes
 
-  // Initialize Socket.IO on HTTPS server
-  const io = new SocketServer(httpsServer);
-  InitSocket(io);
+    // Start HTTPS Server
+    httpsServer.listen(HTTPS_PORT, () => {
+        console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
+    });
+
+    // Start HTTP Server and Redirect to HTTPS
+    http.createServer((req, res) => {
+        res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+        res.end();
+    }).listen(HTTP_PORT, () => {
+        console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
+    });
+
+    // Initialize Socket.IO on HTTPS server
+    const io = new SocketServer(httpsServer);
+    InitSocket(io);
 };
 
-init();
+// 5. Add global error handling
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled Rejection:', error);
+});
+
+init().catch(error => {
+    console.error('Failed to initialize server:', error);
+    process.exit(1);
+});
