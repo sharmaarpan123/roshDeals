@@ -2,22 +2,23 @@ import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
 import http from "http";
-import https from "https"; // Import HTTPS module
-import fs from "fs"; // Import File System module
+import https from "https";
+import fs from "fs";
 import logger from "morgan";
 import path from "path";
 import { Server as SocketServer } from "socket.io";
 import InitSocket from "../socket/InitSocket.js";
-import mongoInit from "./database/index.js";
+import mongoInit from "./database/mongoInit.js";
 import "./init-aliases.js";
 import Routes from "./Routes.js";
 import getInitialCacheValues from "./utilities/getInitialCacheValues.js";
 import { fileURLToPath } from "url";
 
-config();
+config(); // Load environment variables
 
 const init = async () => {
-  const PORT = process.env.PORT || 3000;
+  const HTTPS_PORT = process.env.HTTPS_PORT || 8000;
+  const HTTP_PORT = process.env.HTTP_PORT || 80;
 
   const app = express();
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +29,7 @@ const init = async () => {
   app.use(express.urlencoded({ extended: false, limit: "4mb" }));
   app.use("/.well-known", express.static(path.join(process.cwd(), "server/public", ".well-known")));
   app.use("/images", express.static(path.join(process.cwd(), "server/public", "images")));
+
   app.get("/", (req, res) => {
     res.sendFile(path.join(process.cwd(), "server/public", "deep-link.html"));
   });
@@ -35,28 +37,34 @@ const init = async () => {
     res.sendFile(path.join(process.cwd(), "server/public", "buyr.apk"));
   });
 
+  // Ensure REDIS_URL is set
+  if (!process.env.REDIS_URL) {
+    console.error("❌ REDIS_URL not found. Please check your .env file.");
+    process.exit(1);
+  }
+
   await mongoInit();
   getInitialCacheValues();
-  Routes(app); // Initialize routes
+  Routes(app);
 
-  // Load Cloudflare SSL Certificate & Key
+  // Load SSL Certificate & Key
   const sslOptions = {
-    key: fs.readFileSync("/home/ubuntu/ssl/cloudflare.key"), // Updated key path
-    cert: fs.readFileSync("/home/ubuntu/ssl/cloudflare.pem"), // Updated cert path
+    key: fs.readFileSync("/home/ubuntu/ssl/cloudflare.key"),
+    cert: fs.readFileSync("/home/ubuntu/ssl/cloudflare.pem"),
   };
 
   // Start HTTPS Server
   const httpsServer = https.createServer(sslOptions, app);
-  httpsServer.listen(PORT, () => {
-    console.log(`🚀 HTTPS Server running on port ${PORT}`);
+  httpsServer.listen(HTTPS_PORT, () => {
+    console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
   });
 
   // Start HTTP Server and Redirect to HTTPS
   http.createServer((req, res) => {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
     res.end();
-  }).listen(PORT, () => {
-    console.log(`🔄 Redirecting HTTP to HTTPS on port ${PORT}`);
+  }).listen(HTTP_PORT, () => {
+    console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
   });
 
   // Initialize Socket.IO on HTTPS server
