@@ -17,7 +17,8 @@ import { fileURLToPath } from "url";
 config();
 
 const init = async () => {
-  const PORT = process.env.PORT || 3000;
+    const HTTPS_PORT = process.env.PORT || 3000;
+    const HTTP_PORT = 80; 
 
   const app = express();
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,16 +48,16 @@ const init = async () => {
 
   // Start HTTPS Server
   const httpsServer = https.createServer(sslOptions, app);
-  httpsServer.listen(PORT, () => {
-    console.log(`🚀 HTTPS Server running on port ${PORT}`);
+  httpsServer.listen(HTTPS_PORT, () => {
+    console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
   });
 
   // Start HTTP Server and Redirect to HTTPS
   http.createServer((req, res) => {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
     res.end();
-  }).listen(PORT, () => {
-    console.log(`🔄 Redirecting HTTP to HTTPS on port ${PORT}`);
+  }).listen(HTTP_PORT, () => {
+    console.log(`🔄 Redirecting HTTP to HTTPS on port ${HTTP_PORT}`);
   });
 
   // Initialize Socket.IO on HTTPS server
