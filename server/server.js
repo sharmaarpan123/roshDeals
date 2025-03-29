@@ -55,7 +55,7 @@ const init = async () => {
   http.createServer((req, res) => {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
     res.end();
-  }).listen(HTTP_PORT, () => {
+  }).listen(PORT, () => {
     console.log(`🔄 Redirecting HTTP to HTTPS on port ${PORT}`);
   });
 
