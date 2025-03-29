@@ -47,8 +47,8 @@ const init = async () => {
 
   // Start HTTPS Server
   const httpsServer = https.createServer(sslOptions, app);
-  httpsServer.listen(HTTPS_PORT, () => {
-    console.log(`🚀 HTTPS Server running on port ${HTTPS_PORT}`);
+  httpsServer.listen(PORT, () => {
+    console.log(`🚀 HTTPS Server running on port ${PORT}`);
   });
 
   // Start HTTP Server and Redirect to HTTPS
