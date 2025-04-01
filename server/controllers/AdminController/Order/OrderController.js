@@ -76,10 +76,10 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
             message = `Your order for ${order.orderIdOfPlatForm} is rejected`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_ACCEPTED:
-            message = `Your Review for ${order.orderIdOfPlatForm} is accepted`;
+            message = `Your Review form for ${order.orderIdOfPlatForm} is accepted`;
             break;
         case ORDER_FORM_STATUS.REVIEW_FORM_REJECTED:
-            message = `Your Review for ${order.orderIdOfPlatForm} is rejected`;
+            message = `Your Review form for ${order.orderIdOfPlatForm} is rejected`;
             break;
         default:
             message = 'your order is ' + status;
@@ -114,9 +114,16 @@ export const acceptRejectOrder = catchAsync(async (req, res) => {
         title,
     }).then((res) => res.save());
 
+    const orderStatusEnumForSuccessMessage = {
+        rejected: 'Order Rejected',
+        accepted: 'Order Accepted',
+        reviewFormRejected: 'Review Rejected',
+        reviewFormAccepted: 'Review Accepted',
+    };
+
     return res.status(200).json(
         successResponse({
-            message: `order is ${status} successfully`,
+            message: `${orderStatusEnumForSuccessMessage[status] || ''} successfully`,
             data: updatedOrder,
         }),
     );
@@ -582,6 +589,7 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
         brandId,
         orderFormStatus,
         selectedPlatformFilter,
+        mediatorId,
     } = allOrdersListSchema.parse(req.body);
 
     const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
@@ -597,10 +605,14 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
     const aggregateArr = [
         {
             $match: {
-                ...(!isSuperAdminAccessing && {
-                    dealOwner: {
-                        $in: allMed?.map((item) => item.subAdminId) || [],
-                    },
+                ...(!isSuperAdminAccessing &&
+                    !mediatorId && {
+                        dealOwner: {
+                            $in: allMed?.map((item) => item.subAdminId) || [],
+                        },
+                    }),
+                ...(mediatorId && {
+                    dealOwner: MongooseObjectId(mediatorId),
                 }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
@@ -637,6 +649,15 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$dealId.parentDealId' },
+        {
+            $lookup: {
+                from: 'admins',
+                localField: 'dealId.adminId',
+                foreignField: '_id',
+                as: 'dealId.adminId',
+            },
+        },
+        { $unwind: '$dealId.adminId' },
         {
             $lookup: {
                 from: 'brands',

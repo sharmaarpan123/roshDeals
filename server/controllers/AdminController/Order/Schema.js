@@ -73,8 +73,6 @@ export const acceptRejectOrderSchema = orderIdSchema
         },
     );
 
-
-
 export const allOrdersListSchema = filterSchemaObject
     .merge(
         z.object({
@@ -100,6 +98,7 @@ export const allOrdersListSchema = filterSchemaObject
                     { invalid_type_error: 'deal Id should be arr' },
                 )
                 .optional(),
+            mediatorId: z.string().optional(),
             brandId: z.string().optional(),
         }),
     )

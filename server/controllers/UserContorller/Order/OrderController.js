@@ -178,7 +178,7 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
     );
 
     const body = 'Order Form Updated';
-    const title = name + ' buyer has updated Order from';
+    const title = name + ' buyer has updated  refund form';
 
     sendNotification({
         notification: {

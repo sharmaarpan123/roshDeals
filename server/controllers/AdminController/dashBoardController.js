@@ -1,6 +1,9 @@
+import Admin from '../../database/models/Admin.js';
+import AdminSubAdminLinker from '../../database/models/AdminSubAdminLinker.js';
 import Order from '../../database/models/Order.js';
 import User from '../../database/models/User.js';
 import catchAsync from '../../utilities/catchAsync.js';
+import { ADMIN_ROLE_TYPE_ENUM } from '../../utilities/commonTypes.js';
 import { successResponse } from '../../utilities/Responses.js';
 import {
     getAccessorId,
@@ -125,30 +128,30 @@ export const dashboardController = catchAsync(async (req, res) => {
                 $match: {
                     paymentStatus: 'paid',
                     // above check to sure if start date come then revenue report will not calculated on revenueReportType filter
-                    ...(!startDate &&
-                        revenueReportType === 'yearly' && {
-                            paymentDate: {
-                                $gte: getPrevious12thMonthFromToday(),
-                            },
-                        }),
-                    ...(!startDate &&
-                        revenueReportType === 'monthly' && {
-                            paymentDate: {
-                                $gte: getPrevious30ThDateFromToday(),
-                            },
-                        }),
-                    ...(!startDate &&
-                        revenueReportType === 'weekly' && {
-                            paymentDate: {
-                                $gte: getLastWeekStartDateFromToday(),
-                            },
-                        }),
-                    ...(startDate && {
-                        paymentDate: {
-                            $gte: new Date(startDate),
-                            $lte: new Date(endDate),
-                        },
-                    }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'yearly' && {
+                    //         paymentDate: {
+                    //             $gte: getPrevious12thMonthFromToday(),
+                    //         },
+                    //     }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'monthly' && {
+                    //         paymentDate: {
+                    //             $gte: getPrevious30ThDateFromToday(),
+                    //         },
+                    //     }),
+                    // ...(!startDate &&
+                    //     revenueReportType === 'weekly' && {
+                    //         paymentDate: {
+                    //             $gte: getLastWeekStartDateFromToday(),
+                    //         },
+                    //     }),
+                    // ...(startDate && {
+                    //     paymentDate: {
+                    //         $gte: new Date(startDate),
+                    //         $lte: new Date(endDate),
+                    //     },
+                    // }),
                 },
             },
             {
@@ -193,10 +196,7 @@ export const dashboardController = catchAsync(async (req, res) => {
                     revenue: 1,
                     yearMonth: {
                         $dateToString: {
-                            format:
-                                !startDate && revenueReportType === 'yearly'
-                                    ? '%Y-%m'
-                                    : '%Y-%m-%d',
+                            format: '%Y-%m-%d',
                             date: '$createdAt',
                         },
                     },
@@ -214,6 +214,17 @@ export const dashboardController = catchAsync(async (req, res) => {
         ]),
     ); // revenue report
 
+    queryS.push(
+        Admin.find({
+            roles: ADMIN_ROLE_TYPE_ENUM.ADMIN,
+        }).countDocuments(),
+    ); // total agency
+    queryS.push(
+        Admin.find({
+            roles: ADMIN_ROLE_TYPE_ENUM.SUBADMIN,
+        }).countDocuments(),
+    ); // total mediators
+
     const data = await Promise.all(queryS);
 
     console.log(JSON.stringify(data[4]), 'Data');
@@ -228,6 +239,8 @@ export const dashboardController = catchAsync(async (req, res) => {
                 totalRevenue: data[4] && data[4][0]?.totalEarnings,
                 orderStatus: data[3],
                 revenueGraphData: data[5],
+                totalAgency: data[6],
+                totalMediator: data[7],
             },
         }),
     );

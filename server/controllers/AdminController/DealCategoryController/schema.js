@@ -7,6 +7,12 @@ const addDealCategorySchema = z.object({
         })
         .trim()
         .min(1, { message: 'name should have at least one character' }),
+    image: z
+        .string({
+            required_error: 'Image is required',
+        })
+        .min(1, { message: 'Image is required' })
+        .trim(),
     isExchangeDeal: requiredBoolean('Is Exchange Deal'),
 });
 const DealCategoryIdSchema = z.object({

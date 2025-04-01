@@ -268,7 +268,6 @@ class subAdminController {
             },
         );
 
-
         if (isAlreadyExists) {
             return res.status(400).json(
                 errorResponse({
@@ -323,7 +322,7 @@ class subAdminController {
                 ...req?.body,
                 adminId: isSuperAdminId
                     ? req?.body?.adminId
-                    : getAccessorId(id),
+                    : getAccessorId(req),
             });
 
         const updatedData = await AdminSubAdminLinker.findOneAndUpdate(
