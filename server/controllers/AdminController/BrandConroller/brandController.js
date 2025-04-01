@@ -5,7 +5,10 @@ import {
     updateStatusSchema,
 } from './schema.js';
 import catchAsync from '../../../utilities/catchAsync.js';
-import { errorResponse, successResponse } from '../../../utilities/Responses.js';
+import {
+    errorResponse,
+    successResponse,
+} from '../../../utilities/Responses.js';
 import Brand from '../../../database/models/Brand.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 
@@ -143,6 +146,5 @@ export default {
     editBrandController,
     updateStatusController,
     geBrandByIdController,
-    getAllBrandWithCFilters
+    getAllBrandWithCFilters,
 };
-
