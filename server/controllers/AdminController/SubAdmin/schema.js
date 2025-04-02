@@ -71,7 +71,7 @@ class subAdminValidation {
                 .min(5, {
                     message: 'Username must be at least 5 characters long.',
                 })
-                .max(10, { message: 'Username must not exceed 10 characters.' })
+                .max(20, { message: 'Username must not exceed 20 characters.' })
                 .regex(/^[a-zA-Z0-9]+$/, {
                     message:
                         'Username can only contain alphanumeric characters.',
@@ -100,7 +100,7 @@ class subAdminValidation {
                 .min(5, {
                     message: 'Username must be at least 5 characters long.',
                 })
-                .max(10, { message: 'Username must not exceed 10 characters.' })
+                .max(20, { message: 'Username must not exceed 20 characters.' })
                 .regex(/^[a-zA-Z0-9]+$/, {
                     message:
                         'Username can only contain alphanumeric characters.',
