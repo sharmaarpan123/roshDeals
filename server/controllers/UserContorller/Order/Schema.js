@@ -37,6 +37,15 @@ export const createOrderSchema = z.object({
             message: 'Invalid Order Screenshot Url',
         }),
     exchangeDealProducts: z.array(z.string()).optional(),
+    orderDate: z.string({ required_error: 'OrderDate is required' }).refine(
+        (data) => {
+            if (new Date(data) == 'Invalid Date') {
+                return false;
+            }
+            return true;
+        },
+        { message: 'Invalid order date' },
+    ),
 }); //
 
 export const reviewFormSubmitSchema = z
@@ -98,5 +107,17 @@ export const OrderFromUpdateSchema = z
             })
             .optional(),
         orderIdOfPlatForm: z.string().trim().optional(),
+        orderDate: z
+            .string()
+            .refine(
+                (data) => {
+                    if (data && new Date(data) == 'Invalid Date') {
+                        return false;
+                    }
+                    return true;
+                },
+                { message: 'Invalid order date' },
+            )
+            .optional(),
     })
     .merge(orderIdSchema);

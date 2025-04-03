@@ -33,6 +33,9 @@ const orderSchema = new mongoose.Schema(
         paymentDate: {
             type: Date,
         },
+        orderDate: {
+            type: Date,
+        },
     },
     {
         timestamps: true,
