@@ -61,11 +61,7 @@ const addDealSchema = z
                 required_error: 'Deal category Id is required',
             })
             .trim(),
-        productCategories: z.array(
-            z.string({
-                invalid_type_error: 'product category should be string',
-            }),
-        ),
+
         postUrl: z
             .string({ required_error: 'post url is required' })
             .trim()
@@ -258,13 +254,6 @@ const editDealSchema = z
         brand: z.string().optional(),
         platForm: z.string().trim().optional(),
         dealCategory: z.string().trim().optional(),
-        productCategories: z
-            .array(
-                z.string({
-                    invalid_type_error: 'product category should be s   tring',
-                }),
-            )
-            .optional(),
         postUrl: z
             .string()
             .trim()

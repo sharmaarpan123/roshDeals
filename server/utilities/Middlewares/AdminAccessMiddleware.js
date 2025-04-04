@@ -10,8 +10,6 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
 
         const admin = admins?.find((item) => item?._id?.toString() === adminId);
 
-        console.log(admin, 'admin12');
-
         const sendNotPermittedRes = () => {
             res.status(403).json(
                 errorResponse({
@@ -36,11 +34,8 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
             return next();
         } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)) {
             if (!canAdminAccess) {
-                console.log('1---------');
-
                 return sendNotPermittedRes();
             }
-            console.log('2---------');
             return next();
         } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUBADMIN)) {
             if (!canSubAdminAccess) {
@@ -48,7 +43,6 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
             }
             return next();
         } else {
-            console.log('d---------');
             return sendNotPermittedRes();
         }
     });

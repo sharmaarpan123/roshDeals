@@ -73,9 +73,9 @@ const dealSchema = new mongoose.Schema(
                     `${props.value} is not a valid DealCategory ID!`,
             },
         },
-        productCategories: {
-            type: [String],
-        },
+        // productCategories: {
+        //     type: [String],
+        // },
         exchangeDealProducts: { type: [String] },
         postUrl: {
             type: String,
