@@ -324,19 +324,9 @@ export const addDealController = catchAsync(async (req, res) => {
 export const bulkAddDealController = catchAsync(async (req, res) => {
     let bulkAddArr = BulkAddDealSchema.parse(req.body);
 
-    bulkAddArr = await Promise.all(bulkAddArr.map(async (item) => {
-        let scrapImageUrl = '';
-
-        if (!item?.imageUrl) {
-            scrapImageUrl = await extractProductImage(item?.postUrl);
-        } else {
-            scrapImageUrl = item?.imageUrl;
-        }
-        return ({
-            ...item,
-            imageUrl: scrapImageUrl,
-            adminId: req?.user?._id,
-        });
+    bulkAddArr = bulkAddArr.map((item) => ({
+        ...item,
+        adminId: req?.user?._id,
     }));
 
     const newDeal = await Deal.insertMany(bulkAddArr);
