@@ -54,7 +54,7 @@ const editDealCategoryController = catchAsync(async (req, res) => {
     const body = editDealCategorySchema.parse(req.body);
     const { dealCategoryId, ...restBody } = body;
 
-    console.log(restBody , "restBody")
+    console.log(restBody, 'restBody');
     const UpdatedDealCategoryForm = await DealCategory.findByIdAndUpdate(
         { _id: dealCategoryId },
         { ...restBody },
@@ -107,12 +107,13 @@ const getAllDealCategoryWithFilters = catchAsync(async (req, res) => {
     const AllDealCategories = DealCategory.find({
         ...(search && { name: { $regex: search, $options: 'i' } }),
         ...(status && { isActive: Boolean(+status) }),
-    })
-        .sort({
-            createdAt: -1,
-        })
-        .skip(offset || 0)
-        .limit(limit || 10);
+    }).sort({
+        createdAt: -1,
+    });
+
+    if (offset || offset === 0) {
+        AllDealCategories.skip(offset || 0).limit(limit || 10);
+    }
 
     const total = DealCategory.find({
         ...(search && { name: { $regex: search, $options: 'i' } }),

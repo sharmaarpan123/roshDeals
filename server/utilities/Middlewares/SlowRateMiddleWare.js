@@ -29,7 +29,7 @@ export default (arg) => {
         if (isAlreadyRequested >= maxReq) {
             redis.setex(ip, expTime, isAlreadyRequested + 1); // not using the await just to send  the response  is less time
             const message =
-                'Tere jada chul mach rahi hai!! ab ruk ja ' + expTime + ' sec';
+                'To Many request , Please wait for  ' + expTime + ' sec' +  " for next attempt";
                 
             return res.status(400).json(
                 errorResponse({
