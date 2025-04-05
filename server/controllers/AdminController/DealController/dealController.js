@@ -417,6 +417,7 @@ export const editDealController = catchAsync(async (req, res) => {
     } else {
         finalImageUrl = imageUrl;
     }
+    console.log(shouldScrapProductImage,'shouldScrapProductImage',scrapImageUrl)
 
     const dealUpdated = await Deal.findOneAndUpdate(
         {
