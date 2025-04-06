@@ -22,6 +22,9 @@ import { sendNotification } from '../../../utilities/sendNotification.js';
 import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
+import PlatForm from '../../../database/models/PlatForm.js';
+import Brand from '../../../database/models/Brand.js';
+import DealCategory from '../../../database/models/DealCategory.js';
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
@@ -337,6 +340,45 @@ export const OrderList = catchAsync(async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(offset || 0)
         .limit(limit || 10);
+
+    //  then the extra keys if offset is zero
+    if (offset === 0) {
+        // Fetch related brands, categories, and platforms with populate
+        const relatedFilter = {
+            isActive: true,
+            isSlotCompleted: false,
+            adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
+        };
+
+        // Fetch distinct IDs and populate their details
+        const [relatedBrands, relatedCategories, relatedPlatforms] =
+            await Promise.all([
+                Deal.find(relatedFilter)
+                    .distinct('brand')
+                    .then((ids) => Brand.find({ _id: { $in: ids } })),
+                Deal.find(relatedFilter)
+                    .distinct('dealCategory')
+                    .then((ids) => DealCategory.find({ _id: { $in: ids } })),
+                Deal.find(relatedFilter)
+                    .distinct('platForm')
+                    .then((ids) => PlatForm.find({ _id: { $in: ids } })),
+            ]);
+        // Respond with successResponse
+        return res.status(200).json(
+            successResponse({
+                message: 'Order List with related data',
+      
+                others: {
+                    orders ,
+                    relatedData: {
+                        brands: relatedBrands,
+                        categories: relatedCategories,
+                        platforms: relatedPlatforms,
+                    },
+                },
+            }),
+        );
+    }
 
     return res.status(200).json(
         successResponse({

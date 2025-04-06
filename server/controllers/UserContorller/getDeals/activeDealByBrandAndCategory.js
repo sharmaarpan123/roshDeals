@@ -257,6 +257,7 @@ export default catchAsync(async (req, res) => {
 
     const data = await Deal.aggregate([...pipeLine]);
 
+    //  then the extra keys if offset is zero
     if (offset === 0) {
         // Fetch related brands, categories, and platforms with populate
         const relatedFilter = {
@@ -284,8 +285,7 @@ export default catchAsync(async (req, res) => {
         // Respond with successResponse
         return res.status(200).json(
             successResponse({
-                message:
-                    'Deal data',
+                message: 'Deal data',
                 data,
                 others: {
                     relatedData: {
