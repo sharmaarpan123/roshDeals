@@ -49,7 +49,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         return res.status(400).json(
             errorResponse({
                 message:
-                    'Some deals are not valid or do not belong to your admin account.',
+                    'Some deals are not valid or do not belong to your agency or mediator account.',
             }),
         );
     }
@@ -148,8 +148,13 @@ export const OrderCreateController = catchAsync(async (req, res) => {
 });
 //
 export const OrderFromUpdate = catchAsync(async (req, res) => {
-    const { orderIdOfPlatForm, reviewerName, orderScreenShot, orderId , orderDate } =
-        OrderFromUpdateSchema.parse(req.body);
+    const {
+        orderIdOfPlatForm,
+        reviewerName,
+        orderScreenShot,
+        orderId,
+        orderDate,
+    } = OrderFromUpdateSchema.parse(req.body);
 
     const { name } = req.user;
     const order = await Order.findOne({ _id: orderId }).populate('dealOwner');
@@ -291,7 +296,7 @@ export const OrderList = catchAsync(async (req, res) => {
     const { limit, offset, selectedDate } = filterSchema.parse(req.body);
     const dateFilter = selectedDate
         ? {
-              createdAt: {
+              orderDate: {
                   $gte: toUTC(new Date(selectedDate)), // Start of the day in UTC
                   $lt: toUTC(
                       new Date(

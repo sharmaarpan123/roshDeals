@@ -332,7 +332,10 @@ export const bulkAddDealController = catchAsync(async (req, res) => {
     const newDeal = await Deal.insertMany(bulkAddArr);
 
     const data = await Promise.all([
-        User.find({}, { fcmToken: 1, _id: 0 }),
+        User.find(
+            { historyAdminReferences: req?.user?._id },
+            { fcmToken: 1, _id: 0 },
+        ),
         Brand.findOne({
             _id: bulkAddArr[0].brand,
         }),

@@ -15,7 +15,10 @@ import {
     editDealController,
     getDealsWithBrandId,
 } from '../controllers/AdminController/DealController/dealController.js';
-import { adminMeQueryController } from '../controllers/AdminController/meQuery.js';
+import {
+    adminLogout,
+    adminMeQueryController,
+} from '../controllers/AdminController/meQuery.js';
 import { sendNotificationController } from '../controllers/AdminController/NotificationController/NotificationCotroller.js';
 import {
     acceptRejectOrder,
@@ -44,6 +47,7 @@ const canAdminAccess = true;
 const canSubAdminAccess = true;
 
 AdminRouter.post('/me', adminMeQueryController);
+AdminRouter.post('/logout', adminLogout);
 
 AdminRouter.post(
     '/dashboard',
@@ -51,7 +55,7 @@ AdminRouter.post(
         uniqueSlug: 'dashboard',
         key: permissionsLevelKey.canView,
         canAdminAccess,
-        canSubAdminAccess
+        canSubAdminAccess,
     }),
     dashboardController,
 );

@@ -464,6 +464,8 @@ export const getAllOrders = catchAsync(async (req, res) => {
         brandId,
         orderFormStatus,
         selectedPlatformFilter,
+        startDate,
+        endDate,
     } = allOrdersListSchema.parse(req.body);
 
     const adminId = isAdminAccessingApi(req);
@@ -474,6 +476,16 @@ export const getAllOrders = catchAsync(async (req, res) => {
                 ...(adminId && {
                     dealOwner: new mongoose.Types.ObjectId(adminId),
                 }),
+                // ...(startDate && {
+                //     orderDate: {
+                //         $gte: new Date(
+                //             new Date(startDate).setHours(0, 0, 0, 0),
+                //         ),
+                //         $lte: new Date(
+                //             new Date(endDate).setHours(23, 59, 59, 999),
+                //         ),
+                //     },
+                // }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
                     dealId: {

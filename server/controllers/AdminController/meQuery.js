@@ -1,7 +1,11 @@
 import Admin from '../../database/models/Admin.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { verifyJwt } from '../../utilities/jwt.js';
-import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import {
+    errorResponse,
+    sendSuccessResponse,
+    successResponse,
+} from '../../utilities/Responses.js';
 import { AdminMeQuerySchema } from './Schema.js';
 
 export const adminMeQueryController = catchAsync(async (req, res) => {
@@ -35,4 +39,23 @@ export const adminMeQueryController = catchAsync(async (req, res) => {
             data: user,
         }),
     );
+});
+
+export const adminLogout = catchAsync(async (req, res) => {
+    const user = await Admin.findOneAndUpdate(
+        { _id: req?.user?._id },
+        {
+            $pull: {
+                fcmTokens: req.body.fcmToken,
+            },
+        },
+        { new: true },
+    );
+
+    if (user) {
+        return sendSuccessResponse({
+            res,
+            message: 'Logout successfully',
+        });
+    }
 });

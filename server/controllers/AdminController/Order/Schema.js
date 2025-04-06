@@ -100,6 +100,42 @@ export const allOrdersListSchema = filterSchemaObject
                 .optional(),
             mediatorId: z.string().optional(),
             brandId: z.string().optional(),
+            startDate: z
+                .string()
+                .refine(
+                    (data) => {
+                        if (data && new Date(data) == 'Invalid Date') {
+                            return false;
+                        }
+                        return true;
+                    },
+                    { message: 'Invalid start date' },
+                )
+                .optional(),
+            endDate: z
+                .string()
+                .refine(
+                    (data) => {
+                        if (data && new Date(data) == 'Invalid Date') {
+                            return false;
+                        }
+                        return true;
+                    },
+                    { message: 'Invalid end date' },
+                )
+                .optional(),
         }),
+    )
+    .refine(
+        (data) => {
+            if (data?.startDate && !data?.endDate) {
+                return false;
+            }
+            if (data?.endDate && !data?.startDate) {
+                return false;
+            }
+            return true;
+        },
+        { message: 'Please send both start Date and end Date or neither' },
     )
     .refine(filterRefineFunction, filterRefineMessage);
