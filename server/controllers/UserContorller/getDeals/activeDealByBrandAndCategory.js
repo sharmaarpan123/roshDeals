@@ -257,29 +257,46 @@ export default catchAsync(async (req, res) => {
 
     const data = await Deal.aggregate([...pipeLine]);
 
-    // Fetch related brands, categories, and platforms with populate
-    const relatedFilter = {
-        isActive: true,
-        isSlotCompleted: false,
-        adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
-        ...(type === SearchEnumType.brand && { brand: id }),
-        ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
-        ...(type === SearchEnumType.platForm && { platForm: id }),
-    };
+    if (offset === 0) {
+        // Fetch related brands, categories, and platforms with populate
+        const relatedFilter = {
+            isActive: true,
+            isSlotCompleted: false,
+            adminId: new mongoose.Types.ObjectId(adminCurrentRecreance),
+            ...(type === SearchEnumType.brand && { brand: id }),
+            ...(type === SearchEnumType.dealCategory && { dealCategory: id }),
+            ...(type === SearchEnumType.platForm && { platForm: id }),
+        };
 
-    // Fetch distinct IDs and populate their details
-    const [relatedBrands, relatedCategories, relatedPlatforms] =
-        await Promise.all([
-            Deal.find(relatedFilter)
-                .distinct('brand')
-                .then((ids) => Brand.find({ _id: { $in: ids } })),
-            Deal.find(relatedFilter)
-                .distinct('dealCategory')
-                .then((ids) => DealCategory.find({ _id: { $in: ids } })),
-            Deal.find(relatedFilter)
-                .distinct('platForm')
-                .then((ids) => PlatForm.find({ _id: { $in: ids } })),
-        ]);
+        // Fetch distinct IDs and populate their details
+        const [relatedBrands, relatedCategories, relatedPlatforms] =
+            await Promise.all([
+                Deal.find(relatedFilter)
+                    .distinct('brand')
+                    .then((ids) => Brand.find({ _id: { $in: ids } })),
+                Deal.find(relatedFilter)
+                    .distinct('dealCategory')
+                    .then((ids) => DealCategory.find({ _id: { $in: ids } })),
+                Deal.find(relatedFilter)
+                    .distinct('platForm')
+                    .then((ids) => PlatForm.find({ _id: { $in: ids } })),
+            ]);
+        // Respond with successResponse
+        return res.status(200).json(
+            successResponse({
+                message:
+                    'Deal data',
+                data,
+                others: {
+                    relatedData: {
+                        brands: relatedBrands,
+                        categories: relatedCategories,
+                        platforms: relatedPlatforms,
+                    },
+                },
+            }),
+        );
+    }
 
     // Respond with successResponse
     return res.status(200).json(
@@ -287,13 +304,6 @@ export default catchAsync(async (req, res) => {
             message:
                 'Deal data with related brands, categories, and platforms for the requested id',
             data,
-            others: {
-                relatedData: {
-                    brands: relatedBrands,
-                    categories: relatedCategories,
-                    platforms: relatedPlatforms,
-                },
-            },
         }),
     );
 });
