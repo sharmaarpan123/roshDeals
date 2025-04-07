@@ -21,6 +21,7 @@ export const getAllNotifications = catchAsync(async (req, res) => {
     const notificationsPromise = Notifications.find(query)
         .populate('dealId')
         .populate('orderId')
+        .populate('brandId')
         .sort({ createdAt: -1 })
         .skip(offset || 0)
         .limit(limit || 30);
