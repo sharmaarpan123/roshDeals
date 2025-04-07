@@ -510,27 +510,6 @@ export const OrderList = catchAsync(async (req, res) => {
             $limit: limit || 10,
         },
     ]);
-    // .populate({
-    //     path: 'dealId',
-    //     select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
-    //     populate: [
-    //         { path: 'brand', select: 'name image' },
-    //         { path: 'dealCategory', select: 'name' },
-    //         { path: 'platForm', select: 'name' },
-    //         {
-    //             path: 'parentDealId',
-    //             select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
-    //             populate: [
-    //                 { path: 'brand', select: 'name image' },
-    //                 { path: 'dealCategory', select: 'name' },
-    //                 { path: 'platForm', select: 'name' },
-    //             ],
-    //         },
-    //     ],
-    // })
-    // .sort({ createdAt: -1 })
-    // .skip(offset || 0)
-    // .limit(limit || 10);
 
     //  then the extra keys if offset is zero
     if (offset === 0) {
