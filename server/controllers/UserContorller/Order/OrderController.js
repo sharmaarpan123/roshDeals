@@ -323,9 +323,11 @@ export const OrderList = catchAsync(async (req, res) => {
 
     const orders = await Order.aggregate([
         {
-            userId: MongooseObjectId(req.user._id),
-            ...dateFilter,
-            dealOwner: new mongoose.Types.ObjectId(adminCurrentRecreance),
+            $match: {
+                userId: MongooseObjectId(req.user._id),
+                ...dateFilter,
+                dealOwner: new mongoose.Types.ObjectId(adminCurrentRecreance),
+            },
         },
         {
             $lookup: {
