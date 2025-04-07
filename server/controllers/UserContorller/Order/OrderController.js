@@ -296,7 +296,14 @@ export const reviewFromSubmitController = catchAsync(async (req, res) => {
     );
 }); //
 export const OrderList = catchAsync(async (req, res) => {
-    const { limit, offset, selectedDate } = filterSchema.parse(req.body);
+    const {
+        limit,
+        offset,
+        selectedDate,
+        selectedBrandFilter,
+        selectedCategoryFilter,
+        selectedPlatformFilter,
+    } = filterSchema.parse(req.body);
     const dateFilter = selectedDate
         ? {
               orderDate: {
@@ -314,32 +321,214 @@ export const OrderList = catchAsync(async (req, res) => {
 
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 
-    const orders = await Order.find({
-        userId: req.user._id,
-        ...dateFilter,
-        dealOwner: new mongoose.Types.ObjectId(adminCurrentRecreance),
-    })
-        .populate({
-            path: 'dealId',
-            select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
-            populate: [
-                { path: 'brand', select: 'name image' },
-                { path: 'dealCategory', select: 'name' },
-                { path: 'platForm', select: 'name' },
-                {
-                    path: 'parentDealId',
-                    select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
-                    populate: [
-                        { path: 'brand', select: 'name image' },
-                        { path: 'dealCategory', select: 'name' },
-                        { path: 'platForm', select: 'name' },
+    const orders = await Order.aggregate([
+        {
+            userId: MongooseObjectId(req.user._id),
+            ...dateFilter,
+            dealOwner: new mongoose.Types.ObjectId(adminCurrentRecreance),
+        },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'dealId',
+                foreignField: '_id',
+                as: 'dealId',
+            },
+        },
+        { $unwind: '$dealId' },
+        {
+            $lookup: {
+                from: 'deals',
+                localField: 'dealId.parentDealId',
+                foreignField: '_id',
+                as: 'dealId.parentDealId',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.parentDealId',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $match: {
+                ...(selectedBrandFilter?.length > 0 && {
+                    $or: [
+                        {
+                            'dealId.parentDealId.brand': {
+                                $in: selectedBrandFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
+                        {
+                            'dealId.brand': {
+                                $in: selectedBrandFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
                     ],
-                },
-            ],
-        })
-        .sort({ createdAt: -1 })
-        .skip(offset || 0)
-        .limit(limit || 10);
+                }),
+                ...(selectedPlatformFilter?.length > 0 && {
+                    $or: [
+                        {
+                            'dealId.parentDealId.platForm': {
+                                $in: selectedPlatformFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
+                        {
+                            'dealId.platForm': {
+                                $in: selectedPlatformFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
+                    ],
+                }),
+                ...(selectedCategoryFilter?.length > 0 && {
+                    $or: [
+                        {
+                            'dealId.parentDealId.dealCategory': {
+                                $in: selectedCategoryFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
+                        {
+                            'dealId.dealCategory': {
+                                $in: selectedCategoryFilter?.map((item) =>
+                                    MongooseObjectId(item),
+                                ),
+                            },
+                        },
+                    ],
+                }),
+            },
+        },
+
+        // root level  deal populate
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'dealId.dealCategory',
+                foreignField: '_id',
+                as: 'dealId.dealCategory',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.dealCategory',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'dealId.platForm',
+                foreignField: '_id',
+                as: 'dealId.platForm',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.platForm',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.brand',
+                foreignField: '_id',
+                as: 'dealId.brand',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.brand',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+
+        // parent deal populate
+        {
+            $lookup: {
+                from: 'dealcategories',
+                localField: 'dealId.parentDealId.dealCategory',
+                foreignField: '_id',
+                as: 'dealId.parentDealId.dealCategory',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.parentDealId.dealCategory',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $lookup: {
+                from: 'platforms',
+                localField: 'dealId.parentDealId.platForm',
+                foreignField: '_id',
+                as: 'dealId.parentDealId.platForm',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.parentDealId.platForm',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'dealId.parentDealId.brand',
+                foreignField: '_id',
+                as: 'dealId.parentDealId.brand',
+            },
+        },
+        {
+            $unwind: {
+                path: '$dealId.parentDealId.brand',
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $sort: {
+                createdAt: -1,
+            },
+        },
+        {
+            $skip: offset || 0,
+        },
+        {
+            $limit: limit || 10,
+        },
+    ]);
+    // .populate({
+    //     path: 'dealId',
+    //     select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
+    //     populate: [
+    //         { path: 'brand', select: 'name image' },
+    //         { path: 'dealCategory', select: 'name' },
+    //         { path: 'platForm', select: 'name' },
+    //         {
+    //             path: 'parentDealId',
+    //             select: 'brand dealCategory platForm productName productCategories actualPrice cashBack termsAndCondition postUrl paymentStatus finalCashBackForUser imageUrl',
+    //             populate: [
+    //                 { path: 'brand', select: 'name image' },
+    //                 { path: 'dealCategory', select: 'name' },
+    //                 { path: 'platForm', select: 'name' },
+    //             ],
+    //         },
+    //     ],
+    // })
+    // .sort({ createdAt: -1 })
+    // .skip(offset || 0)
+    // .limit(limit || 10);
 
     //  then the extra keys if offset is zero
     if (offset === 0) {
@@ -367,9 +556,9 @@ export const OrderList = catchAsync(async (req, res) => {
         return res.status(200).json(
             successResponse({
                 message: 'Order List with related data',
-      
+
                 others: {
-                    orders ,
+                    orders,
                     relatedData: {
                         brands: relatedBrands,
                         categories: relatedCategories,
