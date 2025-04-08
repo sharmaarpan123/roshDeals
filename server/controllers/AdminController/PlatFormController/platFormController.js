@@ -100,7 +100,7 @@ const editPlatFormController = catchAsync(async (req, res) => {
     if (UpdatedPlatForm) {
         return res.status(200).json(
             successResponse({
-                message: 'Platform updated successfully',
+                message: 'Platform Updated successfully.',
                 data: UpdatedPlatForm,
             }),
         );

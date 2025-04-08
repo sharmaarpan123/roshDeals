@@ -1,10 +1,10 @@
-import User from '../../database/models/User.js';
-import catchAsync from '../../utilities/catchAsync.js';
-import { randomOtp } from '../../utilities/utilitis.js';
 import { z } from 'zod';
+import User from '../../database/models/User.js';
 import forgetPasswordTemplate from '../../services/email/emailsTemplates/forgetpasswordTemplate.js';
 import NodeMailerTransPorter from '../../services/email/NodeMailerTransPorter.js';
+import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
+import { randomOtp } from '../../utilities/utilitis.js';
 const schema = z.object({
     email: z
         .string({
@@ -15,15 +15,15 @@ const schema = z.object({
         .toLowerCase(),
 });
 const forgetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email } = req.body;
+    const body = schema.parse(req.body);
+    const { email } = body;
     const isUserRegistered = await User.findOne({
         email,
     });
     if (!isUserRegistered) {
         return res.status(400).json(
             errorResponse({
-                message: 'This email is not registered',
+                message: 'Provided email address is not associated with any account',
             }),
         );
     }
@@ -36,11 +36,6 @@ const forgetPasswordController = catchAsync(async (req, res) => {
         subject: 'ROSH DEALS - Reset Your Password ',
         html: forgetPasswordTemplate(otp),
     };
-    // return res.status(200).json(
-    //     successResponse({
-    //         message: 'devloping mode',
-    //     }),
-    // );
     transporter.sendMail(mailOptions, (error) => {
         if (error) {
             return res.status(400).json(
@@ -52,7 +47,7 @@ const forgetPasswordController = catchAsync(async (req, res) => {
         } else {
             return res.status(200).json(
                 successResponse({
-                    message: 'Your One Time Password is sended to the mail',
+                    message: 'A one-time password has been sent to your email',
                 }),
             );
         }

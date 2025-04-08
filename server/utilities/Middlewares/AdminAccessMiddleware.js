@@ -13,7 +13,7 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
         const sendNotPermittedRes = () => {
             res.status(403).json(
                 errorResponse({
-                    message: "You dont't have permissioin access this api",
+                    message: "You don't have permission to access this API.",
                 }),
             );
         };

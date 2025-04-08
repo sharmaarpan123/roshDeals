@@ -33,6 +33,7 @@ import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
 import { extractProductImage } from '../../../utilities/extractProductImage.js';
+import Admin from '../../../database/models/Admin.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -59,7 +60,7 @@ export const dealPaymentStatusChangeController = catchAsync(
 
         return res.status(200).json(
             successResponse({
-                message: 'Payment status updated successfully!',
+                message: 'Payment status Updated successfully.!',
                 data: updatedDeal,
             }),
         );
@@ -85,7 +86,7 @@ export const dealStatusChangeController = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: 'status updated successfully!',
+            message: 'status Updated successfully.!',
             data: updatedDeal,
         }),
     );
@@ -342,35 +343,93 @@ export const bulkAddDealController = catchAsync(async (req, res) => {
         adminId: req?.user?._id,
     }));
 
+    const showToUsers = bulkAddArr.some((item) => item?.showToUsers);
+    const showToMediators = bulkAddArr.some((item) => item?.showToSubAdmins);
+
     const newDeal = await Deal.insertMany(bulkAddArr);
 
     const data = await Promise.all([
         User.find(
             { historyAdminReferences: req?.user?._id },
-            { fcmToken: 1, _id: 0 },
+            { fcmToken: 1, _id: 1 },
         ),
         Brand.findOne({
             _id: bulkAddArr[0].brand,
         }),
+        AdminSubAdminLinker.find({ adminId: req?.user?._id }).populate(
+            'subAdminId',
+        ),
     ]);
 
-    const filterToken = data[0]
-        .filter((i) => i.fcmToken)
-        .map((i) => i.fcmToken);
+    const userFilterToken =
+        data[0].filter((i) => i.fcmToken).map((i) => i.fcmToken) || []; // user fireBase tokens
 
-    sendNotification({
-        notification: {
-            body: 'New Deals',
-            title: data[1].name + " brand 's deal  are Launched",
-            imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
-        },
-        android: {
+    const adminFilterToken =
+        data[2]
+            .filter((i) => i?.subAdminId?.fcmTokens?.length > 0)
+            .map((i) => i?.subAdminId?.fcmTokens)
+            ?.flat() || []; // admins fireBase tokens
+
+    const body = 'New Deals';
+    const userTitle = data[1].name + " brand 's deal  are Launched";
+    const AdminTitle =
+        req?.user?.name + ' has Launched ' + data[1].name + " brand 's deals ";
+
+    // sending the user push notify if show  deals is show to users is true
+    showToUsers &&
+        sendNotification({
             notification: {
+                body,
+                title: userTitle,
                 imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
             },
-        },
-        tokens: filterToken,
-    });
+            android: {
+                notification: {
+                    imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+                },
+            },
+            tokens: userFilterToken,
+        });
+
+    // sending the mediators push notify if show  deals is show to mediator is true
+    showToMediators &&
+        sendNotification({
+            notification: {
+                body,
+                title: AdminTitle,
+                imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+            },
+            android: {
+                notification: {
+                    imageUrl: `${process.env.BASE_URL}/images/logo.jpeg`,
+                },
+            },
+            tokens: adminFilterToken,
+        });
+
+    Notifications.insertMany([
+        // for the subAdmins
+        ...(showToMediators
+            ? data[2].map((i) => ({
+                  adminId: i?.subAdminId?._id,
+                  body,
+                  title: AdminTitle,
+                  brandId: data[1]?._id,
+                  type: notificationType.newBrandDealCreated,
+              }))
+            : []),
+        // for the users
+        ...(showToUsers
+            ? data[0].map((i) => ({
+                  userId: i?._id,
+                  body,
+                  title: userTitle,
+                  brandId: data[1]?._id,
+                  type: notificationType.newBrandDealCreated,
+                  userCurrentAdminReference: req?.user?._id,
+              }))
+            : []),
+    ]);
 
     return res.status(200).json(
         successResponse({
@@ -469,7 +528,7 @@ export const editDealController = catchAsync(async (req, res) => {
     if (dealUpdated) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: dealUpdated,
             }),
         );

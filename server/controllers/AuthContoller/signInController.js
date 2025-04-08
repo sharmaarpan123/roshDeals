@@ -39,8 +39,8 @@ const schema = z.object({
     fcmToken: z.string().optional(),
 });
 const signInController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { password, phoneNumber, fcmToken, currentAdminReference } = req.body;
+    const body = schema.parse(req.body);
+    const { password, phoneNumber, fcmToken, currentAdminReference } = body;
     const user = await User.findOne({
         phoneNumber,
     });

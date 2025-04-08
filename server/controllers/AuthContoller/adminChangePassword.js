@@ -58,12 +58,21 @@ const adminChangePassword = catchAsync(async (req, res) => {
         });
     }
 
+    if (oldPassword === newPassword) {
+        return res.status(400).json(
+            errorResponse({
+                message:
+                    'The new password cannot be the same as the current one.',
+            }),
+        );
+    }
+
     const isMatched = await comparePassword(oldPassword, isUserExists.password);
 
     if (!isMatched) {
         return res.status(400).json(
             errorResponse({
-                message: 'wrong old password',
+                message: 'Please enter the correct old password',
             }),
         );
     }
@@ -74,8 +83,7 @@ const adminChangePassword = catchAsync(async (req, res) => {
         { _id: adminId },
         { $set: { password: hashedPassword } },
         { new: true },
-    )
-      
+    );
 
     return sendSuccessResponse({
         res,

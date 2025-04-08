@@ -41,17 +41,7 @@ export const dealDetails = catchAsync(async (req, res) => {
 });
 export const activeDealsController = catchAsync(async (req, res) => {
     const { limit, offset, search } = filterSchema.parse(req.body);
-    // const activelyDeals = Deal.find({
-    //     isActive: true,
-    //     isSlotCompleted: false,
-    //     ...(search && { productName: { $regex: search, $options: 'i' } }),
-    // })
-    //     .populate('brand')
-    //     .populate('dealCategory')
-    //     .populate('platForm')
-    //     .sort({ createdAt: -1 })
-    //     .skip(offset || 0)
-    //     .limit(limit || 20);
+   
 
     const adminCurrentRecreance = getCurrentAdminReferencesId(req);
 

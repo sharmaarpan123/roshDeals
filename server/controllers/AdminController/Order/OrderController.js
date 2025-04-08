@@ -272,7 +272,7 @@ export const paymentStatusUpdate = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: `order payment status updated successfully`,
+            message: `order payment status Updated successfully.`,
             data: updatedOrder,
         }),
     );
@@ -450,7 +450,7 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: `orders payment status updated successfully`,
+            message: `orders payment status Updated successfully.`,
         }),
     );
 });

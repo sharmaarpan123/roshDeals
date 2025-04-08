@@ -1,7 +1,7 @@
 import User from '../../database/models/User.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import catchAsync from '../../utilities/catchAsync.js';
-import { hashPassword } from '../../utilities/hashPassword.js';
+import { comparePassword, hashPassword } from '../../utilities/hashPassword.js';
 import { z } from 'zod';
 const schema = z.object({
     email: z
@@ -42,16 +42,28 @@ const schema = z.object({
         ),
 });
 const resetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email, otp, password } = req.body;
+    const body = schema.parse(req.body);
+    const { email, otp, password } = body;
 
     const isUserExists = await User.findOne({
         email,
     });
+
     if (!isUserExists) {
         return res.status(400).json(
             errorResponse({
-                message: 'This email is not registered , please sign up',
+                message: 'Provided email address is not associated with any account , please sign up',
+            }),
+        );
+    }
+
+    const isMatched = await comparePassword(password, isUserExists.password);
+
+    if (isMatched) {
+        return res.status(400).json(
+            errorResponse({
+                message:
+                    'The new password cannot be the same as the current one.',
             }),
         );
     }
@@ -74,7 +86,7 @@ const resetPasswordController = catchAsync(async (req, res) => {
     );
     return res.status(200).json(
         successResponse({
-            message: 'Your Password is upgraded',
+            message: ' Password Updated successfully.',
         }),
     );
 });

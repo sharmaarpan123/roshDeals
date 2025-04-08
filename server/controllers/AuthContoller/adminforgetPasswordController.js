@@ -16,15 +16,16 @@ const schema = z.object({
         .toLowerCase(),
 });
 const AdminForgetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email } = req.body;
+    const body = schema.parse(req.body);
+    let { email } = body;
+
     const isUserRegistered = await Admin.findOne({
         email,
     });
     if (!isUserRegistered) {
         return res.status(400).json(
             errorResponse({
-                message: 'This email is not registered',
+                message: 'Provided email address is not associated with any account',
             }),
         );
     }
@@ -37,7 +38,7 @@ const AdminForgetPasswordController = catchAsync(async (req, res) => {
         subject: 'ROSH DEALS - Reset Your Password ',
         html: forgetPasswordTemplate(otp),
     };
-   
+
     transporter.sendMail(mailOptions, (error) => {
         if (error) {
             return res.status(400).json(
@@ -49,7 +50,7 @@ const AdminForgetPasswordController = catchAsync(async (req, res) => {
         } else {
             return res.status(200).json(
                 successResponse({
-                    message: 'Your One Time Password is sended to the mail',
+                    message: 'A one-time password has been sent to your email',
                 }),
             );
         }
