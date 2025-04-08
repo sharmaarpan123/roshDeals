@@ -25,7 +25,7 @@ const AdminForgetPasswordController = catchAsync(async (req, res) => {
     if (!isUserRegistered) {
         return res.status(400).json(
             errorResponse({
-                message: 'This email is not registered',
+                message: 'Provided email address is not associated with any account',
             }),
         );
     }
@@ -50,7 +50,7 @@ const AdminForgetPasswordController = catchAsync(async (req, res) => {
         } else {
             return res.status(200).json(
                 successResponse({
-                    message: 'Your One Time Password is sended to the mail',
+                    message: 'A one-time password has been sent to your email',
                 }),
             );
         }

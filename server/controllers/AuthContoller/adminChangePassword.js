@@ -72,7 +72,7 @@ const adminChangePassword = catchAsync(async (req, res) => {
     if (!isMatched) {
         return res.status(400).json(
             errorResponse({
-                message: 'wrong old password',
+                message: 'Please enter the correct old password',
             }),
         );
     }

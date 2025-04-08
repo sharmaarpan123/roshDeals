@@ -68,7 +68,7 @@ const forgetPasswordTemplate = (otp) => {
     <body>
         <div class="container">
             <div class="logo">
-                <img src="https://via.placeholder.com/150" alt="Logo">
+                <img src="${process.env.BASE_URL}/images/logo.jpeg" alt="Logo">
             </div>
             <div class="title">Here is your One-Time OTP</div>
             <div class="otp" id="otp">${otp}</div>

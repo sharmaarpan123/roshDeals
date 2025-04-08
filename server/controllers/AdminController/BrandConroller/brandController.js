@@ -73,7 +73,7 @@ const editBrandController = catchAsync(async (req, res) => {
     if (UpdatedBrand) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: UpdatedBrand,
             }),
         );
@@ -98,7 +98,7 @@ const updateStatusController = catchAsync(async (req, res) => {
     if (updatedData) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: updatedData,
             }),
         );

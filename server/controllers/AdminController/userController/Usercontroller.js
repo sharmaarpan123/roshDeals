@@ -74,7 +74,7 @@ export const activeInActiveUserController = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: 'status updated successfully',
+            message: 'status Updated successfully.',
         }),
     );
 });
@@ -104,7 +104,7 @@ export const updateUserController = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: 'user updated successfully',
+            message: 'user Updated successfully.',
         }),
     );
 });

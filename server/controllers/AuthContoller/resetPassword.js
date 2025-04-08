@@ -48,11 +48,11 @@ const resetPasswordController = catchAsync(async (req, res) => {
     const isUserExists = await User.findOne({
         email,
     });
-    
+
     if (!isUserExists) {
         return res.status(400).json(
             errorResponse({
-                message: 'This email is not registered , please sign up',
+                message: 'Provided email address is not associated with any account , please sign up',
             }),
         );
     }
@@ -86,7 +86,7 @@ const resetPasswordController = catchAsync(async (req, res) => {
     );
     return res.status(200).json(
         successResponse({
-            message: 'Your Password is upgraded',
+            message: ' Password Updated successfully.',
         }),
     );
 });

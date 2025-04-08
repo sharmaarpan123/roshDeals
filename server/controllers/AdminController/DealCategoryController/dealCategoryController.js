@@ -63,7 +63,7 @@ const editDealCategoryController = catchAsync(async (req, res) => {
     if (UpdatedDealCategoryForm) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: UpdatedDealCategoryForm,
             }),
         );
@@ -88,7 +88,7 @@ const DealCategoryUpdateStatusController = catchAsync(async (req, res) => {
     if (UpdatedDealCategoryForm) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: UpdatedDealCategoryForm,
             }),
         );

@@ -60,7 +60,7 @@ export const dealPaymentStatusChangeController = catchAsync(
 
         return res.status(200).json(
             successResponse({
-                message: 'Payment status updated successfully!',
+                message: 'Payment status Updated successfully.!',
                 data: updatedDeal,
             }),
         );
@@ -86,7 +86,7 @@ export const dealStatusChangeController = catchAsync(async (req, res) => {
 
     return res.status(200).json(
         successResponse({
-            message: 'status updated successfully!',
+            message: 'status Updated successfully.!',
             data: updatedDeal,
         }),
     );
@@ -515,7 +515,7 @@ export const editDealController = catchAsync(async (req, res) => {
     if (dealUpdated) {
         return res.status(200).json(
             successResponse({
-                message: 'updated successfully',
+                message: 'Updated successfully.',
                 data: dealUpdated,
             }),
         );
