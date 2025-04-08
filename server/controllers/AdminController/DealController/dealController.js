@@ -218,7 +218,20 @@ export const addDealController = catchAsync(async (req, res) => {
         showToUsers,
         showToSubAdmins,
     } = validatedBody;
-
+    if (Number(lessAmount) + Number(adminCommission) >= Number(actualPrice)) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Buyr less (incl. Platform Fee) should be less than the actual price.',
+            }),
+        );
+    }
+    if (Number(lessAmountToSubAdmin)  >= Number(actualPrice)) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Mediator less should be less than the actual price.',
+            }),
+        );
+    }
     if (!imageUrl) {
         // if we did not get the image url from the frontend we should scrap it
         imageUrl = await extractProductImage(postUrl);

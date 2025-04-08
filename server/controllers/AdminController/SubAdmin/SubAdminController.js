@@ -354,7 +354,13 @@ class subAdminController {
             subAdminValidationSchema.linkAdminSubAdmin.parse({
                 ...req?.body,
             });
-
+        if (subAdminUserName === adminUserName) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'Agency and Mediator usernames cannot be the same',
+                }),
+            );
+        }
         const isUserNameExistsPromise = [
             Admin.findOne({ userName: adminUserName }),
             Admin.findOne({ userName: subAdminUserName }),
