@@ -15,8 +15,8 @@ const schema = z.object({
         .toLowerCase(),
 });
 const forgetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email } = req.body;
+    const body = schema.parse(req.body);
+    const { email } = body;
     const isUserRegistered = await User.findOne({
         email,
     });

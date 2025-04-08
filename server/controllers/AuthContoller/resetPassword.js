@@ -42,12 +42,13 @@ const schema = z.object({
         ),
 });
 const resetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email, otp, password } = req.body;
+    const body = schema.parse(req.body);
+    const { email, otp, password } = body;
 
     const isUserExists = await User.findOne({
         email,
     });
+    
     if (!isUserExists) {
         return res.status(400).json(
             errorResponse({

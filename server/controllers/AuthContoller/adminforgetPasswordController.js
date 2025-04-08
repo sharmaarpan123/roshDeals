@@ -16,8 +16,9 @@ const schema = z.object({
         .toLowerCase(),
 });
 const AdminForgetPasswordController = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email } = req.body;
+    const body = schema.parse(req.body);
+    let { email } = body;
+
     const isUserRegistered = await Admin.findOne({
         email,
     });
@@ -37,7 +38,7 @@ const AdminForgetPasswordController = catchAsync(async (req, res) => {
         subject: 'ROSH DEALS - Reset Your Password ',
         html: forgetPasswordTemplate(otp),
     };
-   
+
     transporter.sendMail(mailOptions, (error) => {
         if (error) {
             return res.status(400).json(

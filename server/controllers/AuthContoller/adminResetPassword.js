@@ -2,7 +2,7 @@ import Admin from '../../database/models/Admin.js';
 import User from '../../database/models/User.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import catchAsync from '../../utilities/catchAsync.js';
-import { hashPassword } from '../../utilities/hashPassword.js';
+import { comparePassword, hashPassword } from '../../utilities/hashPassword.js';
 import { z } from 'zod';
 const schema = z.object({
     email: z
@@ -43,8 +43,8 @@ const schema = z.object({
         ),
 });
 const adminResetPassword = catchAsync(async (req, res) => {
-    schema.parse(req.body);
-    const { email, otp, password } = req.body;
+    const body = schema.parse(req.body);
+    const { email, otp, password } = body;
 
     const isUserExists = await Admin.findOne({
         email,
@@ -57,6 +57,17 @@ const adminResetPassword = catchAsync(async (req, res) => {
         );
     }
 
+    const isMatched = await comparePassword(password, isUserExists.password);
+
+    if (isMatched) {
+        return res.status(400).json(
+            errorResponse({
+                message:
+                    'The new password cannot be the same as the current one.',
+            }),
+        );
+    }
+
     const isOtpValid = await Admin.findOne({
         email,
         otp,
@@ -64,7 +75,7 @@ const adminResetPassword = catchAsync(async (req, res) => {
     if (!isOtpValid) {
         return res.status(400).json(
             errorResponse({
-                message: 'wrong otp',
+                message: 'Please Enter valid otp',
             }),
         );
     }
