@@ -75,7 +75,7 @@ const resetPasswordController = catchAsync(async (req, res) => {
     if (!isOtpValid) {
         return res.status(400).json(
             errorResponse({
-                message: 'wrong otp',
+                message: 'Please enter a valid OTP',
             }),
         );
     }

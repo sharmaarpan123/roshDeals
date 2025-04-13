@@ -152,7 +152,22 @@ export const filterSchemaObject = z.object({
         .optional(),
     search: z
         .string({ invalid_type_error: 'search should be string type' })
-        .optional(),
+        .optional()
+        .transform((val) => {
+            if (val) {
+                const escapeRegExp = (string) => {
+                    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                };
+                const normalizedSearch = val.replace(/\s+/g, '');
+
+                return normalizedSearch
+                    .split('')
+                    .map((char) => escapeRegExp(char)) // prevent issues with special characters
+                    .join('.*'); // allow anything (like space) between characters
+            } else {
+                return val;
+            }
+        }),
     status: z
         .enum(['0', '1', ''], {
             invalid_type_error: 'in Valid status',

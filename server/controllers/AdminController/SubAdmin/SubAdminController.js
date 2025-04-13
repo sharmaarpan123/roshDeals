@@ -236,7 +236,7 @@ class subAdminController {
         return res.status(200).json(
             successResponse({
                 data: newSubAdmin,
-                message: 'Successfully created',
+                message: 'Account Created Successfully',
             }),
         );
     });
@@ -298,14 +298,7 @@ class subAdminController {
             },
         );
 
-        if (
-            restBody?.permissions &&
-            updatedAdmin?.permissions &&
-            JSON.stringify(restBody?.permissions) !==
-                JSON.stringify(updatedAdmin?.permissions)
-        ) {
-            setSubAdminCaches(); // updating the admin cache
-        }
+        setSubAdminCaches(); // updating the admin cache
 
         return res.status(200).json(
             successResponse({
@@ -338,7 +331,9 @@ class subAdminController {
         if (updatedData) {
             return res.status(200).json(
                 successResponse({
-                    message: 'Updated successfully',
+                    message: isActive
+                        ? 'Mediator Activated successfully'
+                        : 'Mediator Inactivated successfully',
                 }),
             );
         }
@@ -357,7 +352,8 @@ class subAdminController {
         if (subAdminUserName === adminUserName) {
             return res.status(400).json(
                 errorResponse({
-                    message: 'Agency and Mediator usernames cannot be the same',
+                    message:
+                        'Agency and Mediator cannot have the same username',
                 }),
             );
         }
@@ -371,7 +367,7 @@ class subAdminController {
         if (!isUserNamesExists[0]) {
             return res.status(400).json(
                 errorResponse({
-                    message: 'In Valid Agency User Name',
+                    message: 'Please enter a valid Agency username',
                 }),
             );
         }
@@ -379,7 +375,7 @@ class subAdminController {
         if (!isUserNamesExists[1]) {
             return res.status(400).json(
                 errorResponse({
-                    message: 'In Valid Med User Name',
+                    message: 'Please enter a valid Mediator username',
                 }),
             );
         }
@@ -418,7 +414,7 @@ class subAdminController {
         if (data) {
             return res.status(200).json(
                 successResponse({
-                    message: 'Successfully Added',
+                    message: 'Linked Mediator successfully',
                 }),
             );
         }

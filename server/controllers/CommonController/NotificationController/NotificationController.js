@@ -12,8 +12,13 @@ export const getAllNotifications = catchAsync(async (req, res) => {
     const query = {};
 
     if (roles.includes(ROLE_TYPE_ENUM.USER)) {
-        query.userId = _id;
-        query.userCurrentAdminReference = currentAdminReference?._id;
+        query['$or'] = [
+            { sendFromSuperAdmin: true, userId: _id },
+            {
+                userId: _id,
+                userCurrentAdminReference: currentAdminReference?._id,
+            },
+        ];
     } else {
         query.adminId = _id;
     }

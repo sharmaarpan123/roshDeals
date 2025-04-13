@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
+import { boolean } from 'zod';
 
 export const notificationType = {
     order: 'order',
     deal: 'deal',
     newBrandDealCreated: 'newBrandDealCreated',
     orderFormUpdate: 'orderFromUpdate',
+    information: 'information',
 };
 
 const NotificationSchema = new mongoose.Schema(
@@ -14,13 +16,13 @@ const NotificationSchema = new mongoose.Schema(
             type: mongoose.Types.ObjectId,
             ref: 'Admin',
         },
+        sendFromSuperAdmin: { type: Boolean, default: false },
         adminId: { type: mongoose.Types.ObjectId, ref: 'Admin' },
         dealId: { type: mongoose.Types.ObjectId, ref: 'Deal' },
         brandId: { type: mongoose.Types.ObjectId, ref: 'Brand' },
         orderId: { type: mongoose.Types.ObjectId, ref: 'Order' },
         title: { type: String, required: true },
         body: { type: String, required: true },
-
         type: {
             type: String,
             enum: Object.values(notificationType),

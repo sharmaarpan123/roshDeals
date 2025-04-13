@@ -478,12 +478,8 @@ export const getAllOrders = catchAsync(async (req, res) => {
                 }),
                 // ...(startDate && {
                 //     orderDate: {
-                //         $gte: new Date(
-                //             new Date(startDate).setHours(0, 0, 0, 0),
-                //         ),
-                //         $lte: new Date(
-                //             new Date(endDate).setHours(23, 59, 59, 999),
-                //         ),
+                //         $gte: moment(startDate).utc(),
+                //         $lte: moment(endDate).utc(),
                 //     },
                 // }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
@@ -564,7 +560,10 @@ export const getAllOrders = catchAsync(async (req, res) => {
         },
         { $unwind: '$userId' },
         { $sort: { createdAt: -1 } },
+        // { $project: { orderDate: 1 } },
     ];
+
+    // console.log(aggregateArr[0]['$match'].orderDate, 'filter');
 
     if (limit || offset) {
         aggregateArr.push({ $skip: offset || 0 });

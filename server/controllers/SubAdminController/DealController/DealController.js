@@ -92,7 +92,7 @@ class SubAdminDealControllerClass {
 
         return res.status(200).json(
             successResponse({
-                message: 'Deal  Cloned successfully',
+                message: 'Deal reposted successfully',
                 data: DealRes,
             }),
         );
@@ -322,9 +322,6 @@ class SubAdminDealControllerClass {
                 $count: 'totalCount',
             },
         ];
-
-       
-
         const totalCount = Deal.aggregate(aggregatePipelines);
 
         aggregatePipelines.pop();
@@ -374,53 +371,6 @@ class SubAdminDealControllerClass {
             selectedCategoryFilter,
             selectedPlatformFilter,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
-
-        // const query = {
-        //     ...(search && { productName: { $regex: search, $options: 'i' } }),
-        //     ...(status && { isActive: Boolean(+status) }),
-        //     ...(paymentStatus && { paymentStatus }),
-        //     ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
-        //     ...(isSlotCompleted === 'uncompleted' && {
-        //         isSlotCompleted: false,
-        //     }),
-        //     parentDealId: { $exists: true },
-        //     adminId: new mongoose.Types.ObjectId(subAdminId),
-        //     ...(selectedBrandFilter?.length && {
-        //         brand: {
-        //             $in: selectedBrandFilter?.map((i) => i),
-        //         },
-        //     }),
-        //     ...(selectedCategoryFilter?.length && {
-        //         dealCategory: {
-        //             $in: selectedCategoryFilter?.map((i) => i),
-        //         },
-        //     }),
-        //     ...(selectedPlatformFilter?.length && {
-        //         platForm: {
-        //             $in: selectedPlatformFilter?.map((i) => i),
-        //         },
-        //     }),
-        // };
-
-        // const dealData = Deal.find(query)
-        //     .populate('brand')
-        //     .populate({
-        //         path: 'parentDealId',
-        //         populate: [
-        //             { path: 'dealCategory' },
-        //             { path: 'platForm' },
-        //             { path: 'brand' },
-        //         ],
-        //     })
-        //     .populate('dealCategory')
-        //     .populate('platForm')
-        //     .skip(offset || 0)
-        //     .limit(limit || 20)
-        //     .sort({ createdAt: -1 });
-
-        // const totalCount = Deal.find(query).countDocuments();
-
-        // const data = await Promise.all([dealData, totalCount]);
 
         let aggregatePipelines = [
             {
@@ -539,7 +489,6 @@ class SubAdminDealControllerClass {
                 $count: 'totalCount',
             },
         ];
-
 
         const totalCount = Deal.aggregate(aggregatePipelines);
 

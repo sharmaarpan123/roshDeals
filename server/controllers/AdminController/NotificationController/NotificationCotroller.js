@@ -1,4 +1,7 @@
 import AdminSubAdminLinker from '../../../database/models/AdminSubAdminLinker.js';
+import Notifications, {
+    notificationType,
+} from '../../../database/models/Notifications.js';
 import Order from '../../../database/models/Order.js';
 import User from '../../../database/models/User.js';
 import catchAsync from '../../../utilities/catchAsync.js';
@@ -36,19 +39,38 @@ export const sendNotificationController = catchAsync(async (req, res) => {
     };
 
     if (data.type === 'users') {
-        const tokens = await User.find(
+        const users = await User.find(
             {
                 ...(!isSuperAdminAccessing && {
                     historyAdminReferences: adminId,
                 }),
             },
-            { _id: 0, fcmToken: 1 },
+            { fcmToken: 1 },
         );
-        const token = tokens
+        const token = users
             .filter((item) => item.fcmToken)
             .map((item) => item.fcmToken);
         messageBody.tokens = token;
-        await sendNotification(messageBody);
+
+        sendNotification(messageBody);
+
+        Notifications.insertMany(
+            users?.map((item) => {
+                return {
+                    userId: item?._id,
+                    body: data.body,
+                    title: data.title,
+                    type: notificationType.information,
+                    ...(isSuperAdminAccessing && {
+                        sendFromSuperAdmin: true,
+                    }),
+                    ...(!isSuperAdminAccessing && {
+                        userCurrentAdminReference: adminId,
+                    }),
+                };
+            }) || [],
+        );
+
         return res.status(200).json(
             successResponse({
                 message: 'Notification sent to users successfully',
@@ -84,7 +106,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             },
             {
                 $project: {
-                    subAdminId: { fcmTokens: 1 },
+                    subAdminId: { fcmTokens: 1, _id: 1 },
                 },
             },
         ]);
@@ -94,7 +116,22 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             ?.flat();
         const token = tokens.filter((item) => item).map((item) => item);
         messageBody.tokens = token;
-        await sendNotification(messageBody);
+        sendNotification(messageBody);
+
+        Notifications.insertMany(
+            mediators?.map((item) => {
+                return {
+                    adminId: item?.subAdminId?._id,
+                    body: data.body,
+                    title: data.title,
+                    type: notificationType.information,
+                    ...(isSuperAdminAccessing && {
+                        sendFromSuperAdmin: true,
+                    }),
+                };
+            }) || [],
+        );
+
         return res.status(200).json(
             successResponse({
                 message: 'Notification sent Mediator successfully',
@@ -129,7 +166,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             },
             {
                 $project: {
-                    adminId: { fcmTokens: 1 },
+                    adminId: { fcmTokens: 1, _id: 1 },
                 },
             },
         ]);
@@ -139,7 +176,22 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             ?.flat();
         const token = tokens.filter((item) => item).map((item) => item);
         messageBody.tokens = token;
-        await sendNotification(messageBody);
+        sendNotification(messageBody);
+
+        Notifications.insertMany(
+            agencies?.map((item) => {
+                return {
+                    adminId: item?.adminId?._id,
+                    body: data.body,
+                    title: data.title,
+                    type: notificationType.information,
+                    ...(isSuperAdminAccessing && {
+                        sendFromSuperAdmin: true,
+                    }),
+                };
+            }) || [],
+        );
+
         return res.status(200).json(
             successResponse({
                 message: 'Notification sent to Agencies successfully',
@@ -158,7 +210,7 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             {
                 userId: 1,
             },
-        ).populate({ path: 'userId', select: 'fcmToken' });
+        ).populate({ path: 'userId', select: 'fcmToken _id' });
 
         if (!tokens.length) {
             return res.status(400).json(
@@ -168,10 +220,27 @@ export const sendNotificationController = catchAsync(async (req, res) => {
             );
         }
 
-        console.log(tokens, 'tokens');
-
         messageBody.tokens = tokens.map((item) => item?.userId?.fcmToken);
         sendNotification(messageBody);
+
+        Notifications.insertMany(
+            tokens?.map((item) => {
+                return {
+                    userId: item?.userId?._id,
+                    orderId: item?._id,
+                    body: data.body,
+                    title: data.title,
+                    type: notificationType.orderFormUpdate,
+                    ...(isSuperAdminAccessing && {
+                        sendFromSuperAdmin: true,
+                    }),
+                    ...(!isSuperAdminAccessing && {
+                        userCurrentAdminReference: adminId,
+                    }),
+                };
+            }) || [],
+        );
+
         return res.status(200).json(
             successResponse({
                 message: 'notification sended successfully',

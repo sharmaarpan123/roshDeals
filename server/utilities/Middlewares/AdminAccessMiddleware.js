@@ -11,14 +11,21 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
         const admin = admins?.find((item) => item?._id?.toString() === adminId);
 
         const sendNotPermittedRes = () => {
-            res.status(403).json(
+            res.status(401).json(
                 errorResponse({
                     message: "You don't have permission to access this API.",
                 }),
             );
         };
 
-        if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERADMIN)) {
+        if (!admin || !admin?.isActive) {
+            return res.status(403).json(
+                errorResponse({
+                    message:
+                        'Your account has been deactivated by the super admin. Please contact the super admin for assistance. ',
+                }),
+            );
+        } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERADMIN)) {
             // where the king enters
             return next();
         } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERSUBADMIN)) {
