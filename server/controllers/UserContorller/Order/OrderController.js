@@ -34,6 +34,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         reviewerName,
         exchangeDealProducts,
         orderDate,
+        deliveryFee
     } = createOrderSchema.parse(req.body);
     const { _id, name } = req.user;
 
@@ -110,6 +111,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             userId: _id,
             orderDate,
             exchangeDealProducts,
+            deliveryFee
         };
     });
 
@@ -157,6 +159,7 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
         orderScreenShot,
         orderId,
         orderDate,
+        deliveryFee
     } = OrderFromUpdateSchema.parse(req.body);
 
     const { name } = req.user;
@@ -183,6 +186,7 @@ export const OrderFromUpdate = catchAsync(async (req, res) => {
             reviewerName,
             orderScreenShot,
             orderDate,
+            deliveryFee,
             orderFormStatus: ORDER_FORM_STATUS.PENDING,
         },
         { new: true },

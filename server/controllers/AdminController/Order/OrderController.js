@@ -13,6 +13,7 @@ import {
     isAdminAccessingApi,
     isSuperAdminAccessingApi,
     MongooseObjectId,
+    toUTC,
 } from '../../../utilities/utilitis.js';
 import {
     acceptRejectOrderSchema,
@@ -476,12 +477,18 @@ export const getAllOrders = catchAsync(async (req, res) => {
                 ...(adminId && {
                     dealOwner: new mongoose.Types.ObjectId(adminId),
                 }),
-                // ...(startDate && {
-                //     orderDate: {
-                //         $gte: moment(startDate).utc(),
-                //         $lte: moment(endDate).utc(),
-                //     },
-                // }),
+                ...(startDate && {
+                    orderDate: {
+                        $gte: toUTC(new Date(startDate)), // Start of the day in UTC
+                        $lt: toUTC(
+                            new Date(
+                                new Date(endDate).setDate(
+                                    new Date(endDate).getDate() + 1,
+                                ),
+                            ),
+                        ), // End of the day in UTC
+                    },
+                }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
                     dealId: {
@@ -560,10 +567,7 @@ export const getAllOrders = catchAsync(async (req, res) => {
         },
         { $unwind: '$userId' },
         { $sort: { createdAt: -1 } },
-        // { $project: { orderDate: 1 } },
     ];
-
-    // console.log(aggregateArr[0]['$match'].orderDate, 'filter');
 
     if (limit || offset) {
         aggregateArr.push({ $skip: offset || 0 });
@@ -660,6 +664,17 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$dealId.parentDealId' },
+        ...(isSuperAdminAccessing
+            ? []
+            : [
+                  {
+                      $match: {
+                          'dealId.parentDealId.adminId': MongooseObjectId(
+                              req?.user?._id,
+                          ),
+                      },
+                  },
+              ]),
         {
             $lookup: {
                 from: 'admins',
@@ -696,6 +711,7 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
             },
         },
         { $unwind: '$dealId.parentDealId.platForm' },
+        { $unwind: '$dealId.parentDealId.dealCategory' },
         {
             $match: {
                 ...(brandId && {

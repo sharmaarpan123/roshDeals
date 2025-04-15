@@ -36,6 +36,7 @@ const orderSchema = new mongoose.Schema(
         orderDate: {
             type: Date,
         },
+        deliveryFee: { type: String },
     },
     {
         timestamps: true,

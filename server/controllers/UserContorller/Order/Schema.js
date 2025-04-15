@@ -36,6 +36,20 @@ export const createOrderSchema = z.object({
         .refine((data) => isUrlValid(data), {
             message: 'Invalid Order Screenshot Url',
         }),
+    deliveryFee: z
+        .string()
+        .optional()
+        .refine(
+            (data) => {
+                if (data && isNaN(data)) {
+                    return false;
+                }
+                return true;
+            },
+            {
+                message: 'Delivery fee should be numeric',
+            },
+        ),
     exchangeDealProducts: z.array(z.string()).optional(),
     orderDate: z.string({ required_error: 'OrderDate is required' }).refine(
         (data) => {
@@ -119,5 +133,19 @@ export const OrderFromUpdateSchema = z
                 { message: 'Invalid order date' },
             )
             .optional(),
+        deliveryFee: z
+            .string()
+            .optional()
+            .refine(
+                (data) => {
+                    if (data && isNaN(data)) {
+                        return false;
+                    }
+                    return true;
+                },
+                {
+                    message: 'Delivery fee should be numeric',
+                },
+            ),
     })
     .merge(orderIdSchema);
