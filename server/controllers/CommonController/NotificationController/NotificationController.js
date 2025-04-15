@@ -25,7 +25,15 @@ export const getAllNotifications = catchAsync(async (req, res) => {
 
     const notificationsPromise = Notifications.find(query)
         .populate('dealId')
-        .populate('orderId')
+        .populate({
+            path: 'orderId',
+            populate: {
+                path: 'dealId',
+                populate: {
+                    path: 'parentDealId',
+                },
+            },
+        })
         .populate('brandId')
         .sort({ createdAt: -1 })
         .skip(offset || 0)

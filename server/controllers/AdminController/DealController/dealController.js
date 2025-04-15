@@ -222,11 +222,12 @@ export const addDealController = catchAsync(async (req, res) => {
     if (Number(lessAmount) + Number(adminCommission) >= Number(actualPrice)) {
         return res.status(400).json(
             errorResponse({
-                message: 'Buyr less (incl. Platform Fee) should be less than the actual price.',
+                message:
+                    'Buyr less (incl. Platform Fee) should be less than the actual price.',
             }),
         );
     }
-    if (Number(lessAmountToSubAdmin)  >= Number(actualPrice)) {
+    if (Number(lessAmountToSubAdmin) >= Number(actualPrice)) {
         return res.status(400).json(
             errorResponse({
                 message: 'Mediator less should be less than the actual price.',
@@ -306,6 +307,17 @@ export const addDealController = catchAsync(async (req, res) => {
         },
         tokens: firebaseTokens,
     });
+
+    console.log([
+        ...users.map((i) => ({
+            userId: i?._id,
+            body,
+            title,
+            dealId: DealRes?._id,
+            type: notificationType.deal,
+            userCurrentAdminReference: req?.user?._id,
+        })),
+    ]);
 
     Notifications.insertMany([
         // for the subAdmins
