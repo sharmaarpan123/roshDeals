@@ -308,17 +308,6 @@ export const addDealController = catchAsync(async (req, res) => {
         tokens: firebaseTokens,
     });
 
-    console.log([
-        ...users.map((i) => ({
-            userId: i?._id,
-            body,
-            title,
-            dealId: DealRes?._id,
-            type: notificationType.deal,
-            userCurrentAdminReference: req?.user?._id,
-        })),
-    ]);
-
     Notifications.insertMany([
         // for the subAdmins
         ...subAdmins.map((i) => ({
