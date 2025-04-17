@@ -19,6 +19,7 @@ const schema = z.object({
         .string({
             required_error: 'Current  Reference Code is required',
         })
+        .trim()
         .min(1, { message: 'Current Reference Code is required' }),
     password: z
         .string({
