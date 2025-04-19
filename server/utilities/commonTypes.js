@@ -5,6 +5,9 @@ export let ADMIN_ROLE_TYPE_ENUM = {
     ADMIN: 'admin',
     SUBADMIN: 'subadmin',
 };
+export let SELLER_ROLE_TYPE_ENUM = {
+    SELLER: 'seller',
+};
 
 export let POSTER_ENUM = {
     REDIRECT: 'redirect',

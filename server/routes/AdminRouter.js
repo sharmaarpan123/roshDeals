@@ -39,6 +39,7 @@ import {
 } from '../controllers/AdminController/userController/Usercontroller.js';
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
+import sellerController from '../controllers/AdminController/Seller/sellerController.js';
 const AdminRouter = express.Router();
 
 // dashboard
@@ -583,6 +584,54 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
     }),
     chatController.getChatHistory,
+);
+AdminRouter.post(
+    '/add/seller',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canAdd,
+        canAdminAccess,
+    }),
+    sellerController.createSeller,
+);
+
+AdminRouter.post(
+    '/linkSellerDeals',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+    }),
+    sellerController.linkSellerDeals,
+);
+
+AdminRouter.post(
+    '/getSellerById',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.getSellerById,
+);
+
+AdminRouter.post(
+    '/updateSeller',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canEdit,
+        canAdminAccess,
+    }),
+    sellerController.updateSeller,
+);
+AdminRouter.get(
+    '/seller/getAllWithFilters',
+    AdminAccessMiddleware({
+        uniqueSlug: 'systemAccess',
+        key: permissionsLevelKey.canViewList,
+        canAdminAccess,
+    }),
+    sellerController.getSellerListWithFilter,
 );
 
 export default AdminRouter;

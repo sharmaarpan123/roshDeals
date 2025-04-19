@@ -10,7 +10,9 @@ import adminResetPassword from '../controllers/AuthContoller/adminResetPassword.
 import adminChangePassword from '../controllers/AuthContoller/adminChangePassword.js';
 import AuthMiddleware from '../utilities/Middlewares/AuthMiddleware.js';
 import { ADMIN_ROLE_TYPE_ENUM } from '../utilities/commonTypes.js';
-
+import sellerSignInController from '../controllers/AuthContoller/sellerSignInController.js';
+import sellerForgetPasswordController from '../controllers/AuthContoller/sellerforgetPasswordController.js';
+import sellerResetPassword from '../controllers/AuthContoller/sellerResetPassword.js';
 const AuthRouter = express.Router();
 
 AuthRouter.post('/signUp', signupController);
@@ -33,5 +35,9 @@ AuthRouter.post(
     AuthMiddleware(Object.values(ADMIN_ROLE_TYPE_ENUM)?.map((role) => role)),
     adminChangePassword,
 );
+
+AuthRouter.post('/seller/singIn', sellerSignInController);
+AuthRouter.post('/seller/forgetPassword', sellerForgetPasswordController);
+AuthRouter.post('/seller/resetPassword', sellerResetPassword);
 export default AuthRouter;
 //# sourceMappingURL=AuthRouter.js.map
