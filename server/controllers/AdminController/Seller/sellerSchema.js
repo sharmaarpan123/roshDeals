@@ -46,6 +46,16 @@ class SellerValidation {
             path: ["email"]
         }
     );
+
+    getSellerDealsSchema = z.object({
+        sellerId: requiredString('Seller Id'),
+        offset: z.string().optional().default('0'),
+        limit: z.string().optional().default('10'),
+        isActive: z.string().optional()
+    });
+    removeSellerDealSchema = z.object({
+        sellerDealId: requiredString('Seller Deal Id')
+    });
 }
 
 const sellerValidationSchema = new SellerValidation();

@@ -226,6 +226,55 @@ class SellerController {
             })
         );
     });
+
+    getSellerDeals = catchAsync(async (req, res) => {
+        const { sellerId, offset, limit, isActive } = sellerValidationSchema.getSellerDealsSchema.parse(req.body);
+
+        // Build the query
+        const query = { sellerId: new mongoose.Types.ObjectId(sellerId) };
+        if (isActive !== undefined) {
+            query.isActive = Boolean(+isActive);
+        }
+
+        // Get total count
+        const total = await SellerDealLinker.countDocuments(query);
+
+        // Get paginated results
+        const sellerDeals = await SellerDealLinker.find(query)
+            .sort({ createdAt: -1 })
+            .skip(parseInt(offset))
+            .limit(parseInt(limit))
+            .populate('dealId', 'title description') // Populate deal details
+            .populate('adminId', 'name email'); // Populate admin details
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Seller deals fetched successfully',
+                data: {
+                    deals: sellerDeals,
+                    pagination: {
+                        total,
+                        offset: parseInt(offset),
+                        limit: parseInt(limit)
+                    }
+                }
+            })
+        );
+    });
+
+    removeSellerDeal = catchAsync(async (req, res) => {
+        const { sellerDealId } = sellerValidationSchema.removeSellerDealSchema.parse(req.body);
+
+        await SellerDealLinker.findByIdAndDelete(sellerDealId);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Seller deal removed successfully'
+            })
+        );
+        
+    });
 }
+
 
 export default new SellerController(); 
