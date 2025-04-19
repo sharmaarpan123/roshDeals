@@ -15,3 +15,5 @@ AdminRouter.post('/update', sellerController.updateSeller);
 AdminRouter.get('/getAllWithFilters', sellerController.getSellerListWithFilter);
 AdminRouter.post('/getSellerDeals', sellerController.getSellerDeals);
 AdminRouter.post('/removeSellerDeal', sellerController.removeSellerDeal);
+AdminRouter.post('/addSellerDeal', sellerController.addSellerDeal);
+

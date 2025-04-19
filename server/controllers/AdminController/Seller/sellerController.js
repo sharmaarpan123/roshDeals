@@ -228,7 +228,7 @@ class SellerController {
     });
 
     getSellerDeals = catchAsync(async (req, res) => {
-        const { sellerId, offset, limit, isActive } = sellerValidationSchema.getSellerDealsSchema.parse(req.body);
+        const { sellerId, offset, limit, isActive } = sellerValidationSchema.getSellerDealsSchema.parse(req.query);
 
         // Build the query
         const query = { sellerId: new mongoose.Types.ObjectId(sellerId) };
@@ -263,18 +263,67 @@ class SellerController {
     });
 
     removeSellerDeal = catchAsync(async (req, res) => {
-        const { sellerDealId } = sellerValidationSchema.removeSellerDealSchema.parse(req.body);
+        const { sellerDealId } = sellerValidationSchema.removeSellerDealSchema.parse(req.params);
 
-        await SellerDealLinker.findByIdAndDelete(sellerDealId);
+        const deletedDeal = await SellerDealLinker.findByIdAndDelete(sellerDealId);
+
+        if (!deletedDeal) {
+            return res.status(404).json(
+                errorResponse({
+                    message: 'Seller deal not found'
+                })
+            );
+        }
 
         return res.status(200).json(
             successResponse({
                 message: 'Seller deal removed successfully'
             })
         );
-        
+    });
+
+    addSellerDeal = catchAsync(async (req, res) => {
+        const { sellerId, dealId, isActive } = sellerValidationSchema.addSellerDealSchema.parse(req.body);
+
+        // Check if seller exists
+        const seller = await Seller.findById(sellerId);
+        if (!seller) {
+            return res.status(404).json(
+                errorResponse({
+                    message: 'Seller not found'
+                })
+            );
+        }
+
+        // Check if deal is already linked
+        const existingDeal = await SellerDealLinker.findOne({ 
+            sellerId: new mongoose.Types.ObjectId(sellerId), 
+            dealId: new mongoose.Types.ObjectId(dealId) 
+        });
+
+        if (existingDeal) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'This deal is already linked to the seller'
+                })
+            );
+        }
+
+        // Create new deal linkage
+        const newDealLink = await SellerDealLinker.create({
+            sellerId: new mongoose.Types.ObjectId(sellerId),
+            dealId: new mongoose.Types.ObjectId(dealId),
+            adminId: req.user._id,
+            isActive
+        });
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Seller deal added successfully',
+                data: newDealLink
+            })
+        );
     });
 }
-
 
 export default new SellerController(); 

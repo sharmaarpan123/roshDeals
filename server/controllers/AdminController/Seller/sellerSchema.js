@@ -53,8 +53,15 @@ class SellerValidation {
         limit: z.string().optional().default('10'),
         isActive: z.string().optional()
     });
+
     removeSellerDealSchema = z.object({
         sellerDealId: requiredString('Seller Deal Id')
+    });
+
+    addSellerDealSchema = z.object({
+        sellerId: requiredString('Seller Id'),
+        dealId: requiredString('Deal Id'),
+        isActive: z.boolean().default(true)
     });
 }
 
