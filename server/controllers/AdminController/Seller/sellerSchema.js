@@ -63,6 +63,13 @@ class SellerValidation {
         dealId: requiredString('Deal Id'),
         isActive: z.boolean().default(true)
     });
+
+    getAdminDealSellersSchema = z.object({
+        offset: z.string().optional().default('0'),
+        limit: z.string().optional().default('10'),
+        search: z.string().optional(),
+        isActive: z.string().optional()
+    });
 }
 
 const sellerValidationSchema = new SellerValidation();

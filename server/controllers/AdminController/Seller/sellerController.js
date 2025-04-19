@@ -323,6 +323,90 @@ class SellerController {
             })
         );
     });
+
+    getAdminDealSellers = catchAsync(async (req, res) => {
+        const { offset, limit, search, isActive } = sellerValidationSchema.getAdminDealSellersSchema.parse(req.query);
+
+        // Build the pipeline
+        const pipeline = [
+            // Match deals linked to the admin
+            {
+                $match: {
+                    adminId: new mongoose.Types.ObjectId(req.user._id),
+                    ...(isActive !== undefined && { isActive: Boolean(+isActive) })
+                }
+            },
+            // Group by sellerId to get unique sellers
+            {
+                $group: {
+                    _id: '$sellerId',
+                    dealCount: { $sum: 1 }
+                }
+            },
+            // Lookup seller details
+            {
+                $lookup: {
+                    from: 'sellers',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'seller'
+                }
+            },
+            // Unwind seller array
+            {
+                $unwind: '$seller'
+            },
+            // Add search filter if provided
+            ...(search ? [{
+                $match: {
+                    $or: [
+                        { 'seller.name': { $regex: search, $options: 'i' } },
+                        { 'seller.email': { $regex: search, $options: 'i' } },
+                        { 'seller.phoneNumber': { $regex: search, $options: 'i' } }
+                    ]
+                }
+            }] : []),
+            // Project required fields
+            {
+                $project: {
+                    _id: '$seller._id',
+                    name: '$seller.name',
+                    email: '$seller.email',
+                    phoneNumber: '$seller.phoneNumber',
+                    isActive: '$seller.isActive',
+                    dealCount: 1,
+                    createdAt: '$seller.createdAt'
+                }
+            }
+        ];
+
+        // Get total count
+        const totalPipeline = [...pipeline, { $count: 'totalCount' }];
+        const total = await SellerDealLinker.aggregate(totalPipeline);
+
+        // Add pagination
+        pipeline.push(
+            { $sort: { createdAt: -1 } },
+            { $skip: parseInt(offset) },
+            { $limit: parseInt(limit) }
+        );
+
+        const sellers = await SellerDealLinker.aggregate(pipeline);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Sellers linked to admin deals fetched successfully',
+                data: {
+                    sellers,
+                    pagination: {
+                        total: total[0]?.totalCount || 0,
+                        offset: parseInt(offset),
+                        limit: parseInt(limit)
+                    }
+                }
+            })
+        );
+    });
 }
 
 export default new SellerController(); 
