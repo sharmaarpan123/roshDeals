@@ -9,6 +9,7 @@ import catchErrorHandler from './utilities/catchErrorHandler.js';
 import {
     ADMIN_ROLE_TYPE_ENUM,
     ROLE_TYPE_ENUM,
+    SELLER_ROLE_TYPE_ENUM,
 } from './utilities/commonTypes.js';
 import AuthMiddleware from './utilities/Middlewares/AuthMiddleware.js';
 import { upload } from './utilities/multer.js';
@@ -32,10 +33,19 @@ export default (app) => {
         ),
         AdminRouter,
     );
+
     app.use(
         '/subAdmin',
         AuthMiddleware(
             Object.values(ADMIN_ROLE_TYPE_ENUM)?.map((role) => role),
+        ),
+        SubAdminRouter,
+    );
+
+    app.use(
+        '/seller',
+        AuthMiddleware(
+            Object.values(SELLER_ROLE_TYPE_ENUM)?.map((role) => role),
         ),
         SubAdminRouter,
     );
