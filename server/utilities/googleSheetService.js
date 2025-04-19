@@ -1,17 +1,45 @@
 import { google } from 'googleapis';
+import setting from '../../setting.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Simulate __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const auth = new google.auth.GoogleAuth({
-    keyFile: path.join(__dirname, './buyrSheets.json'), // path to your service account key file
+    keyFile: path.join(setting, './config/googleSheet.json'), // path to your
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
 const sheets = google.sheets({ version: 'v4', auth });
+
+export const isSpreadsheetAndSheetValid = async ({
+    SPREADSHEET_ID,
+    sheetName,
+}) => {
+    try {
+        const res = await sheets.spreadsheets.get({
+            spreadsheetId: SPREADSHEET_ID,
+        });
+
+        const sheetTitles = res.data.sheets.map(
+            (sheet) => sheet.properties.title,
+        );
+
+        const sheetExists = sheetTitles.includes(sheetName);
+
+        return {
+            success: sheetExists ? true : false,
+            spreadsheetExists: true,
+            sheetExists,
+            availableSheets: sheetTitles,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            spreadsheetExists: false,
+            sheetExists: false,
+            error,
+            errorCode: error.code,
+        };
+    }
+};
 
 const HEADERS = [
     'Order ID',
@@ -22,11 +50,24 @@ const HEADERS = [
     'User ID',
     'Deal ID',
     'Order Status',
-    'Created At'
+    'Created At',
 ];
 
-export const addNewOrder = async (order, SPREADSHEET_ID, SHEET_NAME) => {
+export const addNewOrderToSheet = async ({
+    orders,
+    SPREADSHEET_ID,
+    SHEET_NAME,
+}) => {
     try {
+        const checkSpreadSheet = await isSpreadsheetAndSheetValid({
+            SPREADSHEET_ID,
+            SHEET_NAME,
+        });
+
+        if (!checkSpreadSheet.success) {
+            return checkSpreadSheet;
+        }
+
         // First, check if the sheet exists and has headers
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
@@ -48,7 +89,7 @@ export const addNewOrder = async (order, SPREADSHEET_ID, SHEET_NAME) => {
 
         // Add the new order
         const values = [
-            [
+            ...orders.map((order) => [
                 order._id,
                 order.orderIdOfPlatForm,
                 order.reviewerName,
@@ -57,8 +98,8 @@ export const addNewOrder = async (order, SPREADSHEET_ID, SHEET_NAME) => {
                 order.userId,
                 order.dealId,
                 order.orderFormStatus,
-                new Date().toISOString(),
-            ],
+                order.createdAt,
+            ]),
         ];
 
         const appendResponse = await sheets.spreadsheets.values.append({
@@ -77,7 +118,12 @@ export const addNewOrder = async (order, SPREADSHEET_ID, SHEET_NAME) => {
     }
 };
 
-export const updateOrderStatus = async (orderId, newStatus, SPREADSHEET_ID, SHEET_NAME) => {
+export const updateOrderStatus = async ({
+    orderId,
+    newStatus,
+    SPREADSHEET_ID,
+    SHEET_NAME,
+}) => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${SHEET_NAME}!A2:Z1000`,
@@ -100,7 +146,7 @@ export const updateOrderStatus = async (orderId, newStatus, SPREADSHEET_ID, SHEE
     });
 };
 
-export const getOrders = async (SPREADSHEET_ID, SHEET_NAME) => {
+export const getOrders = async ({ SPREADSHEET_ID, SHEET_NAME }) => {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${SHEET_NAME}!A2:Z1000`,

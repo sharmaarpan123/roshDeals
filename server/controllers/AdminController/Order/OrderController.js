@@ -458,6 +458,7 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
 
 // for the super admin and admin only
 export const getAllOrders = catchAsync(async (req, res) => {
+    '';
     const {
         offset,
         limit,
@@ -605,6 +606,8 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
         orderFormStatus,
         selectedPlatformFilter,
         mediatorId,
+        startDate,
+        endDate,
     } = allOrdersListSchema.parse(req.body);
 
     const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
@@ -628,6 +631,18 @@ export const getAllOrdersOfMedAsAgency = catchAsync(async (req, res) => {
                     }),
                 ...(mediatorId && {
                     dealOwner: MongooseObjectId(mediatorId),
+                }),
+                ...(startDate && {
+                    orderDate: {
+                        $gte: toUTC(new Date(startDate)), // Start of the day in UTC
+                        $lt: toUTC(
+                            new Date(
+                                new Date(endDate).setDate(
+                                    new Date(endDate).getDate() + 1,
+                                ),
+                            ),
+                        ), // End of the day in UTC
+                    },
                 }),
                 ...(orderFormStatus && { orderFormStatus: orderFormStatus }),
                 ...(dealId?.length > 0 && {
@@ -775,6 +790,8 @@ export const getAllOrdersOfMedAsMed = catchAsync(async (req, res) => {
         brandId,
         orderFormStatus,
         selectedPlatformFilter,
+        startDate,
+        endDate,
     } = allOrdersListSchema.parse(req.body);
 
     const aggregateArr = [
@@ -787,6 +804,18 @@ export const getAllOrdersOfMedAsMed = catchAsync(async (req, res) => {
                         $in: dealId?.map(
                             (id) => new mongoose.Types.ObjectId(id),
                         ),
+                    },
+                }),
+                ...(startDate && {
+                    orderDate: {
+                        $gte: toUTC(new Date(startDate)), // Start of the day in UTC
+                        $lt: toUTC(
+                            new Date(
+                                new Date(endDate).setDate(
+                                    new Date(endDate).getDate() + 1,
+                                ),
+                            ),
+                        ), // End of the day in UTC
                     },
                 }),
             },

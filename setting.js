@@ -1,4 +1,10 @@
 /* eslint-disable no-undef */
-module.exports = {
-    PROJECT_DIR: __dirname,
-  };
+
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const setting = path.dirname(__filename);
+
+
+export default setting 
