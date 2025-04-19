@@ -34,6 +34,7 @@ const sellerSchema = new mongoose.Schema(
             type: String,
             enum: SELLER_ROLE_TYPE_ENUM,
             required: true,
+            default: SELLER_ROLE_TYPE_ENUM.SELLER,
         },
     },
     {

@@ -586,6 +586,84 @@ AdminRouter.post(
     chatController.getChatHistory,
 );
 
+// seller
+
+AdminRouter.post(
+    '/seller/add',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.createSeller,
+);
+
+AdminRouter.post(
+    '/seller/link',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.linkSellerDeals,
+);
+
+AdminRouter.post(
+    '/seller/getById',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.getSellerById,
+);
+
+AdminRouter.post(
+    '/seller/update',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.updateSeller,
+);
+
+AdminRouter.get(
+    '/seller/getAllWithFilters',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.getSellerListWithFilter,
+);
+AdminRouter.post(
+    '/seller/getSellerDeals',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.getSellerDeals,
+);
+AdminRouter.post(
+    '/seller/removeSellerDeal',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.removeSellerDeal,
+);
+AdminRouter.post(
+    '/seller/addSellerDeal',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.addSellerDeal,
+);
 
 export default AdminRouter;
 // # sourceMappingURL=AdminRouter.js.map

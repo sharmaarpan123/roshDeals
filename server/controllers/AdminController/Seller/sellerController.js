@@ -108,7 +108,6 @@ class SellerController {
             password: hashedPassword,
             phoneNumber,
             isActive,
-            role: 'SELLER'
         });
 
         await newSeller.save();
@@ -118,7 +117,7 @@ class SellerController {
             const dealLinkers = dealIds.map(dealId => ({
                 sellerId: newSeller._id,
                 adminId: req.user._id,
-                dealId: new mongoose.Types.ObjectId(dealId),
+                dealId: dealId,
                 isActive: true
             }));
 
