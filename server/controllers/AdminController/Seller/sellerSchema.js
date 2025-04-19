@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import {
+    filterRefineFunction,
+    filterRefineMessage,
+    filterSchemaObject,
     optionalEmailString,
     optionalPassword,
     optionalPhoneNUmber,
@@ -13,7 +16,7 @@ import {
 
 class SellerValidation {
     getByIdSchema = z.object({
-        sellerId: requiredString('Seller Id')
+        sellerId: requiredString('Seller Id'),
     });
 
     createSellerSchema = z.object({
@@ -22,7 +25,7 @@ class SellerValidation {
         password: requiredPassword(),
         phoneNumber: requiredPhoneNumber(),
         dealIds: z.array(z.string()).optional(),
-        isActive: z.boolean().default(true)
+        isActive: z.boolean().default(true),
     });
 
     updateSellerSchema = z.object({
@@ -31,47 +34,48 @@ class SellerValidation {
         email: optionalEmailString(),
         password: optionalPassword(),
         phoneNumber: optionalPhoneNUmber(),
-        isActive: z.boolean().optional()
+        isActive: z.boolean().optional(),
     });
 
-    linkSellerDealsSchema = z.object({
-        email: optionalEmailString(),
-        phoneNumber: optionalPhoneNUmber(),
-        dealIds: z.array(z.string()).min(1, 'At least one deal ID is required'),
-        isActive: z.boolean().default(true)
-    }).refine(
-        (data) => data.email || data.phoneNumber,
-        {
-            message: "Either email or phone number is required",
-            path: ["email"]
-        }
-    );
+    linkSellerDealsSchema = z
+        .object({
+            email: optionalEmailString(),
+            phoneNumber: optionalPhoneNUmber(),
+            dealIds: z
+                .array(z.string())
+                .min(1, 'At least one deal ID is required'),
+            isActive: z.boolean().default(true),
+        })
+        .refine((data) => data.email || data.phoneNumber, {
+            message: 'Either email or phone number is required',
+            path: ['email'],
+        });
 
     getSellerDealsSchema = z.object({
         sellerId: requiredString('Seller Id'),
         offset: z.string().optional().default('0'),
         limit: z.string().optional().default('10'),
-        isActive: z.string().optional()
+        isActive: z.string().optional(),
     });
 
     removeSellerDealSchema = z.object({
-        sellerDealId: requiredString('Seller Deal Id')
+        sellerDealId: requiredString('Seller Deal Id'),
     });
 
     addSellerDealSchema = z.object({
         sellerId: requiredString('Seller Id'),
         dealId: requiredString('Deal Id'),
-        isActive: z.boolean().default(true)
+        isActive: z.boolean().default(true),
     });
 
-    getAdminDealSellersSchema = z.object({
-        offset: z.string().optional().default('0'),
-        limit: z.string().optional().default('10'),
-        search: z.string().optional(),
-        isActive: z.string().optional()
-    });
+    getAdminDealSellersSchema = z
+        .object({
+            isActive: z.string().optional(),
+        })
+        .merge(filterSchemaObject)
+        .refine(filterRefineFunction, filterRefineMessage);
 }
 
 const sellerValidationSchema = new SellerValidation();
 
-export default sellerValidationSchema; 
+export default sellerValidationSchema;

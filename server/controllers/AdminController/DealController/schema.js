@@ -410,7 +410,7 @@ const getDealsWithBrandIdSchema = z
         }),
     })
     .merge(filterSchemaObject)
-    .refine(filterRefineFunction, filterSchemaObject);
+    .refine(filterRefineFunction, filterRefineMessage);
 
 export {
     addDealSchema,

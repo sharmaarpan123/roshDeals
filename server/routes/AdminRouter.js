@@ -637,6 +637,17 @@ AdminRouter.get(
     }),
     sellerController.getSellerListWithFilter,
 );
+
+AdminRouter.post(
+    '/seller/agency/getAllWithFilters',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    sellerController.getAdminDealSellers,
+);
+
 AdminRouter.post(
     '/seller/getSellerDeals',
     AdminAccessMiddleware({
