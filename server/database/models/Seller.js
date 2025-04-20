@@ -30,11 +30,11 @@ const sellerSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        role: {
-            type: String,
+        roles: {
+            type: [String],
             enum: SELLER_ROLE_TYPE_ENUM,
             required: true,
-            default: SELLER_ROLE_TYPE_ENUM.SELLER,
+            default: [SELLER_ROLE_TYPE_ENUM.SELLER],
         },
     },
     {
