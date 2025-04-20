@@ -28,9 +28,10 @@ export default (app) => {
     app.use('/auth', AuthRouter);
     app.use(
         '/admin',
-        AuthMiddleware(
-            Object.values(ADMIN_ROLE_TYPE_ENUM)?.map((role) => role),
-        ),
+        AuthMiddleware([
+            ...Object.values(ADMIN_ROLE_TYPE_ENUM).map((role) => role),
+            ...Object.values(SELLER_ROLE_TYPE_ENUM).map((role) => role),
+        ]),
         AdminRouter,
     );
 

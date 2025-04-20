@@ -1,9 +1,21 @@
 import catchAsync from '../catchAsync.js';
-import { ADMIN_ROLE_TYPE_ENUM } from '../commonTypes.js';
+import { ADMIN_ROLE_TYPE_ENUM, SELLER_ROLE_TYPE_ENUM } from '../commonTypes.js';
 import { errorResponse } from '../Responses.js';
 import { getAllAdminsFromCache } from '../utilitis.js';
-export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
+export default ({ canAdminAccess, canSubAdminAccess }) => {
     return catchAsync(async (req, res, next) => {
+        // seller check
+        const isSeller = req?.user?.roles?.includes(
+            SELLER_ROLE_TYPE_ENUM.SELLER,
+        );
+
+        console.log(req?.user , "user----")
+
+        if (isSeller) {
+            return next();
+        }
+
+        // super admin , agency , mediator check
         const adminId = req?.user?._id;
 
         const admins = await getAllAdminsFromCache();
@@ -28,18 +40,20 @@ export default ({ uniqueSlug, key, canAdminAccess, canSubAdminAccess }) => {
         } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERADMIN)) {
             // where the king enters
             return next();
-        } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERSUBADMIN)) {
-            const permissions = admin?.permissions;
+        }
+        // else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.SUPERSUBADMIN)) {
+        //     const permissions = admin?.permissions;
 
-            const permission = permissions?.find(
-                (item) => item?.moduleId?.uniqueSlug === uniqueSlug,
-            );
+        //     const permission = permissions?.find(
+        //         (item) => item?.moduleId?.uniqueSlug === uniqueSlug,
+        //     );
 
-            if (!permission || !permission[key]) {
-                return sendNotPermittedRes();
-            }
-            return next();
-        } else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)) {
+        //     if (!permission || !permission[key]) {
+        //         return sendNotPermittedRes();
+        //     }
+        //     return next();
+        // }
+        else if (admin?.roles?.includes(ADMIN_ROLE_TYPE_ENUM.ADMIN)) {
             if (!canAdminAccess) {
                 return sendNotPermittedRes();
             }
