@@ -9,26 +9,23 @@ import AdminForgetPasswordController from '../controllers/AuthContoller/adminfor
 import adminResetPassword from '../controllers/AuthContoller/adminResetPassword.js';
 import adminChangePassword from '../controllers/AuthContoller/adminChangePassword.js';
 import AuthMiddleware from '../utilities/Middlewares/AuthMiddleware.js';
-import { ADMIN_ROLE_TYPE_ENUM } from '../utilities/commonTypes.js';
+import { ADMIN_ROLE_TYPE_ENUM, SELLER_ROLE_TYPE_ENUM } from '../utilities/commonTypes.js';
 import sellerSignInController from '../controllers/AuthContoller/sellerSignInController.js';
 import sellerForgetPasswordController from '../controllers/AuthContoller/sellerforgetPasswordController.js';
 import sellerResetPassword from '../controllers/AuthContoller/sellerResetPassword.js';
+import sellerChangePassword from '../controllers/AuthContoller/sellerChangePassword.js';
 const AuthRouter = express.Router();
 
 AuthRouter.post('/signUp', signupController);
 AuthRouter.post('/signIn', signInController);
+AuthRouter.post('/forgetPassword',SlowRateMiddleWare(),forgetPasswordController);
+AuthRouter.post('/resetPassword', resetPasswordController);
 AuthRouter.post('/admin/singIn', adminSignInController);
-AuthRouter.post(
-    '/forgetPassword',
-    SlowRateMiddleWare(),
-    forgetPasswordController,
-);
 AuthRouter.post(
     '/admin/forgetPassword',
     SlowRateMiddleWare(),
     AdminForgetPasswordController,
 );
-AuthRouter.post('/resetPassword', resetPasswordController);
 AuthRouter.post('/admin/resetPassword', adminResetPassword);
 AuthRouter.post(
     '/admin/changePassword',
@@ -39,5 +36,10 @@ AuthRouter.post(
 AuthRouter.post('/seller/singIn', sellerSignInController);
 AuthRouter.post('/seller/forgetPassword', sellerForgetPasswordController);
 AuthRouter.post('/seller/resetPassword', sellerResetPassword);
+AuthRouter.post(
+    '/seller/changePassword',
+    AuthMiddleware(Object.values(SELLER_ROLE_TYPE_ENUM)?.map((role) => role)),
+    sellerChangePassword,
+);
 export default AuthRouter;
 //# sourceMappingURL=AuthRouter.js.map

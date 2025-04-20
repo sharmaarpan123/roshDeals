@@ -650,11 +650,6 @@ AdminRouter.post(
 
 AdminRouter.post(
     '/seller/getSellerDeals',
-    AdminAccessMiddleware({
-        uniqueSlug: 'seller',
-        key: permissionsLevelKey.canView,
-        canAdminAccess,
-    }),
     sellerController.getSellerDeals,
 );
 AdminRouter.post(
