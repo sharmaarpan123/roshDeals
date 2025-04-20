@@ -9,6 +9,7 @@ import {
 } from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import sellerValidationSchema from './sellerSchema.js';
+import Order from '../../../database/models/Order.js';
 
 class SellerController {
     getSellerListWithFilter = catchAsync(async (req, res) => {
@@ -426,6 +427,145 @@ class SellerController {
                 data: sellers,
                 others: {
                     total: total[0]?.totalCount || 0,
+                },
+            }),
+        );
+    });
+
+    getSellerOrdersByDealId = catchAsync(async (req, res) => {
+        const {
+            dealId,
+            offset = 0,
+            limit = 10,
+            orderFormStatus,
+            selectedPlatformFilter,
+            startDate,
+            endDate,
+        } = req.query;
+
+        if (!dealId) {
+            return res.status(400).json(
+                errorResponse({
+                    message: 'Deal ID is required',
+                }),
+            );
+        }
+
+        // First verify if the seller has access to this deal
+        const sellerDealLink = await SellerDealLinker.findOne({
+            sellerId: req.user._id,
+            dealId: new mongoose.Types.ObjectId(dealId),
+            isActive: true,
+        });
+
+        if (!sellerDealLink) {
+            return res.status(403).json(
+                errorResponse({
+                    message: 'You do not have access to this deal',
+                }),
+            );
+        }
+
+        const aggregateArr = [
+            {
+                $match: {
+                    dealId: new mongoose.Types.ObjectId(dealId),
+                    ...(startDate && {
+                        orderDate: {
+                            $gte: new Date(startDate),
+                            $lt: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)),
+                        },
+                    }),
+                    ...(orderFormStatus && { orderFormStatus }),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'deals',
+                    localField: 'dealId',
+                    foreignField: '_id',
+                    as: 'dealId',
+                },
+            },
+            { $unwind: '$dealId' },
+            {
+                $lookup: {
+                    from: 'brands',
+                    localField: 'dealId.brand',
+                    foreignField: '_id',
+                    as: 'dealId.brand',
+                },
+            },
+            { $unwind: '$dealId.brand' },
+            {
+                $lookup: {
+                    from: 'dealcategories',
+                    localField: 'dealId.dealCategory',
+                    foreignField: '_id',
+                    as: 'dealId.dealCategory',
+                },
+            },
+            { $unwind: '$dealId.dealCategory' },
+            {
+                $lookup: {
+                    from: 'platforms',
+                    localField: 'dealId.platForm',
+                    foreignField: '_id',
+                    as: 'dealId.platForm',
+                },
+            },
+            { $unwind: '$dealId.platForm' },
+            {
+                $match: {
+                    ...(selectedPlatformFilter?.length && {
+                        'dealId.platForm._id': {
+                            $in: selectedPlatformFilter?.map(
+                                (i) => new mongoose.Types.ObjectId(i),
+                            ) || [],
+                        },
+                    }),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userId',
+                },
+            },
+            { $unwind: '$userId' },
+            { $sort: { createdAt: -1 } },
+        ];
+
+        if (limit || offset) {
+            aggregateArr.push({ $skip: parseInt(offset) });
+            aggregateArr.push({ $limit: parseInt(limit) });
+        }
+
+        const orders = Order.aggregate(aggregateArr);
+
+        if (limit || offset) {
+            aggregateArr.pop();
+            aggregateArr.pop();
+        }
+
+        aggregateArr.push({ $count: 'total' });
+
+        const totalCount = Order.aggregate(aggregateArr);
+
+        const data = await Promise.all([orders, totalCount]);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Orders fetched successfully',
+                data: {
+                    orders: data[0],
+                    pagination: {
+                        total: data[1].length > 0 ? data[1][0].total : 0,
+                        offset: parseInt(offset),
+                        limit: parseInt(limit),
+                    },
                 },
             }),
         );
