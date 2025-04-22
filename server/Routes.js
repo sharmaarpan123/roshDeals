@@ -3,6 +3,7 @@ import './init-aliases.js';
 import AdminRouter from './routes/AdminRouter.js';
 import AuthRouter from './routes/AuthRouter.js';
 import CommonRouter from './routes/CommonRoutes.js';
+import SellerRouter from './routes/SellerRouter.js';
 import SubAdminRouter from './routes/SubAdminRouter.js';
 import UserRouter from './routes/UserRouter.js';
 import catchErrorHandler from './utilities/catchErrorHandler.js';
@@ -48,7 +49,7 @@ export default (app) => {
         AuthMiddleware(
             Object.values(SELLER_ROLE_TYPE_ENUM)?.map((role) => role),
         ),
-        SubAdminRouter,
+        SellerRouter,
     );
 
     app.use('/user', AuthMiddleware([ROLE_TYPE_ENUM.USER]), UserRouter);

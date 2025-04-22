@@ -39,7 +39,7 @@ import {
 } from '../controllers/AdminController/userController/Usercontroller.js';
 import { permissionsLevelKey } from '../utilities/Const.js';
 import AdminAccessMiddleware from '../utilities/Middlewares/AdminAccessMiddleware.js';
-import sellerController from '../controllers/AdminController/Seller/sellerController.js';
+import AdminSellerController from '../controllers/AdminController/Seller/sellerController.js';
 const AdminRouter = express.Router();
 
 // dashboard
@@ -595,7 +595,7 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.createSeller,
+    AdminSellerController.createSeller,
 );
 
 AdminRouter.post(
@@ -605,7 +605,7 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.linkSellerDeals,
+    AdminSellerController.linkSellerDeals,
 );
 
 AdminRouter.post(
@@ -615,7 +615,7 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.getSellerById,
+    AdminSellerController.getSellerById,
 );
 
 AdminRouter.post(
@@ -625,7 +625,7 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.updateSeller,
+    AdminSellerController.updateSeller,
 );
 
 AdminRouter.get(
@@ -635,7 +635,7 @@ AdminRouter.get(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.getSellerListWithFilter,
+    AdminSellerController.getSellerListWithFilter,
 );
 
 AdminRouter.post(
@@ -645,13 +645,9 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.getAdminDealSellers,
+    AdminSellerController.getAdminDealSellers,
 );
 
-AdminRouter.post(
-    '/seller/getSellerDeals',
-    sellerController.getSellerDeals,
-);
 AdminRouter.post(
     '/seller/removeSellerDeal',
     AdminAccessMiddleware({
@@ -659,7 +655,7 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.removeSellerDeal,
+    AdminSellerController.removeSellerDeal,
 );
 AdminRouter.post(
     '/seller/addSellerDeal',
@@ -668,7 +664,17 @@ AdminRouter.post(
         key: permissionsLevelKey.canView,
         canAdminAccess,
     }),
-    sellerController.addSellerDeal,
+    AdminSellerController.addSellerDeal,
+);
+
+AdminRouter.post(
+    '/seller/getSellerDeals',
+    AdminAccessMiddleware({
+        uniqueSlug: 'seller',
+        key: permissionsLevelKey.canView,
+        canAdminAccess,
+    }),
+    AdminSellerController.getSellerDeals,
 );
 
 export default AdminRouter;

@@ -11,8 +11,9 @@ import {
 } from '../../../utilities/Responses.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
 import sellerValidationSchema from './sellerSchema.js';
+import { MongooseObjectId } from '../../../utilities/utilitis.js';
 
-class SellerController {
+class AdminSellerController {
     getSellerListWithFilter = catchAsync(async (req, res) => {
         const { offset, limit, search, status } = filterSchema.parse(req.query);
 
@@ -169,7 +170,7 @@ class SellerController {
     });
 
     linkSellerDeals = catchAsync(async (req, res) => {
-        const { email, phoneNumber, dealIds, isActive } =
+        const { email, phoneNumber, dealIds, isActive, sellerId } =
             sellerValidationSchema.linkSellerDealsSchema.parse(req.body);
 
         // Find seller by email or phone number
@@ -177,14 +178,16 @@ class SellerController {
             $or: [
                 ...(email ? [{ email }] : []),
                 ...(phoneNumber ? [{ phoneNumber }] : []),
+                ...(sellerId ? [{ _id: sellerId }] : []),
             ],
         });
 
         if (!seller) {
             return res.status(404).json(
                 errorResponse({
-                    message:
-                        'Seller not found with the provided email or phone number',
+                    message: sellerId
+                        ? 'Seller not found with provided Id'
+                        : 'Seller not found with the provided email or phone number',
                 }),
             );
         }
@@ -200,7 +203,10 @@ class SellerController {
         if (existingLinks.length > 0) {
             return res.status(400).json(
                 errorResponse({
-                    message: 'Some deals are already linked to this seller',
+                    message:
+                        dealIds?.length === 1
+                            ? 'Provided Deal is already linked to this seller'
+                            : 'Some deals are already linked to this seller',
                     data: {
                         existingDealIds: existingLinks.map(
                             (link) => link.dealId,
@@ -236,47 +242,141 @@ class SellerController {
     });
 
     getSellerDeals = catchAsync(async (req, res) => {
-        const { sellerId, offset, limit, isActive } =
-            sellerValidationSchema.getSellerDealsSchema.parse(req.query);
+        const {
+            offset = 0,
+            limit = 10,
+            search,
+            status,
+            selectedCategoryFilter,
+            selectedPlatformFilter,
+            sellerId,
+        } = sellerValidationSchema.getSellerDealsSchema.parse(req.body);
 
-        // Build the query
-        const query = { sellerId: new mongoose.Types.ObjectId(sellerId) };
-        if (isActive !== undefined) {
-            query.isActive = Boolean(+isActive);
-        }
+        const pipeline = [
+            // Match seller's active deals
+            {
+                $match: {
+                    sellerId: MongooseObjectId(sellerId),
+                    isActive: true,
+                },
+            },
+            // Lookup deal details
+            {
+                $lookup: {
+                    from: 'deals',
+                    localField: 'dealId',
+                    foreignField: '_id',
+                    as: 'dealId',
+                },
+            },
+            { $unwind: '$dealId' },
+            // Apply filters on deal fields
+            {
+                $match: {
+                    ...(search && {
+                        'dealId.productName': { $regex: search, $options: 'i' },
+                    }),
+                    ...(status !== undefined && {
+                        'dealId.isActive': Boolean(+status),
+                    }),
+                    ...(selectedCategoryFilter?.length && {
+                        'dealId.dealCategory': {
+                            $in: selectedCategoryFilter.map(
+                                (id) => new mongoose.Types.ObjectId(id),
+                            ),
+                        },
+                    }),
+                    ...(selectedPlatformFilter?.length && {
+                        'dealId.platForm': {
+                            $in: selectedPlatformFilter.map(
+                                (id) => new mongoose.Types.ObjectId(id),
+                            ),
+                        },
+                    }),
+                    'dealId.parentDealId': { $exists: false },
+                },
+            },
+
+            // Lookup deal category details
+            {
+                $lookup: {
+                    from: 'dealcategories',
+                    localField: 'dealId.dealCategory',
+                    foreignField: '_id',
+                    as: 'dealId.dealCategory',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$dealId.dealCategory',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            // Lookup platform details
+            {
+                $lookup: {
+                    from: 'platforms',
+                    localField: 'dealId.platForm',
+                    foreignField: '_id',
+                    as: 'dealId.platForm',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$dealId.platForm',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'brands',
+                    localField: 'dealId.brand',
+                    foreignField: '_id',
+                    as: 'dealId.brand',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$dealId.brand',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            { $sort: { 'dealId.createdAt': -1 } },
+            { $skip: parseInt(offset) },
+            { $limit: parseInt(limit) },
+        ];
 
         // Get total count
-        const total = await SellerDealLinker.countDocuments(query);
+        const countPipeline = [
+            ...pipeline.slice(0, 4), // Take only the filtering stages
+            { $count: 'total' },
+        ];
+        const totalResult = await SellerDealLinker.aggregate(countPipeline);
+        const total = totalResult[0]?.total || 0;
 
         // Get paginated results
-        const sellerDeals = await SellerDealLinker.find(query)
-            .sort({ createdAt: -1 })
-            .skip(parseInt(offset))
-            .limit(parseInt(limit))
-            .populate('dealId', 'title description') // Populate deal details
-            .populate('adminId', 'name email'); // Populate admin details
+        const deals = await SellerDealLinker.aggregate(pipeline);
 
         return res.status(200).json(
             successResponse({
                 message: 'Seller deals fetched successfully',
-                data: {
-                    deals: sellerDeals,
-                    pagination: {
-                        total,
-                        offset: parseInt(offset),
-                        limit: parseInt(limit),
-                    },
+                data: deals.map((item) => item.dealId),
+                others: {
+                    total,
                 },
             }),
         );
     });
 
     removeSellerDeal = catchAsync(async (req, res) => {
-        const { sellerDealId } =
-            sellerValidationSchema.removeSellerDealSchema.parse(req.params);
+        const { sellerId , dealId } =
+            sellerValidationSchema.removeSellerDealSchema.parse(req.body);
 
-        const deletedDeal =
-            await SellerDealLinker.findByIdAndDelete(sellerDealId);
+        const deletedDeal = await SellerDealLinker.findOneAndDelete({
+            dealId: dealId,
+            sellerId: sellerId,
+        });
 
         if (!deletedDeal) {
             return res.status(404).json(
@@ -432,221 +532,6 @@ class SellerController {
             }),
         );
     });
-
-    getSellerOrdersByDealId = catchAsync(async (req, res) => {
-        const {
-            dealId,
-            offset = 0,
-            limit = 10,
-            orderFormStatus,
-            selectedPlatformFilter,
-            startDate,
-            endDate,
-        } = req.query;
-
-        if (!dealId) {
-            return res.status(400).json(
-                errorResponse({
-                    message: 'Deal ID is required',
-                }),
-            );
-        }
-
-        // First verify if the seller has access to this deal
-        const sellerDealLink = await SellerDealLinker.findOne({
-            sellerId: req.user._id,
-            dealId: new mongoose.Types.ObjectId(dealId),
-            isActive: true,
-        });
-
-        if (!sellerDealLink) {
-            return res.status(403).json(
-                errorResponse({
-                    message: 'You do not have access to this deal',
-                }),
-            );
-        }
-
-        const aggregateArr = [
-            {
-                $match: {
-                    dealId: new mongoose.Types.ObjectId(dealId),
-                    ...(startDate && {
-                        orderDate: {
-                            $gte: new Date(startDate),
-                            $lt: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)),
-                        },
-                    }),
-                    ...(orderFormStatus && { orderFormStatus }),
-                },
-            },
-            {
-                $lookup: {
-                    from: 'deals',
-                    localField: 'dealId',
-                    foreignField: '_id',
-                    as: 'dealId',
-                },
-            },
-            { $unwind: '$dealId' },
-            {
-                $lookup: {
-                    from: 'brands',
-                    localField: 'dealId.brand',
-                    foreignField: '_id',
-                    as: 'dealId.brand',
-                },
-            },
-            { $unwind: '$dealId.brand' },
-            {
-                $lookup: {
-                    from: 'dealcategories',
-                    localField: 'dealId.dealCategory',
-                    foreignField: '_id',
-                    as: 'dealId.dealCategory',
-                },
-            },
-            { $unwind: '$dealId.dealCategory' },
-            {
-                $lookup: {
-                    from: 'platforms',
-                    localField: 'dealId.platForm',
-                    foreignField: '_id',
-                    as: 'dealId.platForm',
-                },
-            },
-            { $unwind: '$dealId.platForm' },
-            {
-                $match: {
-                    ...(selectedPlatformFilter?.length && {
-                        'dealId.platForm._id': {
-                            $in: selectedPlatformFilter?.map(
-                                (i) => new mongoose.Types.ObjectId(i),
-                            ) || [],
-                        },
-                    }),
-                },
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'userId',
-                },
-            },
-            { $unwind: '$userId' },
-            { $sort: { createdAt: -1 } },
-        ];
-
-        if (limit || offset) {
-            aggregateArr.push({ $skip: parseInt(offset) });
-            aggregateArr.push({ $limit: parseInt(limit) });
-        }
-
-        const orders = Order.aggregate(aggregateArr);
-
-        if (limit || offset) {
-            aggregateArr.pop();
-            aggregateArr.pop();
-        }
-
-        aggregateArr.push({ $count: 'total' });
-
-        const totalCount = Order.aggregate(aggregateArr);
-
-        const data = await Promise.all([orders, totalCount]);
-
-        return res.status(200).json(
-            successResponse({
-                message: 'Orders fetched successfully',
-                data: {
-                    orders: data[0],
-                    pagination: {
-                        total: data[1].length > 0 ? data[1][0].total : 0,
-                        offset: parseInt(offset),
-                        limit: parseInt(limit),
-                    },
-                },
-            }),
-        );
-    });
-
-    getSellerDealsWithFilters = catchAsync(async (req, res) => {
-        const {
-            offset = 0,
-            limit = 10,
-            search,
-            status,
-            paymentStatus,
-            isSlotCompleted,
-            selectedBrandFilter,
-            selectedCategoryFilter,
-            selectedPlatformFilter,
-        } = req.body;
-
-        // First get all deal IDs linked to this seller
-        const sellerDealLinks = await SellerDealLinker.find({
-            sellerId: req.user._id,
-            isActive: true
-        }).select('dealId');
-
-        const dealIds = sellerDealLinks.map(link => link.dealId);
-
-        // Build the query
-        const query = {
-            _id: { $in: dealIds },
-            ...(search && { productName: { $regex: search, $options: 'i' } }),
-            ...(status !== undefined && { isActive: Boolean(+status) }),
-            ...(paymentStatus && { paymentStatus }),
-            ...(isSlotCompleted === 'completed' && { isSlotCompleted: true }),
-            ...(isSlotCompleted === 'uncompleted' && { isSlotCompleted: false }),
-            ...(selectedBrandFilter?.length && {
-                brand: { $in: selectedBrandFilter.map(id => new mongoose.Types.ObjectId(id)) }
-            }),
-            ...(selectedCategoryFilter?.length && {
-                dealCategory: { $in: selectedCategoryFilter.map(id => new mongoose.Types.ObjectId(id)) }
-            }),
-            ...(selectedPlatformFilter?.length && {
-                platForm: { $in: selectedPlatformFilter.map(id => new mongoose.Types.ObjectId(id)) }
-            }),
-            parentDealId: { $exists: false }
-        };
-
-        // Get total count
-        const total = await Deal.countDocuments(query);
-
-        // Get paginated results with populated fields
-        const deals = await Deal.find(query)
-            .populate('brand')
-            .populate('dealCategory')
-            .populate('platForm')
-            .populate({
-                path: 'parentDealId',
-                populate: [
-                    { path: 'dealCategory' },
-                    { path: 'platForm' },
-                    { path: 'brand' }
-                ]
-            })
-            .sort({ createdAt: -1 })
-            .skip(parseInt(offset))
-            .limit(parseInt(limit));
-
-        return res.status(200).json(
-            successResponse({
-                message: 'Seller deals fetched successfully',
-                data: {
-                    deals,
-                    pagination: {
-                        total,
-                        offset: parseInt(offset),
-                        limit: parseInt(limit)
-                    }
-                }
-            })
-        );
-    });
 }
 
-export default new SellerController();
+export default new AdminSellerController();

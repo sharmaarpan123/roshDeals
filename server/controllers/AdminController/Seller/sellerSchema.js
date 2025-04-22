@@ -3,11 +3,11 @@ import {
     filterRefineFunction,
     filterRefineMessage,
     filterSchemaObject,
+    optionalBoolean,
     optionalEmailString,
     optionalPassword,
     optionalPhoneNUmber,
     optionalString,
-    requiredBoolean,
     requiredEmailString,
     requiredPassword,
     requiredPhoneNumber,
@@ -40,26 +40,40 @@ class SellerValidation {
     linkSellerDealsSchema = z
         .object({
             email: optionalEmailString(),
+            linkBySellerId: optionalBoolean().default(false),
             phoneNumber: optionalPhoneNUmber(),
+            sellerId: optionalString('Seller Id'),
             dealIds: z
                 .array(z.string())
                 .min(1, 'At least one deal ID is required'),
             isActive: z.boolean().default(true),
         })
-        .refine((data) => data.email || data.phoneNumber, {
-            message: 'Either email or phone number is required',
-            path: ['email'],
+        .refine(
+            (data) =>
+                data.email ||
+                data.phoneNumber ||
+                (data.sellerId && data?.linkBySellerId),
+            {
+                message: 'Either email or phone number is required',
+                path: ['email'],
+            },
+        )
+        .refine((data) => data?.linkBySellerId || !data?.sellerId, {
+            message: 'Please send the seller Id',
+            path: ['sellerId'],
         });
 
-    getSellerDealsSchema = z.object({
-        sellerId: requiredString('Seller Id'),
-        offset: z.string().optional().default('0'),
-        limit: z.string().optional().default('10'),
-        isActive: z.string().optional(),
-    });
+    getSellerDealsSchema = z
+        .object({
+            sellerId: requiredString('Seller Id'),
+            isActive: z.string().optional(),
+        })
+        .merge(filterSchemaObject)
+        .refine(filterRefineFunction, filterRefineMessage);
 
     removeSellerDealSchema = z.object({
-        sellerDealId: requiredString('Seller Deal Id'),
+        dealId: requiredString('Deal Id'),
+        sellerId: requiredString('Seller Id'),
     });
 
     addSellerDealSchema = z.object({
