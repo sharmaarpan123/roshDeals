@@ -36,6 +36,12 @@ const init = async () => {
             path.join(process.cwd(), 'server/public', 'deep-link.html'),
         );
     });
+    // Add new tutorials route
+    app.get('/tutorials', (req, res) => {
+        res.sendFile(
+            path.join(process.cwd(), 'server/public', 'tutorials.html'),
+        );
+    });
     app.get('/buyr.apk', (req, res) => {
         res.sendFile(path.join(process.cwd(), 'server/public', 'buyr.apk'));
     });
