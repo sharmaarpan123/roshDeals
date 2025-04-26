@@ -608,3 +608,35 @@ export const UserEarning = catchAsync(async (req, res) => {
         }),
     );
 }); //
+
+export const getOrderById = catchAsync(async (req, res) => {
+    const { orderId } = req.params;
+
+    if (!orderId) {
+        return res.status(400).json(
+            errorResponse({
+                message: 'Order ID is required',
+            }),
+        );
+    }
+
+    const order = await Order.findOne({ 
+        _id: orderId,
+        userId: req.user._id // Ensure user can only access their own orders
+    }).populate('dealId');
+
+    if (!order) {
+        return res.status(404).json(
+            errorResponse({
+                message: 'Order not found',
+            }),
+        );
+    }
+
+    return res.status(200).json(
+        successResponse({ 
+            message: 'Order retrieved successfully',
+            data: order,
+        }),
+    );
+});

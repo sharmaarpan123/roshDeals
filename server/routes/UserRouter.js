@@ -13,6 +13,7 @@ import {
 import brandController from '../controllers/UserContorller/BrandConroller/brandController.js';
 import dealCategoryController from '../controllers/UserContorller/DealCategoryController/dealCategoryController.js';
 import {
+    getOrderById,
     OrderCreateController,
     OrderFromUpdate,
     OrderList,
@@ -69,6 +70,7 @@ UserRouter.post('/order/update', OrderFromUpdate);
 UserRouter.post('/order/getOrderList', OrderList);
 UserRouter.post('/order/reviewFormSubmit', reviewFromSubmitController);
 UserRouter.get('/order/userEarning', UserEarning);
+UserRouter.get('/order/getOrderById/:orderId', getOrderById);
 
 // plat form
 UserRouter.get(
