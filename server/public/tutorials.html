@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuyR - Platform Tutorials</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f4f6fc;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(120deg, #6A82FB, #FC5C7D);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: #ffffff;
+            color: #6A82FB;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button:hover {
+            background-color: #FC5C7D;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .platform-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .platform-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .platform-logo {
+            width: 60px;
+            height: 60px;
+            margin-right: 1rem;
+        }
+
+        .platform-name {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tutorial-item {
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .tutorial-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .tutorial-media {
+            width: 100%;
+            position: relative;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+
+        .tutorial-media img {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+            object-fit: contain;
+            display: block;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .tutorial-media img:hover {
+            transform: scale(1.02);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .tutorial-caption {
+            padding: 0.8rem;
+            background: #ffffff;
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .tutorial-item:hover .tutorial-caption {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 1024px) {
+            .tutorial-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tutorial-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .tutorial-media img {
+                max-height: 200px;
+            }
+
+            .tutorial-caption {
+                font-size: 0.9rem;
+                padding: 0.7rem;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .modal-caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Add Modal HTML -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div id="modalCaption" class="modal-caption"></div>
+    </div>
+
+    <header>
+        <h1>Platform Tutorials</h1>
+        <p>Learn how to use BuyR with different e-commerce platforms</p>
+        <a href="/" class="back-button">Back to Home</a>
+    </header>
+
+    <div class="container">
+        <!-- Amazon Section -->
+        <section class="platform-section">
+            <div class="platform-header">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlO7c1ph0372RPy2_DwWn7a8PX_i7xxSUYPw&s"
+                    alt="Amazon Logo" class="platform-logo">
+                <h2 class="platform-name">Amazon Tutorials</h2>
+            </div>
+            <div class="tutorial-grid">
+                <div class="tutorial-item">
+                    <div class="tutorial-media video-container">
+                        <video controls>
+                            <source src="./images/Amazon/amazon_rating_submit.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="tutorial-caption">How to Submit Ratings on Amazon</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonRatingScreenshotSample.webp" alt="Amazon Rating Process">
+                    </div>
+                    <div class="tutorial-caption">Rating Screenshot Example</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonOrderSS.webp" alt="Amazon Order Process">
+                    </div>
+                    <div class="tutorial-caption">Order Process Guide</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonReviewSubmitSample.webp" alt="Amazon Review Submit Process">
+                    </div>
+                    <div class="tutorial-caption">Review Submit Process</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonRatingScreenshotSampleLaptop.webp" alt="Amazon Rating Process on Laptop">
+                    </div>
+                    <div class="tutorial-caption">Rating Process on Laptop</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonExchangeDealSampleOrderSS.webp" alt="Amazon Exchange Deal Process">
+                    </div>
+                    <div class="tutorial-caption">Exchange Deal Process</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Amazon/AmazonDelivered.webp" alt="Amazon Delivery Confirmation">
+                    </div>
+                    <div class="tutorial-caption">Delivery Confirmation</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flipkart Section -->
+        <section class="platform-section">
+            <div class="platform-header">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFAS1xR8ZdYCvsWvARhon_DyYInDgr2WpIPQ&s"
+                    alt="Flipkart Logo" class="platform-logo">
+                <h2 class="platform-name">Flipkart Tutorials</h2>
+            </div>
+            <div class="tutorial-grid">
+                <div class="tutorial-item">
+                    <div class="tutorial-media video-container">
+                        <video controls>
+                            <source src="./images/Flipkart/flipkart_Review_Link.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="tutorial-caption">How to Submit Reviews on Flipkart</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Flipkart/FlipkartReviewScreenshotSample.webp"
+                            alt="Flipkart Review Process">
+                    </div>
+                    <div class="tutorial-caption">Review Screenshot Example</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Flipkart/FlipkartOrderSS.webp" alt="Flipkart Order Process">
+                    </div>
+                    <div class="tutorial-caption">Order Process Guide</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Flipkart/FlipkartRatingScreenshotSample.webp" alt="Flipkart Rating Process">
+                    </div>
+                    <div class="tutorial-caption">Rating Process Guide</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/Flipkart/FlipkartDeliveredWithReturnWindowClosedSample.webp" alt="Flipkart Delivery Confirmation">
+                    </div>
+                    <div class="tutorial-caption">Delivery Confirmation</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Myntra/Nykaa Section -->
+        <section class="platform-section">
+            <div class="platform-header">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDjTRAMkw1ub06xFYGTzvD2eyeywq1-XYuCQ&s"
+                    alt="Nykaa Logo" class="platform-logo">
+                <h2 class="platform-name">Nykaa Tutorials</h2>
+            </div>
+            <div class="tutorial-grid">
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/MyntraNykaa/NykaaReviewScreenshot.webp" alt="Nykaa Review Process">
+                    </div>
+                    <div class="tutorial-caption">How to Submit Reviews on Nykaa</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/MyntraNykaa/NykaaOrderScreenshot.webp" alt="Nykaa Order Process">
+                    </div>
+                    <div class="tutorial-caption">Order Process Guide</div>
+                </div>
+                <div class="tutorial-item">
+                    <div class="tutorial-media">
+                        <img src="./images/MyntraNykaa/NykaaDeliveredScreenshot.webp"
+                            alt="Nykaa Delivery Confirmation">
+                    </div>
+                    <div class="tutorial-caption">Delivery Confirmation Example</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Get the modal
+        const modal = document.getElementById("imageModal");
+        const modalImg = document.getElementById("modalImage");
+        const captionText = document.getElementById("modalCaption");
+        const closeBtn = document.getElementsByClassName("modal-close")[0];
+
+        // Get all tutorial images
+        const tutorialImages = document.querySelectorAll('.tutorial-media img');
+
+        // Add click event to all images
+        tutorialImages.forEach(img => {
+            img.onclick = function() {
+                modal.style.display = "block";
+                modalImg.src = this.src;
+                captionText.innerHTML = this.alt;
+            }
+        });
+
+        // Close modal when clicking the close button
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Close modal when clicking outside the image
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                modal.style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>
