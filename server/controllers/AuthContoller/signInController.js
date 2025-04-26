@@ -5,50 +5,63 @@ import catchAsync from '../../utilities/catchAsync.js';
 import { comparePassword } from '../../utilities/hashPassword.js';
 import { jwtGen } from '../../utilities/jwt.js';
 import { z } from 'zod';
-const schema = z.object({
-    phoneNumber: z
-        .string({
-            required_error: 'Phone Number is required',
-        })
-        .trim()
-        .min(1, { message: 'Phone Number is required' })
-        .refine((data) => /^\d+$/.test(data), {
-            message: 'phone Number should be Numeric',
-        }),
-    currentAdminReference: z
-        .string({
-            required_error: 'Current  Reference Code is required',
-        })
-        .trim()
-        .min(1, { message: 'Current Reference Code is required' }),
-    password: z
-        .string({
-            required_error: 'Password is required',
-        })
-        .trim()
-        .min(1, { message: 'password is required' })
-        .refine(
-            (data) =>
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
-                    data,
-                ),
-            {
-                message:
-                    'Password Must have Lowercase, Uppercase, Number, Symbol or special char',
-            },
-        ),
-    fcmToken: z.string().optional(),
-});
+const schema = z
+    .object({
+        phoneNumber: z
+            .string()
+            .trim()
+            .min(1, { message: 'Phone Number is required' })
+            .refine((data) => /^\d+$/.test(data), {
+                message: 'Phone Number should be Numeric',
+            })
+            .optional(),
+        email: z
+            .string()
+            .trim()
+            .email({ message: 'Invalid email address' })
+            .optional(),
+        currentAdminReference: z
+            .string({
+                required_error: 'Current Reference Code is required',
+            })
+            .trim()
+            .min(1, { message: 'Current Reference Code is required' }),
+        password: z
+            .string({
+                required_error: 'Password is required',
+            })
+            .trim()
+            .min(1, { message: 'Password is required' })
+            .refine(
+                (data) =>
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$/.test(
+                        data,
+                    ),
+                {
+                    message:
+                        'Password must have Lowercase, Uppercase, Number, Symbol or special char',
+                },
+            ),
+        fcmToken: z.string().optional(),
+    })
+    .refine((data) => data.phoneNumber || data.email, {
+        message: 'Either phone number or email is required',
+        path: ['phoneNumber', 'email'],
+    });
 const signInController = catchAsync(async (req, res) => {
     const body = schema.parse(req.body);
-    const { password, phoneNumber, fcmToken, currentAdminReference } = body;
-    const user = await User.findOne({
-        phoneNumber,
-    });
+    const { password, phoneNumber, email, fcmToken, currentAdminReference } = body;
+    const user = await User.findOne(
+        phoneNumber
+            ? { phoneNumber }
+            : email
+            ? { email }
+            : null,
+    );
     if (!user) {
         return res.status(400).json(
             errorResponse({
-                message: 'This Phone Number is not registered , please sign up',
+                message: 'This account is not registered, please sign up',
             }),
         );
     }
@@ -57,7 +70,7 @@ const signInController = catchAsync(async (req, res) => {
     if (!isMatched) {
         return res.status(400).json(
             errorResponse({
-                message: 'wrong password',
+                message: 'Wrong password',
             }),
         );
     }
@@ -66,7 +79,7 @@ const signInController = catchAsync(async (req, res) => {
         return res.status(400).json(
             errorResponse({
                 message:
-                    'Your account has been deactivated by the  super Admin ,  please contact your Admin',
+                    'Your account has been deactivated by the super Admin, please contact your Admin',
             }),
         );
     }
@@ -75,15 +88,13 @@ const signInController = catchAsync(async (req, res) => {
     if (!adminCheck?._id || !adminCheck.isActive) {
         return res.status(400).json(
             errorResponse({
-                message: 'Your Reference Code is In valid',
+                message: 'Your Reference Code is invalid',
             }),
         );
     }
 
     const updatedUser = await User.findOneAndUpdate(
-        {
-            phoneNumber,
-        },
+        phoneNumber ? { phoneNumber } : { email },
         {
             $set: {
                 fcmToken: fcmToken,
@@ -98,7 +109,7 @@ const signInController = catchAsync(async (req, res) => {
         },
     )
         .populate('currentAdminReference')
-        .select('currentAdminReference , _id , name , roles email phoneNumber');
+        .select('currentAdminReference _id name roles email phoneNumber');
 
     const token = jwtGen(updatedUser);
 
