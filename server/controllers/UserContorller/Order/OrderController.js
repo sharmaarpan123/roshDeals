@@ -623,7 +623,22 @@ export const getOrderById = catchAsync(async (req, res) => {
     const order = await Order.findOne({ 
         _id: orderId,
         userId: req.user._id // Ensure user can only access their own orders
-    }).populate('dealId');
+    }).populate({
+        path: 'dealId',
+        populate: [
+            { path: 'brand' },
+            { path: 'dealCategory' },
+            { path: 'platForm' },
+            {
+                path: 'parentDealId',
+                populate: [
+                    { path: 'dealCategory' },
+                    { path: 'platForm' },
+                    { path: 'brand' }
+                ]
+            }
+        ]
+    });
 
     if (!order) {
         return res.status(404).json(
