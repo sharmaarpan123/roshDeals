@@ -18,4 +18,9 @@ SellerRouter.post(
     sellerController.getSellerDealsWithFilters,
 );
 
+SellerRouter.post(
+    '/agenciesList',
+    sellerController.getSellerAgenciesWithFilters,
+);
+
 export default SellerRouter;

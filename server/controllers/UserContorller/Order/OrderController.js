@@ -84,8 +84,10 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         return res.status(400).json(
             errorResponse({
                 message:
-                    slotCompletedDeals?.productName +
-                    ' This deal have completed their slots. Please cancel these orders.',
+                    (slotCompletedDeals &&
+                        slotCompletedDeals[0]?.productName) ||
+                    '' +
+                        ' This deal have completed their slots. Please cancel these orders.',
                 others: { deals: slotCompletedDeals },
             }),
         );

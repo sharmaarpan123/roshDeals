@@ -298,7 +298,7 @@ export const addDealController = catchAsync(async (req, res) => {
     }
 
     const body = 'New Deal';
-    const title = req?.user?.userName + ' has Create a New Deal';
+    const title = `${req?.user?.name} (${req?.user?.userName})` + ' has Create a New Deal';
 
     sendNotification({
         notification: {
