@@ -5,6 +5,7 @@ import SellerDealLinker from '../../database/models/SellerDealLinker.js';
 import catchAsync from '../../utilities/catchAsync.js';
 import { errorResponse, successResponse } from '../../utilities/Responses.js';
 import { MongooseObjectId } from '../../utilities/utilitis.js';
+import { filterSchema } from '../../utilities/ValidationSchema.js';
 
 class SellerController {
     getSellerDealsWithFilters = catchAsync(async (req, res) => {
@@ -15,6 +16,7 @@ class SellerController {
             status,
             selectedCategoryFilter,
             selectedPlatformFilter,
+            agencyId,
         } = req.body;
 
         const pipeline = [
@@ -26,7 +28,7 @@ class SellerController {
                 },
             },
             // Lookup deal details
-            {
+            {           
                 $lookup: {
                     from: 'deals',
                     localField: 'dealId',
@@ -35,9 +37,13 @@ class SellerController {
                 },
             },
             { $unwind: '$dealId' },
+
             // Apply filters on deal fields
             {
                 $match: {
+                    ...(agencyId && {
+                        adminId: MongooseObjectId(agencyId),
+                    }),
                     ...(search && {
                         'dealId.productName': { $regex: search, $options: 'i' },
                     }),
@@ -108,15 +114,14 @@ class SellerController {
             },
 
             { $sort: { 'dealId.createdAt': -1 } },
-            { $skip: parseInt(offset) },
-            { $limit: parseInt(limit) },
         ];
 
         // Get total count
-        const countPipeline = [
-            ...pipeline.slice(0, 4), // Take only the filtering stages
-            { $count: 'total' },
-        ];
+        const countPipeline = [...pipeline, { $count: 'total' }];
+
+        pipeline.push({ $skip: parseInt(offset) });
+        pipeline.push({ $limit: parseInt(limit) });
+
         const totalResult = await SellerDealLinker.aggregate(countPipeline);
         const total = totalResult[0]?.total || 0;
 
@@ -126,7 +131,11 @@ class SellerController {
         return res.status(200).json(
             successResponse({
                 message: 'Seller deals fetched successfully',
-                data: deals.map((item) => item.dealId),
+                data: deals.map((item) => ({
+                    ...item.dealId,
+                    ...item,
+                })),
+
                 others: {
                     total,
                 },
@@ -361,6 +370,71 @@ class SellerController {
                 data: data[0],
                 others: {
                     total: data[1].length > 0 ? data[1][0].total : 0,
+                },
+            }),
+        );
+    });
+
+    getSellerAgenciesWithFilters = catchAsync(async (req, res) => {
+        const { offset = 0, limit = 10, search } = filterSchema.parse(req.body);
+
+        const pipeline = [
+            {
+                $match: {
+                    isActive: true,
+                    sellerId: MongooseObjectId(req?.user?._id),
+                },
+            },
+            {
+                $lookup: {
+                    from: 'admins',
+                    localField: 'adminId',
+                    foreignField: '_id',
+                    as: 'adminInfo',
+                },
+            },
+            { $unwind: '$adminInfo' },
+            {
+                $match: {
+                    ...(search && {
+                        'adminInfo.name': { $regex: search, $options: 'i' },
+                    }),
+                },
+            },
+            {
+                $group: {
+                    _id: '$adminInfo._id',
+                    admin: { $first: '$adminInfo' },
+                },
+            },
+            {
+                $replaceRoot: {
+                    newRoot: '$admin',
+                },
+            },
+        ];
+
+        // Get total count
+        const countPipeline = [
+            ...pipeline, // Take only the filtering stages
+            { $count: 'total' },
+        ];
+
+        pipeline.push({ $skip: parseInt(offset) });
+        pipeline.push({ $limit: parseInt(limit) });
+
+        const totalResult = await SellerDealLinker.aggregate(countPipeline);
+        const total = totalResult[0]?.total || 0;
+
+        // Get paginated results
+        const agencies = await SellerDealLinker.aggregate(pipeline);
+
+        return res.status(200).json(
+            successResponse({
+                message: 'Seller deals fetched successfully',
+                data: agencies,
+                others: {
+                    total,
                 },
             }),
         );
