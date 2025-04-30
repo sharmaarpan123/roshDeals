@@ -28,7 +28,7 @@ class SellerController {
                 },
             },
             // Lookup deal details
-            {           
+            {
                 $lookup: {
                     from: 'deals',
                     localField: 'dealId',
@@ -131,10 +131,7 @@ class SellerController {
         return res.status(200).json(
             successResponse({
                 message: 'Seller deals fetched successfully',
-                data: deals.map((item) => ({
-                    ...item.dealId,
-                    ...item,
-                })),
+                data: deals.map((item) => item.dealId),
 
                 others: {
                     total,
@@ -162,10 +159,12 @@ class SellerController {
             );
         }
 
+        console.log(req?.user, dealId);
+
         // First verify if the seller has access to this deal
         const sellerDealLink = await SellerDealLinker.findOne({
             sellerId: req.user._id,
-            dealId: new mongoose.Types.ObjectId(dealId),
+            dealId: dealId,
             isActive: true,
         });
 
@@ -238,6 +237,7 @@ class SellerController {
                     as: 'dealId.dealCategory',
                 },
             },
+
             {
                 $unwind: {
                     path: '$dealId.dealCategory',

@@ -14,7 +14,7 @@ import getInitialCacheValues from './utilities/getInitialCacheValues.js';
 config();
 
 const init = async () => {
-    const PORT = process.env.PORT; 
+    const PORT = process.env.PORT;
     const app = express();
     const server = http.createServer(app);
     app.use(cors());

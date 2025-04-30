@@ -347,6 +347,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canAdd,
+        canAdminAccess,
     }),
     PosterController.addPosterController,
 );
@@ -355,6 +356,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
     }),
     PosterController.editPosterController,
 );
@@ -363,6 +365,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
     }),
     PosterController.deletePosterController,
 );
@@ -371,6 +374,7 @@ AdminRouter.post(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canEdit,
+        canAdminAccess,
     }),
     PosterController.statusChangeController,
 );
@@ -379,6 +383,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
     }),
     PosterController.getAllPosterController,
 );
@@ -387,6 +392,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'poster',
         key: permissionsLevelKey.canView,
+        canAdminAccess,
     }),
     PosterController.getPosterById,
 );
@@ -434,6 +440,7 @@ AdminRouter.get(
     AdminAccessMiddleware({
         uniqueSlug: 'deal',
         key: permissionsLevelKey.canViewList,
+        canAdminAccess,
     }),
     allDeals,
 );

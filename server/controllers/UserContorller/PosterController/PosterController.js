@@ -3,10 +3,18 @@ import { successResponse } from '../../../utilities/Responses.js';
 import Poster from '../../../database/models/Poster.js';
 
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
+import { getCurrentAdminReferencesId } from '../../../utilities/utilitis.js';
 
 const getActivePosters = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
-    const AllData = Poster.find({ isActive: true })
+    const currentAdminReference = getCurrentAdminReferencesId(req);
+    const AllData = Poster.find({
+        isActive: true,
+        $or: [
+            { addedBy: 'superAdmin' },
+            { addedBy: 'admin', adminId: currentAdminReference },
+        ],
+    })
         .populate('brand')
         .populate({
             path: 'deal',

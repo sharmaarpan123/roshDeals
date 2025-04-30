@@ -3,6 +3,7 @@ import {
     filterRefineFunction,
     filterRefineMessage,
     filterSchemaObject,
+    optionalString,
 } from '../../../utilities/ValidationSchema.js';
 
 class SubAdminDealSchemaClass {
@@ -76,6 +77,7 @@ class SubAdminDealSchemaClass {
                         message: 'invalid slot payment status',
                     })
                     .optional(),
+                mediatorId: optionalString(),
             }),
         )
         .refine(filterRefineFunction, filterRefineMessage);

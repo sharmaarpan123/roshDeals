@@ -1,10 +1,18 @@
 import { POSTER_ENUM } from '../../utilities/commonTypes.js';
 import mongoose from 'mongoose';
+
+export const posterAddedByEnum = {
+    superAdmin: 'superAdmin',
+    admin: 'admin',
+};
+
 const PosterSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         title: { type: String, required: true },
-        image: { type: String  },
+        addedBy: { type: String, enum: posterAddedByEnum },
+        adminId: { type: mongoose.Types.ObjectId, ref: 'Brand' },
+        image: { type: String },
         posterType: {
             type: String,
             enum: POSTER_ENUM,

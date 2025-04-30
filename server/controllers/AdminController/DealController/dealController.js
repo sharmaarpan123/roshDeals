@@ -33,7 +33,6 @@ import Notifications, {
     notificationType,
 } from '../../../database/models/Notifications.js';
 import { extractProductImage } from '../../../utilities/extractProductImage.js';
-import Admin from '../../../database/models/Admin.js';
 
 export const dealPaymentStatusChangeController = catchAsync(
     async (req, res) => {
@@ -174,7 +173,7 @@ export const allDeals = catchAsync(async (req, res) => {
             isActive: true,
             ...(search && { productName: { $regex: search, $options: 'i' } }),
             ...(adminOrSubAdminId && {
-                adminId: mongoose.Types.ObjectId(adminOrSubAdminId),
+                adminId: MongooseObjectId(adminOrSubAdminId),
             }),
         },
         { _id: 1, productName: 1 },
@@ -183,7 +182,7 @@ export const allDeals = catchAsync(async (req, res) => {
             createdAt: -1,
         })
         .skip(offset || 0)
-        .limit(limit || 10);
+        .limit(limit || 30);
 
     return res.status(200).json(
         successResponse({
@@ -298,7 +297,9 @@ export const addDealController = catchAsync(async (req, res) => {
     }
 
     const body = 'New Deal';
-    const title = `${req?.user?.name} (${req?.user?.userName})` + ' has Create a New Deal';
+    const title =
+        `${req?.user?.name} (${req?.user?.userName})` +
+        ' has Create a New Deal';
 
     sendNotification({
         notification: {

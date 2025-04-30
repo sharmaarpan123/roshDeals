@@ -175,6 +175,7 @@ class SubAdminDealControllerClass {
             selectedBrandFilter,
             selectedCategoryFilter,
             selectedPlatformFilter,
+            mediatorId,
         } = SubAdminDealSchema.allDealsListSchema.parse(req.body);
 
         let adminIds;
@@ -193,6 +194,9 @@ class SubAdminDealControllerClass {
                           $match: {
                               parentDealId: { $exists: true }, // all  deal
                               ...(status && { isActive: Boolean(+status) }),
+                              ...(mediatorId && {
+                                  adminId: MongooseObjectId(mediatorId),
+                              }),
                           },
                       },
                   ]
@@ -200,9 +204,17 @@ class SubAdminDealControllerClass {
                       {
                           $match: {
                               parentDealId: { $exists: true }, // all  deal
-                              adminId: {
-                                  $in: adminIds?.map((i) => i?.subAdminId),
-                              },
+                              ...(mediatorId
+                                  ? {
+                                        adminId: MongooseObjectId(mediatorId),
+                                    }
+                                  : {
+                                        adminId: {
+                                            $in: adminIds?.map(
+                                                (i) => i?.subAdminId,
+                                            ),
+                                        },
+                                    }),
                               ...(status && { isActive: Boolean(+status) }),
                           },
                       },

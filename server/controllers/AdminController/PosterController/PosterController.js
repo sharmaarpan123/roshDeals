@@ -9,15 +9,25 @@ import {
     errorResponse,
     successResponse,
 } from '../../../utilities/Responses.js';
-import Poster from '../../../database/models/Poster.js';
+import Poster, { posterAddedByEnum } from '../../../database/models/Poster.js';
 import { validatingMongoObjectIds } from '../../../utilities/validations.js';
 import { POSTER_ENUM } from '../../../utilities/commonTypes.js';
 import { filterSchema } from '../../../utilities/ValidationSchema.js';
+import {
+    getAccessorId,
+    isSuperAdminAccessingApi,
+} from '../../../utilities/utilitis.js';
 
 const getAllPosterController = catchAsync(async (req, res) => {
     const { offset, limit } = filterSchema.parse(req.body);
-    const AllData = Poster.find()
+    const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
+    const adminId = getAccessorId(req);
+
+    const AllData = Poster.find({
+        ...(!isSuperAdminAccessing && { adminId: adminId }),
+    })
         .populate('brand')
+        .populate('adminId')
         .populate({
             path: 'deal',
             populate: {
@@ -47,7 +57,7 @@ const getPosterById = catchAsync(async (req, res) => {
     const data = await Poster.findOne({ _id: posterId })
         .populate('brand')
         .populate({
-            path: 'deal',   
+            path: 'deal',
             populate: {
                 path: 'brand dealCategory platForm',
             },
@@ -64,6 +74,8 @@ const getPosterById = catchAsync(async (req, res) => {
 
 const addPosterController = catchAsync(async (req, res) => {
     const body = addSchema.parse(req.body);
+    const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
+    const adminId = getAccessorId(req);
     const {
         name,
         title,
@@ -91,6 +103,10 @@ const addPosterController = catchAsync(async (req, res) => {
         title,
         image,
         posterType,
+        addedBy: isSuperAdminAccessing
+            ? posterAddedByEnum.superAdmin
+            : posterAddedByEnum.admin,
+        adminId: adminId,
         ...(posterType === POSTER_ENUM.REDIRECT && { redirectUrl }),
         ...(posterType === POSTER_ENUM.DEAL && { deal }),
         ...(posterType === POSTER_ENUM.DEALCATEGORY && { dealCategory }),
