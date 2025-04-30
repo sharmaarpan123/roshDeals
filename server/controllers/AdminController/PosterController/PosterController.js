@@ -19,11 +19,12 @@ import {
 } from '../../../utilities/utilitis.js';
 
 const getAllPosterController = catchAsync(async (req, res) => {
-    const { offset, limit } = filterSchema.parse(req.body);
+    const { offset, limit, status } = filterSchema.parse(req.body);
     const isSuperAdminAccessing = isSuperAdminAccessingApi(req);
     const adminId = getAccessorId(req);
 
     const AllData = Poster.find({
+        ...(status && { isActive: Boolean(+status) }),
         ...(!isSuperAdminAccessing && { adminId: adminId }),
     })
         .populate('brand')

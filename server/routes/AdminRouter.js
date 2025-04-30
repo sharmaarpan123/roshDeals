@@ -378,7 +378,7 @@ AdminRouter.post(
     }),
     PosterController.statusChangeController,
 );
-AdminRouter.get(
+AdminRouter.post(
     '/poster/getAllPosters',
     AdminAccessMiddleware({
         uniqueSlug: 'poster',

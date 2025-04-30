@@ -11,7 +11,7 @@ const PosterSchema = new mongoose.Schema(
         name: { type: String, required: true },
         title: { type: String, required: true },
         addedBy: { type: String, enum: posterAddedByEnum },
-        adminId: { type: mongoose.Types.ObjectId, ref: 'Brand' },
+        adminId: { type: mongoose.Types.ObjectId, ref: 'Admin' },
         image: { type: String },
         posterType: {
             type: String,
