@@ -150,7 +150,7 @@ export default catchAsync(async (req, res) => {
                 newRoot: '$dealCategoryData',
             },
         },
-        
+
         {
             $skip: dealCategoryFilter?.offset || 0,
         },
@@ -160,6 +160,10 @@ export default catchAsync(async (req, res) => {
     ]);
     const PosterData = Poster.find({
         isActive: true,
+        $or: [
+            { addedBy: 'superAdmin' },
+            { addedBy: 'admin', adminId: adminCurrentRecreance },
+        ],
     })
         .populate('brand')
         .populate('dealCategory')
