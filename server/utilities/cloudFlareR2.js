@@ -33,7 +33,7 @@ export async function uploadToR2(filePath, key) {
             success: true,
             key,
             result,
-            url: `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`,
+            url: `${process.env.BASE_URL}/${key}`,
         };
     } catch (err) {
         console.error('Upload failed:', err);
