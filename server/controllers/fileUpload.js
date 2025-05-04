@@ -8,8 +8,10 @@ import {
 import { errorResponse, successResponse } from '../utilities/Responses.js';
 import catchAsync from '../utilities/catchAsync.js';
 import fireBaseStorage from '../../config/fireBaseStorage.js';
+import { uploadToR2 } from '../utilities/cloudFlareR2.js';
+import fs from "fs";
 initializeApp(fireBaseStorage);
-const storage = getStorage();   
+const storage = getStorage();
 export default catchAsync(async (req, res) => {
     if (!req.file) {
         return res.status(400).json(
@@ -18,6 +20,32 @@ export default catchAsync(async (req, res) => {
             }),
         );
     }
+
+    // cloudflare flare start
+
+    // const file = req.file;
+    // const key = `images/${Date.now()}-${file.originalname}`;
+
+    // const uploadResult = await uploadToR2(file.path, key);
+
+    // // Clean up local file
+    // fs.unlinkSync(file.path);
+
+    // if (uploadResult.success) {
+    //     return res.status(200).json(
+    //         successResponse({
+    //             message: 'file uploaded',
+    //             data: uploadResult.url,
+    //         }),
+    //     );
+    // } else {
+    //     errorResponse({
+    //         message: 'File uploading failed',
+    //     });
+    // }
+
+    // cloudflare flare end
+
     let storageRef;
     if (req.body.dealId) {
         storageRef = ref(
@@ -39,7 +67,7 @@ export default catchAsync(async (req, res) => {
         metadata,
     );
     const downloadURL = await getDownloadURL(snapshot.ref);
-    
+
     return res.status(200).json(
         successResponse({
             message: 'file uploaded',
