@@ -17,14 +17,14 @@ const s3 = new S3Client({
     },
 });
 
-export async function uploadToR2(filePath, key) {
-    const fileStream = fs.createReadStream(filePath);
+export async function uploadToR2(file, key) {
+    const fileStream = fs.createReadStream(file.path);
 
     const command = new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
         Key: key,
         Body: fileStream,
-        ContentType: 'image/jpeg', // or dynamically detect using 'mime-types'
+        ContentType: 'image/jpeg',
     });
 
     try {
@@ -48,8 +48,12 @@ export async function deleteFromR2(key) {
         Key: key,
     });
 
+    console.log(command);
+
     try {
         await s3.send(command);
+
+        console.log('deleted');
         return { success: true };
     } catch (err) {
         console.error('Delete failed:', err);
