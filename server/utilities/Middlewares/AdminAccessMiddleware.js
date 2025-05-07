@@ -9,8 +9,6 @@ export default ({ canAdminAccess, canSubAdminAccess }) => {
             SELLER_ROLE_TYPE_ENUM.SELLER,
         );
 
-        console.log(req?.user , "user----")
-
         if (isSeller) {
             return next();
         }
