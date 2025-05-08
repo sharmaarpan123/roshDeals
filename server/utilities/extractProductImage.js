@@ -7,8 +7,8 @@ const getFinalUrl = async (url) => {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 'Accept-Language': 'en-US,en;q=0.9',
             },
-            maxRedirects: 5, // Follow redirects
-            timeout: 5000,
+            maxRedirects: 10, // Follow redirects
+            timeout: 10000,
         });
 
         return response.request.res.responseUrl || url; // Return final URL after redirection
