@@ -48,12 +48,12 @@ export async function deleteFromR2(key) {
         Key: key,
     });
 
-    console.log(command);
+    
 
     try {
         await s3.send(command);
 
-        console.log('deleted');
+      
         return { success: true };
     } catch (err) {
         console.error('Delete failed:', err);

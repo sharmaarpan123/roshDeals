@@ -227,7 +227,7 @@ export const dashboardController = catchAsync(async (req, res) => {
 
     const data = await Promise.all(queryS);
 
-    console.log(JSON.stringify(data[4]), 'Data');
+   
 
     return res.status(200).json(
         successResponse({

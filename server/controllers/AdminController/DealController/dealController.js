@@ -679,7 +679,6 @@ export const getDealsWithBrandId = catchAsync(async (req, res) => {
         aggregation = dealsAsAgencyAggregation;
     }
 
-    console.log(JSON.stringify(aggregation), 'aggregation');
 
     const deals = await Deal.aggregate(aggregation);
 

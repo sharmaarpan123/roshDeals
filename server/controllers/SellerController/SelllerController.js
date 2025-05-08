@@ -159,7 +159,7 @@ class SellerController {
             );
         }
 
-        console.log(req?.user, dealId);
+        
 
         // First verify if the seller has access to this deal
         const sellerDealLink = await SellerDealLinker.findOne({
