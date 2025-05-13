@@ -284,7 +284,7 @@ export const bulkPaymentStatusUpdate = catchAsync(async (req, res) => {
 
     const adminId = req?.user?._id;
 
-    console.log(orderIds, 'asdf');
+    
 
     const isInvalidMongoDb = orderIds.some((item) => {
         return !isValidObjectId(item);

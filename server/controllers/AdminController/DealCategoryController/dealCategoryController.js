@@ -54,7 +54,6 @@ const editDealCategoryController = catchAsync(async (req, res) => {
     const body = editDealCategorySchema.parse(req.body);
     const { dealCategoryId, ...restBody } = body;
 
-    console.log(restBody, 'restBody');
     const UpdatedDealCategoryForm = await DealCategory.findByIdAndUpdate(
         { _id: dealCategoryId },
         { ...restBody },

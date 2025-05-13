@@ -25,9 +25,9 @@ try {
 
 export const sendNotification = async (message) => {
     try {
-        console.log(message, 'message');
+       
         const response = await admin.messaging().sendEachForMulticast(message);
-        console.log('Successfully sent firebase message:', JSON.stringify(response));
+        // console.log('Successfully sent firebase message:', JSON.stringify(response));
         return response;
     } catch (error) {
         console.error('Error sending firebase message:', error);
