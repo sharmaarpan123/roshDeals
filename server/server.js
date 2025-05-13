@@ -32,7 +32,12 @@ const init = async () => {
         express.static(path.join(process.cwd(), 'server/public', 'images')),
     );
     app.get('/', (req, res) => {
-        res.redirect('https://www.buyrapp.in');
+        const productId = req.query.product_id;
+        if (productId) {
+            res.redirect(`https://www.buyrapp.in/deal/${productId}`);
+        } else {
+            res.redirect('https://www.buyrapp.in');
+        }
     });
     // Add new tutorials route
     app.get('/tutorials', (req, res) => {
@@ -42,17 +47,6 @@ const init = async () => {
     });
     app.get('/buyr.apk', (req, res) => {
         res.sendFile(path.join(process.cwd(), 'server/public', 'buyr.apk'));
-    });
-
-    // Add specific API route handler
-    app.get('/api', (req, res) => {
-        console.log(req.query,'req.query')
-        const productId = req.query.product_id;
-        if (productId) {
-            res.redirect(`https://www.buyrapp.in/deal/${productId}`);
-        } else {
-            res.redirect('https://www.buyrapp.in');
-        }
     });
 
     await mongoInit();
