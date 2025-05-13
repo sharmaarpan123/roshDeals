@@ -46,6 +46,7 @@ const init = async () => {
 
     // Add specific API route handler
     app.get('/api', (req, res) => {
+        console.log(req.query,'req.query')
         const productId = req.query.product_id;
         if (productId) {
             res.redirect(`https://www.buyrapp.in/deal/${productId}`);
