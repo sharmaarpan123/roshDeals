@@ -32,8 +32,6 @@ export default catchAsync(async (req, res) => {
         }
     }
 
-    console.log(key , "key---------------")
-
     const uploadResult = await uploadToR2(file, key);
 
     fs.unlinkSync(file.path);
