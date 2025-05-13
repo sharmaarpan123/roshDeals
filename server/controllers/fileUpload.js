@@ -20,13 +20,13 @@ export default catchAsync(async (req, res) => {
 
     if (dealId) {
         if (isDevMode) {
-            key = `images/dev/dealId=${dealId}${Date.now()}-${file.originalname}`;
+            key = `dev/dealId=${dealId}${Date.now()}-${file.originalname}`;
         } else {
             key = `images/dealId=${dealId}${Date.now()}-${file.originalname}`;
         }
     } else {
         if (isDevMode) {
-            key = `images/dev/${Date.now()}-${file.originalname}`;
+            key = `dev/${Date.now()}-${file.originalname}`;
         } else {
             key = `images/${Date.now()}-${file.originalname}`;
         }
