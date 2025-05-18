@@ -28,7 +28,8 @@ import {
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
-        dealIds,
+        deals,
+        // dealIds,
         orderIdOfPlatForm,
         orderScreenShot,
         reviewerName,
@@ -42,14 +43,16 @@ export const OrderCreateController = catchAsync(async (req, res) => {
 
     // Validate the deals
     const validDeals = await Deal.find({
-        _id: { $in: dealIds },
+        _id: { $in: deals?.map((item) => item?.dealId) },
         adminId: currentAdminReference,
     })
         .populate('adminId')
         .populate('parentDealId')
-        .select('adminId parentDealId slotCompletedCount slotAlloted');
+        .select(
+            'adminId parentDealId slotCompletedCount slotAlloted lessValue commissionValue',
+        );
 
-    if (dealIds.length !== validDeals.length) {
+    if (deals.length !== validDeals.length) {
         return res.status(400).json(
             errorResponse({
                 message:
@@ -80,7 +83,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
     }).select('productName');
 
-    if (slotCompletedDeals.length) {
+    if (slotCompletedDeals?.length) {
         return res.status(400).json(
             errorResponse({
                 message:
@@ -103,7 +106,15 @@ export const OrderCreateController = catchAsync(async (req, res) => {
     );
 
     // Create orders
-    const newOrders = validDeals.map((deal) => {
+
+    const ordersArr = deals?.map((item) => {
+        const dealsData = validDeals?.findOne(
+            (item) => item?._id?.toString() === item?.dealId,
+        );
+        return { ...item, ...dealsData };
+    });
+
+    const newOrders = ordersArr.map((deal) => {
         return {
             dealId: deal?._id,
             dealOwner: deal?.adminId?._id,
@@ -114,6 +125,17 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             orderDate: toUTC(new Date(orderDate)),
             exchangeDealProducts,
             deliveryFee,
+            ...((deal.lessAmount || deal.lessAmount == 0) && {
+                lessAmount: deal.lessAmount,
+            }),
+            ...(deal.commissionValue &&
+                deal.commissionValue != 0 && {
+                    commissionValue: deal.commissionValue,
+                }),
+            ...(deal.commissionValue &&
+                deal.commissionValue != 0 && {
+                    isCommissionDeal: true,
+                }),
         };
     });
 
@@ -620,9 +642,9 @@ export const getOrderById = catchAsync(async (req, res) => {
         );
     }
 
-    const order = await Order.findOne({ 
+    const order = await Order.findOne({
         _id: orderId,
-        userId: req.user._id // Ensure user can only access their own orders
+        userId: req.user._id, // Ensure user can only access their own orders
     }).populate({
         path: 'dealId',
         populate: [
@@ -634,10 +656,10 @@ export const getOrderById = catchAsync(async (req, res) => {
                 populate: [
                     { path: 'dealCategory' },
                     { path: 'platForm' },
-                    { path: 'brand' }
-                ]
-            }
-        ]
+                    { path: 'brand' },
+                ],
+            },
+        ],
     });
 
     if (!order) {
@@ -649,7 +671,7 @@ export const getOrderById = catchAsync(async (req, res) => {
     }
 
     return res.status(200).json(
-        successResponse({ 
+        successResponse({
             message: 'Order retrieved successfully',
             data: order,
         }),
