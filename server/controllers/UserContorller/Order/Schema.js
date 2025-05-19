@@ -16,18 +16,36 @@ export const createOrderSchema = z.object({
         })
         .trim()
         .min(1, { message: 'Reviewer should have at least one character' }),
+    deals: z
+        .array(
+            z.object({
+                dealId: z
+                    .string()
+                    .min(1, { message: 'Deals Ids are required' }),
+                amount: z.number({
+                    invalid_type_error:
+                        'amount should be numeric in deals array',
+                    required_error: 'amount is required in deals array',
+                }),
+            }),
+            {
+                invalid_type_error: 'invalid Deals Array',
+                required_error: 'Deals are required',
+            },
+        )
+        .nonempty({ message: 'At least One deals to create orders' }),
     orderIdOfPlatForm: z
         .string({
             required_error: 'Order id is required',
         })
         .trim()
         .min(1, { message: 'Order Id have at least one character' }),
-    dealIds: z
-        .array(z.string(), {
-            invalid_type_error: 'invalid Deals Id',
-            required_error: 'Deals Ids are required',
-        })
-        .nonempty({ message: 'At least One deals to create orders' }),
+    // dealIds: z
+    //     .array(z.string(), {
+    //         invalid_type_error: 'invalid Deals Id',
+    //         required_error: 'Deals Ids are required',
+    //     })
+    //     .nonempty({ message: 'At least One deals to create orders' }),
     orderScreenShot: z
         .string({
             required_error: 'Order Screenshot  is required',

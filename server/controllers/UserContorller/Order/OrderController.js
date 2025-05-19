@@ -49,10 +49,10 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         .populate('adminId')
         .populate('parentDealId')
         .select(
-            'adminId parentDealId slotCompletedCount slotAlloted lessValue commissionValue',
+            'adminId parentDealId slotCompletedCount slotAlloted lessAmount commissionValue isCommissionDeal',
         );
 
-    if (deals.length !== validDeals.length) {
+    if (deals?.length !== validDeals?.length) {
         return res.status(400).json(
             errorResponse({
                 message:
@@ -105,17 +105,12 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         { $inc: { slotCompletedCount: 1 } },
     );
 
-    // Create orders
-
-    const ordersArr = deals?.map((item) => {
-        const dealsData = validDeals?.findOne(
-            (item) => item?._id?.toString() === item?.dealId,
+    const newOrders = validDeals.map((deal, index) => {
+        const orderedDealsData = deals?.find(
+            (item) => item?.dealId === deal?._id?.toString(),
         );
-        return { ...item, ...dealsData };
-    });
 
-    const newOrders = ordersArr.map((deal) => {
-        return {
+        const obj = {
             dealId: deal?._id,
             dealOwner: deal?.adminId?._id,
             orderIdOfPlatForm,
@@ -124,19 +119,20 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             userId: _id,
             orderDate: toUTC(new Date(orderDate)),
             exchangeDealProducts,
-            deliveryFee,
-            ...((deal.lessAmount || deal.lessAmount == 0) && {
+            ...(index === 0 && { deliveryFee }), // only add the delivery fee to one order
+            orderPrice: orderedDealsData?.amount,
+            ...(deal.lessAmount && {
                 lessAmount: deal.lessAmount,
             }),
-            ...(deal.commissionValue &&
-                deal.commissionValue != 0 && {
-                    commissionValue: deal.commissionValue,
-                }),
-            ...(deal.commissionValue &&
-                deal.commissionValue != 0 && {
-                    isCommissionDeal: true,
-                }),
+            ...(deal.commissionValue && {
+                commissionValue: deal.commissionValue,
+            }),
+            ...(deal.isCommissionDeal && {
+                isCommissionDeal: true,
+            }),
         };
+
+        return obj;
     });
 
     const insertedOrders = await Order.insertMany(newOrders);

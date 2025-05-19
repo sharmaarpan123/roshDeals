@@ -38,7 +38,7 @@ const orderSchema = new mongoose.Schema(
         },
         deliveryFee: { type: String },
         orderPrice: { type: String, required: true },
-        lessValue: { type: String },
+        lessAmount: { type: String },
         commissionValue: { type: String },
         isCommissionDeal: { type: Boolean, default: false },
     },
