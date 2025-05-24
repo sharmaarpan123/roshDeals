@@ -41,6 +41,7 @@ const orderSchema = new mongoose.Schema(
         lessAmount: { type: String },
         commissionValue: { type: String },
         isCommissionDeal: { type: Boolean, default: false },
+        adminCommission: { type: String },
     },
     {
         timestamps: true,

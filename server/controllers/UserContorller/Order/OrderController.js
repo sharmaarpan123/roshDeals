@@ -130,6 +130,9 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             ...(deal.isCommissionDeal && {
                 isCommissionDeal: true,
             }),
+            ...(deal.adminCommission && {
+                adminCommission: deal.adminCommission,
+            }),
         };
 
         return obj;
