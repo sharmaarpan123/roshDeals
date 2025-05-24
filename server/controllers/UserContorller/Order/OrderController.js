@@ -615,6 +615,41 @@ export const UserEarning = catchAsync(async (req, res) => {
                         $toDouble: '$deal.finalCashBackForUser',
                     },
                 },
+                totalAmount: {
+                    $sum: {
+                        $cond: {
+                            if: '$deal.isCommissionDeal',
+                            then: {
+                                $subtract: [
+                                    {
+                                        $add: [
+                                            { $toDouble: '$orderPrice' },
+                                            { $toDouble: '$commissionValue' },
+                                            { $ifNull: [{ $toDouble: '$deliveryFee' }, 0] }
+                                        ]
+                                    },
+                                    { $ifNull: [{ $toDouble: '$adminCommission' }, 0] }
+                                ]
+                            },
+                            else: {
+                                $subtract: [
+                                    {
+                                        $add: [
+                                            {
+                                                $subtract: [
+                                                    { $toDouble: '$orderPrice' },
+                                                    { $toDouble: '$lessAmount' }
+                                                ]
+                                            },
+                                            { $ifNull: [{ $toDouble: '$deliveryFee' }, 0] }
+                                        ]
+                                    },
+                                    { $ifNull: [{ $toDouble: '$adminCommission' }, 0] }
+                                ]
+                            }
+                        }
+                    },
+                },
             },
         },
     ]);
@@ -625,6 +660,8 @@ export const UserEarning = catchAsync(async (req, res) => {
             others: {
                 totalCashback:
                     earnings.length > 0 ? earnings[0].totalCashback : 0,
+                totalAmount:
+                    earnings.length > 0 ? earnings[0].totalAmount : 0,
             },
         }),
     );
