@@ -49,7 +49,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         .populate('adminId')
         .populate('parentDealId')
         .select(
-            'adminId parentDealId slotCompletedCount slotAlloted lessAmount commissionValue isCommissionDeal',
+            'adminId parentDealId slotCompletedCount slotAlloted lessAmount commissionValue isCommissionDeal adminCommission',
         );
 
     if (deals?.length !== validDeals?.length) {
