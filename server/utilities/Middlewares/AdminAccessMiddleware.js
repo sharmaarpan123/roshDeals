@@ -1,3 +1,4 @@
+import Admin from '../../database/models/Admin.js';
 import catchAsync from '../catchAsync.js';
 import { ADMIN_ROLE_TYPE_ENUM, SELLER_ROLE_TYPE_ENUM } from '../commonTypes.js';
 import { errorResponse } from '../Responses.js';
@@ -16,9 +17,16 @@ export default ({ canAdminAccess, canSubAdminAccess }) => {
         // super admin , agency , mediator check
         const adminId = req?.user?._id;
 
-        const admins = await getAllAdminsFromCache();
+         const admins = await getAllAdminsFromCache();
 
         const admin = admins?.find((item) => item?._id?.toString() === adminId);
+
+        // const admin = await Admin.findOne(
+        //     { _id: adminId },
+        //     { isActive: 1, roles: 1 },
+        // );
+
+        console.log(admin, "Admin")
 
         const sendNotPermittedRes = () => {
             res.status(401).json(
