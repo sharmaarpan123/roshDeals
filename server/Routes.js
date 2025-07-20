@@ -76,6 +76,6 @@ export default (app) => {
         upload.single('file'),
         fileUpload,
     );
-    app.use('/seller/scrape/:sellerId', scrapeSellerData);
+    app.get('/seller/scrape/:sellerId', scrapeSellerData);
     app.use(catchErrorHandler);
 };
