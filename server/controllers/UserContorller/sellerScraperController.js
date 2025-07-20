@@ -1,8 +1,8 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import { z } from 'zod';
 import catchAsync from '../../utilities/catchAsync.js';
-import { sendResponse } from '../../utilities/Responses.js';
+import { successResponse, errorResponse } from '../../utilities/Responses.js';
 
 // Validation schema for seller ID
 const sellerIdSchema = z.object({
@@ -21,7 +21,10 @@ export const scrapeSellerData = catchAsync(async (req, res) => {
     // Validate seller ID
     const validationResult = sellerIdSchema.safeParse(req.params);
     if (!validationResult.success) {
-        return sendResponse(res, 400, false, validationResult.error.errors[0].message);
+        return errorResponse({
+            message: validationResult.error.errors[0].message,
+            statusCode: 400,
+        });
     }
 
     const { sellerId } = validationResult.data;
@@ -125,24 +128,42 @@ export const scrapeSellerData = catchAsync(async (req, res) => {
                            Object.keys(sellerData.star_distribution).length > 0;
 
             if (!hasData) {
-                return sendResponse(res, 404, false, 'Seller data not found or seller page is not accessible');
+                return errorResponse({
+                    message: 'Seller data not found or seller page is not accessible',
+                    statusCode: 404,
+                });
             }
 
-            return sendResponse(res, 200, true, 'Seller data retrieved successfully', sellerData);
+            return successResponse({
+                message: 'Seller data retrieved successfully',
+                data: sellerData,
+            });
         } else {
-            return sendResponse(res, response.status, false, `Failed to retrieve page: Status code ${response.status}`);
+            return errorResponse({
+                message: `Failed to retrieve page: Status code ${response.status}`,
+                statusCode: response.status,
+            });
         }
     } catch (error) {
         console.error(`Error fetching seller page: ${error.message}`);
         
         if (error.code === 'ECONNABORTED') {
-            return sendResponse(res, 408, false, 'Request timeout - Amazon server took too long to respond');
+            return errorResponse({
+                message: 'Request timeout - Amazon server took too long to respond',
+                statusCode: 408,
+            });
         }
         
         if (error.response) {
-            return sendResponse(res, error.response.status, false, `Amazon server error: ${error.response.status}`);
+            return errorResponse({
+                message: `Amazon server error: ${error.response.status}`,
+                statusCode: error.response.status,
+            });
         }
         
-        return sendResponse(res, 500, false, `Error fetching seller data: ${error.message}`);
+        return errorResponse({
+            message: `Error fetching seller data: ${error.message}`,
+            statusCode: 500,
+        });
     }
 });
