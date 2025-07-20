@@ -16,10 +16,20 @@ export default catchAsync(async (req, res) => {
 
     const file = req.file;
     let key;
+    const isDevMode = process.env.DEV === 'true';
+
     if (dealId) {
-        key = `images/dealId=${dealId}${Date.now()}-${file.originalname}`;
+        if (isDevMode) {
+            key = `dev/dealId=${dealId}${Date.now()}-${file.originalname}`;
+        } else {
+            key = `images/dealId=${dealId}${Date.now()}-${file.originalname}`;
+        }
     } else {
-        key = `images/${Date.now()}-${file.originalname}`;
+        if (isDevMode) {
+            key = `dev/${Date.now()}-${file.originalname}`;
+        } else {
+            key = `images/${Date.now()}-${file.originalname}`;
+        }
     }
 
     const uploadResult = await uploadToR2(file, key);

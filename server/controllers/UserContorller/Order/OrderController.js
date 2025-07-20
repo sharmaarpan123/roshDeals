@@ -28,7 +28,8 @@ import {
 
 export const OrderCreateController = catchAsync(async (req, res) => {
     const {
-        dealIds,
+        deals,
+        // dealIds,
         orderIdOfPlatForm,
         orderScreenShot,
         reviewerName,
@@ -42,14 +43,16 @@ export const OrderCreateController = catchAsync(async (req, res) => {
 
     // Validate the deals
     const validDeals = await Deal.find({
-        _id: { $in: dealIds },
+        _id: { $in: deals?.map((item) => item?.dealId) },
         adminId: currentAdminReference,
     })
         .populate('adminId')
         .populate('parentDealId')
-        .select('adminId parentDealId slotCompletedCount slotAlloted');
+        .select(
+            'adminId parentDealId slotCompletedCount slotAlloted lessAmount commissionValue isCommissionDeal adminCommission',
+        );
 
-    if (dealIds.length !== validDeals.length) {
+    if (deals?.length !== validDeals?.length) {
         return res.status(400).json(
             errorResponse({
                 message:
@@ -80,7 +83,7 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         $expr: { $gte: ['$slotCompletedCount', '$slotAlloted'] },
     }).select('productName');
 
-    if (slotCompletedDeals.length) {
+    if (slotCompletedDeals?.length) {
         return res.status(400).json(
             errorResponse({
                 message:
@@ -102,9 +105,12 @@ export const OrderCreateController = catchAsync(async (req, res) => {
         { $inc: { slotCompletedCount: 1 } },
     );
 
-    // Create orders
-    const newOrders = validDeals.map((deal) => {
-        return {
+    const newOrders = validDeals.map((deal, index) => {
+        const orderedDealsData = deals?.find(
+            (item) => item?.dealId === deal?._id?.toString(),
+        );
+
+        const obj = {
             dealId: deal?._id,
             dealOwner: deal?.adminId?._id,
             orderIdOfPlatForm,
@@ -113,8 +119,23 @@ export const OrderCreateController = catchAsync(async (req, res) => {
             userId: _id,
             orderDate: toUTC(new Date(orderDate)),
             exchangeDealProducts,
-            deliveryFee,
+            ...(index === 0 && { deliveryFee }), // only add the delivery fee to one order
+            orderPrice: orderedDealsData?.amount,
+            ...(deal.lessAmount && {
+                lessAmount: deal.lessAmount,
+            }),
+            ...(deal.commissionValue && {
+                commissionValue: deal.commissionValue,
+            }),
+            ...(deal.isCommissionDeal && {
+                isCommissionDeal: true,
+            }),
+            ...(deal.adminCommission && {
+                adminCommission: deal.adminCommission,
+            }),
         };
+
+        return obj;
     });
 
     const insertedOrders = await Order.insertMany(newOrders);
@@ -594,6 +615,41 @@ export const UserEarning = catchAsync(async (req, res) => {
                         $toDouble: '$deal.finalCashBackForUser',
                     },
                 },
+                totalAmount: {
+                    $sum: {
+                        $cond: {
+                            if: '$deal.isCommissionDeal',
+                            then: {
+                                $subtract: [
+                                    {
+                                        $add: [
+                                            { $toDouble: '$orderPrice' },
+                                            { $toDouble: '$commissionValue' },
+                                            { $ifNull: [{ $toDouble: '$deliveryFee' }, 0] }
+                                        ]
+                                    },
+                                    { $ifNull: [{ $toDouble: '$adminCommission' }, 0] }
+                                ]
+                            },
+                            else: {
+                                $subtract: [
+                                    {
+                                        $add: [
+                                            {
+                                                $subtract: [
+                                                    { $toDouble: '$orderPrice' },
+                                                    { $toDouble: '$lessAmount' }
+                                                ]
+                                            },
+                                            { $ifNull: [{ $toDouble: '$deliveryFee' }, 0] }
+                                        ]
+                                    },
+                                    { $ifNull: [{ $toDouble: '$adminCommission' }, 0] }
+                                ]
+                            }
+                        }
+                    },
+                },
             },
         },
     ]);
@@ -604,6 +660,8 @@ export const UserEarning = catchAsync(async (req, res) => {
             others: {
                 totalCashback:
                     earnings.length > 0 ? earnings[0].totalCashback : 0,
+                totalAmount:
+                    earnings.length > 0 ? earnings[0].totalAmount : 0,
             },
         }),
     );
@@ -620,9 +678,9 @@ export const getOrderById = catchAsync(async (req, res) => {
         );
     }
 
-    const order = await Order.findOne({ 
+    const order = await Order.findOne({
         _id: orderId,
-        userId: req.user._id // Ensure user can only access their own orders
+        userId: req.user._id, // Ensure user can only access their own orders
     }).populate({
         path: 'dealId',
         populate: [
@@ -634,10 +692,10 @@ export const getOrderById = catchAsync(async (req, res) => {
                 populate: [
                     { path: 'dealCategory' },
                     { path: 'platForm' },
-                    { path: 'brand' }
-                ]
-            }
-        ]
+                    { path: 'brand' },
+                ],
+            },
+        ],
     });
 
     if (!order) {
@@ -649,7 +707,7 @@ export const getOrderById = catchAsync(async (req, res) => {
     }
 
     return res.status(200).json(
-        successResponse({ 
+        successResponse({
             message: 'Order retrieved successfully',
             data: order,
         }),
