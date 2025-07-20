@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { z } from 'zod';
 import catchAsync from '../../utilities/catchAsync.js';
-import { successResponse, errorResponse } from '../../utilities/Responses.js';
+import { sendSuccessResponse, sendErrorResponse } from '../../utilities/Responses.js';
 
 // Validation schema for seller ID
 const sellerIdSchema = z.object({
@@ -21,9 +21,10 @@ export const scrapeSellerData = catchAsync(async (req, res) => {
     // Validate seller ID
     const validationResult = sellerIdSchema.safeParse(req.params);
     if (!validationResult.success) {
-        return errorResponse({
+        return sendErrorResponse({
             message: validationResult.error.errors[0].message,
             statusCode: 400,
+            res,
         });
     }
 
@@ -128,42 +129,48 @@ export const scrapeSellerData = catchAsync(async (req, res) => {
                            Object.keys(sellerData.star_distribution).length > 0;
 
             if (!hasData) {
-                return errorResponse({
+                return sendErrorResponse({
                     message: 'Seller data not found or seller page is not accessible',
                     statusCode: 404,
+                    res,
                 });
             }
 
-            return successResponse({
+            return sendSuccessResponse({
                 message: 'Seller data retrieved successfully',
                 data: sellerData,
+                res,
             });
         } else {
-            return errorResponse({
+            return sendErrorResponse({
                 message: `Failed to retrieve page: Status code ${response.status}`,
                 statusCode: response.status,
+                res,
             });
         }
     } catch (error) {
         console.error(`Error fetching seller page: ${error.message}`);
         
         if (error.code === 'ECONNABORTED') {
-            return errorResponse({
+            return sendErrorResponse({
                 message: 'Request timeout - Amazon server took too long to respond',
                 statusCode: 408,
+                res,
             });
         }
         
         if (error.response) {
-            return errorResponse({
+            return sendErrorResponse({
                 message: `Amazon server error: ${error.response.status}`,
                 statusCode: error.response.status,
+                res,
             });
         }
         
-        return errorResponse({
+        return sendErrorResponse({
             message: `Error fetching seller data: ${error.message}`,
             statusCode: 500,
+            res,
         });
     }
 });
