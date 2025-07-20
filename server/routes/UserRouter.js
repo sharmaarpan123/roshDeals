@@ -23,7 +23,7 @@ import {
 import platFormController from '../controllers/UserContorller/PlatFormController/platFormController.js';
 import GetHomeResult from '../controllers/UserContorller/GetHomeResult.js';
 import activeDealByBrandAndCategory from '../controllers/UserContorller/getDeals/activeDealByBrandAndCategory.js';
-import { scrapeSellerData } from '../controllers/UserContorller/sellerScraperController.js';
+
 const UserRouter = express.Router();
 // payment details
 UserRouter.get('/me', UserController.meQueryController);
@@ -80,9 +80,6 @@ UserRouter.get(
 );
 // home data
 UserRouter.get('/getHomeData', GetHomeResult);
-
-// seller scraper
-UserRouter.get('/seller/scrape/:sellerId', scrapeSellerData);
 
 export default UserRouter;
 //# sourceMappingURL=UserRouter.js.map

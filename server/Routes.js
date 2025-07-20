@@ -1,4 +1,5 @@
 import fileUpload from './controllers/fileUpload.js';
+import { scrapeSellerData } from './controllers/UserContorller/sellerScraperController.js';
 import './init-aliases.js';
 import AdminRouter from './routes/AdminRouter.js';
 import AuthRouter from './routes/AuthRouter.js';
@@ -75,5 +76,6 @@ export default (app) => {
         upload.single('file'),
         fileUpload,
     );
+    app.use('/seller/scrape/:sellerId', scrapeSellerData);
     app.use(catchErrorHandler);
 };
