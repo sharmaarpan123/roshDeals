@@ -3,7 +3,7 @@ import {
     errorResponse,
     successResponse,
 } from '../server/utilities/Responses.js';
-export default (io) => {
+export default (io) => { 
     io.on('connection', (socket) => {
         // User connect listener
         socket.on('userConnect', (data, acknowledge) => {
